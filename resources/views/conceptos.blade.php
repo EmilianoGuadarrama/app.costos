@@ -1,10 +1,10 @@
-{{-- resources/views/welcome.blade.php --}}
+{{-- resources/views/conceptos.blade.php --}}
     <!doctype html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>App Precios Unitarios</title>
+    <title>Conceptos | App Precios Unitarios</title>
 
     {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,63 +12,102 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <style>
-        :root{
-            --ui-dark:#5a5a5a;
-            --ui-dark-2:#4f4f4f;
-            --ui-light:#f5f5f5;
-            --ui-border:#8a8a8a;
-        }
+        :root{ --ui-dark:#5a5a5a; --ui-border:#8a8a8a; }
+        body{ background:#e9e9e9; }
+        .app-shell{ min-height:100vh; display:flex; flex-direction:column; }
+        .app-main{ flex:1; display:flex; }
 
-        body{ background: #e9e9e9; }
-
-        .app-shell{ min-height: 100vh; display: flex; flex-direction: column; }
-        .app-main{ flex: 1; display: flex; }
-
-        .topbar{ background: var(--ui-dark); border-bottom: 1px solid rgba(255,255,255,.15); }
+        /* Topbar */
+        .topbar{ background:var(--ui-dark); border-bottom:1px solid rgba(255,255,255,.15); }
         .brand-badge{
-            width: 44px; height: 44px; border-radius: 50%;
-            background: #ffffff; display: grid; place-items: center;
-            position: relative; overflow: hidden;
+            width:44px;height:44px;border-radius:50%;
+            background:#fff;display:grid;place-items:center;
+            position:relative; overflow:hidden;
         }
         .brand-badge .bolt{
-            position: absolute; right: -2px; top: -2px;
-            width: 18px; height: 18px; border-radius: 4px;
-            background: #2bd15a; display: grid; place-items: center;
-            color: #fff; font-size: .85rem;
+            position:absolute; right:-2px; top:-2px;
+            width:18px; height:18px; border-radius:4px;
+            background:#2bd15a; display:grid; place-items:center;
+            color:#fff; font-size:.85rem;
         }
-        .topbar .welcome{ color:#fff; opacity:.9; font-size: .95rem; }
+        .topbar .welcome{ color:#fff; opacity:.9; font-size:.95rem; }
 
+        /* Sidebar */
         .sidebar{
-            width: 270px; background: var(--ui-dark); color: #fff;
-            border-right: 1px solid rgba(255,255,255,.15);
+            width:270px;
+            background:var(--ui-dark);
+            color:#fff;
+            border-right:1px solid rgba(255,255,255,.15);
         }
-        .sidebar-inner{ padding: 14px 14px 18px 14px; }
-        .sidebar .search{ background: #fff; border-radius: 999px; padding: 4px 10px; }
-
+        .sidebar-inner{ padding:14px 14px 18px 14px; }
+        .sidebar .search{
+            background:#fff;
+            border-radius:999px;
+            padding:4px 10px;
+        }
         .nav-vertical .list-group-item{
-            background: transparent; border: 0; color: #fff;
-            padding: .55rem .75rem; border-radius: .35rem;
-            display: flex; align-items: center; gap: .6rem;
+            background:transparent;
+            border:0;
+            color:#fff;
+            padding:.55rem .75rem;
+            border-radius:.35rem;
+            display:flex;
+            align-items:center;
+            gap:.6rem;
         }
-        .nav-vertical .list-group-item:hover{ background: rgba(255,255,255,.10); }
-        .nav-vertical .list-group-item.active{ background: rgba(255,255,255,.18); color: #fff; }
-        .nav-vertical .icon{ width: 22px; text-align: center; opacity: .95; }
-        .nav-divider{ height: 1px; background: rgba(255,255,255,.18); margin: 12px 0; }
+        .nav-vertical .list-group-item:hover{ background:rgba(255,255,255,.10); }
+        .nav-vertical .list-group-item.active{ background:rgba(255,255,255,.18); color:#fff; }
+        .nav-vertical .icon{ width:22px; text-align:center; opacity:.95; }
+        .nav-divider{ height:1px; background:rgba(255,255,255,.18); margin:12px 0; }
 
-        .content-area{ flex: 1; background: #fff; }
-        .content-card{ max-width: 820px; margin: 0 auto; padding: 34px 18px 30px 18px; }
-        .content-title{ text-align: center; font-weight: 700; margin-bottom: 20px; }
-        .content-text{ color: #333; font-size: .98rem; line-height: 1.6; }
+        /* Content */
+        .content-area{ flex:1; background:#fff; }
+        .content-wrap{ max-width: 820px; margin: 0 auto; padding: 24px 18px 28px; }
+        .sheet{
+            border:1px solid rgba(0,0,0,.15);
+            border-radius:4px;
+            padding: 26px 30px;
+            background:#fff;
+        }
 
-        .footer{ background: var(--ui-dark); color: #fff; }
-        .footer .muted{ opacity: .85; font-size: .9rem; }
-        .footer a{ color: #fff; text-decoration: none; opacity: .9; }
-        .footer a:hover{ opacity: 1; text-decoration: underline; }
-        .footer .footer-title{ font-weight: 700; margin-bottom: .6rem; }
-        .footer .social .btn{ width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; }
+        /* Compact inputs */
+        .form-compact .form-label{ margin-bottom:0; font-size:.9rem; color:#222; }
+        .form-compact .form-control{
+            font-size:.82rem;
+            padding:.2rem .45rem;
+            height: 22px;
+            border-radius:2px;
+            max-width: 210px;
+        }
+        .form-compact .row{ --bs-gutter-x: 14px; }
+        .form-compact .mb-2{ margin-bottom:.55rem !important; }
 
-        @media (max-width: 991.98px){
-            .sidebar{ display:none; }
+        /* Table */
+        .table-wrap{ margin-top: 26px; }
+        .table thead th{
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            vertical-align: middle;
+        }
+        .table td{ height: 42px; vertical-align: middle; }
+        .btn-action{
+            width: 30px; height: 30px;
+            display: inline-grid; place-items: center; padding: 0;
+        }
+
+        /* Footer */
+        .footer{ background:var(--ui-dark); color:#fff; }
+        .footer .muted{ opacity:.85; font-size:.9rem; }
+        .footer .footer-title{ font-weight:700; margin-bottom:.6rem; }
+        .footer a{ color:#fff; text-decoration:none; opacity:.9; }
+        .footer a:hover{ opacity:1; text-decoration:underline; }
+
+        /* Responsive */
+        @media (max-width: 991.98px){ .sidebar{ display:none; } }
+        @media (max-width: 576px){
+            .sheet{ padding: 18px 16px; }
+            .form-compact .form-control{ max-width: 100%; height:auto; padding:.45rem .6rem; }
         }
     </style>
 </head>
@@ -92,21 +131,13 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                {{-- Botón sidebar móvil --}}
                 <button class="btn btn-sm btn-outline-light d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
                     <i class="bi bi-list"></i>
                 </button>
 
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
-                        Usuario Activo
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#">Mi perfil</a></li>
-                        <li><a class="dropdown-item" href="#">Configuración</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#">Cerrar sesión</a></li>
-                    </ul>
+                <div class="d-flex align-items-center gap-2 text-white">
+                    <i class="bi bi-person-circle fs-4"></i>
+                    <span class="small">Usuario Activo</span>
                 </div>
             </div>
         </div>
@@ -175,26 +206,91 @@
 
         {{-- CONTENT --}}
         <main class="content-area">
-            <div class="content-card">
-                <h3 class="content-title">¿Cuál es nuestro propósito?</h3>
+            <div class="content-wrap">
+                <div class="sheet">
 
-                <div class="content-text">
-                    <p>
-                        La App de Precios Unitarios es una herramienta digital diseñada para optimizar la elaboración, análisis y control de presupuestos en proyectos de construcción.
-                        Su propósito principal es facilitar el cálculo estructurado de costos directos e indirectos mediante la integración de materiales, mano de obra, maquinaria y rendimientos,
-                        permitiendo generar análisis de precio unitario (APU) de manera precisa y estandarizada.
-                    </p>
+                    <div class="mb-3 fw-semibold">Conceptos</div>
 
-                    <p>
-                        La aplicación centraliza la información técnica y financiera del proyecto en una plataforma intuitiva, ofreciendo control sobre catálogos de conceptos,
-                        desglose de insumos, generación automática de costos y visualización de reportes comparativos. Esto reduce errores manuales, mejora la trazabilidad de los cálculos
-                        y agiliza la toma de decisiones.
-                    </p>
+                    <form method="POST" action="#" class="form-compact">
+                        @csrf
 
-                    <p class="mb-0">
-                        Orientada a arquitectos, ingenieros civiles, contratistas y desarrolladores, esta solución digital transforma el proceso tradicional de presupuestación en un sistema
-                        eficiente, organizado y adaptable a diferentes tipos de obra.
-                    </p>
+                        <div class="row align-items-center mb-2">
+                            <div class="col-12 col-sm-4 col-lg-3"><label class="form-label">Clave</label></div>
+                            <div class="col-12 col-sm-8 col-lg-9"><input class="form-control" name="clave" placeholder="Placeholder"></div>
+                        </div>
+
+                        <div class="row align-items-center mb-2">
+                            <div class="col-12 col-sm-4 col-lg-3"><label class="form-label">Subpartida</label></div>
+                            <div class="col-12 col-sm-8 col-lg-9"><input class="form-control" name="subpartida" placeholder="Placeholder"></div>
+                        </div>
+
+                        <div class="row align-items-center mb-2">
+                            <div class="col-12 col-sm-4 col-lg-3"><label class="form-label">Descripción</label></div>
+                            <div class="col-12 col-sm-8 col-lg-9"><input class="form-control" name="descripcion" placeholder="Placeholder"></div>
+                        </div>
+
+                        <div class="row align-items-center mb-2">
+                            <div class="col-12 col-sm-4 col-lg-3"><label class="form-label">Unidad</label></div>
+                            <div class="col-12 col-sm-8 col-lg-9"><input class="form-control" name="unidad" placeholder="Placeholder"></div>
+                        </div>
+
+                        <div class="row align-items-center mb-2">
+                            <div class="col-12 col-sm-4 col-lg-3"><label class="form-label">Cantidad</label></div>
+                            <div class="col-12 col-sm-8 col-lg-9"><input class="form-control" name="cantidad" placeholder="Placeholder"></div>
+                        </div>
+
+                        <div class="row align-items-center mb-2">
+                            <div class="col-12 col-sm-4 col-lg-3"><label class="form-label">PU</label></div>
+                            <div class="col-12 col-sm-8 col-lg-9"><input class="form-control" name="pu" placeholder="Placeholder"></div>
+                        </div>
+
+                        <div class="row align-items-center mb-3">
+                            <div class="col-12 col-sm-4 col-lg-3"><label class="form-label">Importe</label></div>
+                            <div class="col-12 col-sm-8 col-lg-9"><input class="form-control" name="importe" placeholder="Placeholder"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-sm btn-secondary px-3">
+                                <i class="bi bi-plus-circle me-2"></i> Agregar Información
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="table-wrap">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle mb-0">
+                                <thead>
+                                <tr class="text-center">
+                                    <th>Clave</th>
+                                    <th>Partida</th>
+                                    <th>Subpartida</th>
+                                    <th>Descripción</th>
+                                    <th>Unidad</th>
+                                    <th>Cantidad</th>
+                                    <th>PU</th>
+                                    <th>Importe</th>
+                                    <th>Acciones</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @for($i=0; $i<5; $i++)
+                                    <tr>
+                                        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-outline-dark btn-sm btn-action me-1" title="Editar">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-dark btn-sm btn-action" title="Eliminar">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endfor
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -210,7 +306,7 @@
                             <i class="bi bi-bar-chart-fill text-dark"></i>
                             <span class="bolt"><i class="bi bi-lightning-fill"></i></span>
                         </div>
-                        <div class="fw-semibold">Akiraka</div>
+                        <div class="fw-semibold">Akraka</div>
                     </div>
                     <div class="muted small">Dirección<br>Derechos reservados</div>
                 </div>
@@ -250,10 +346,16 @@
                         </div>
                     </div>
 
-                    <div class="social d-flex gap-2 mt-3">
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Web"><i class="bi bi-lightning-fill"></i></a>
+                    <div class="d-flex gap-2 mt-3">
+                        <a class="btn btn-outline-light btn-sm rounded-circle" style="width:40px;height:40px;display:grid;place-items:center;" href="#" aria-label="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                        <a class="btn btn-outline-light btn-sm rounded-circle" style="width:40px;height:40px;display:grid;place-items:center;" href="#" aria-label="Facebook">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a class="btn btn-outline-light btn-sm rounded-circle" style="width:40px;height:40px;display:grid;place-items:center;" href="#" aria-label="Web">
+                            <i class="bi bi-lightning-fill"></i>
+                        </a>
                     </div>
                 </div>
             </div>

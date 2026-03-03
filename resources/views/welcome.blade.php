@@ -1,296 +1,139 @@
 {{-- resources/views/welcome.blade.php --}}
-    <!doctype html>
-<html lang="es">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>App Precios Unitarios</title>
+@extends('layout')
 
-    {{-- Bootstrap 5 --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    {{-- Bootstrap Icons --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+@section('title','Inicio | App Precios Unitarios')
 
-    <style>
-        :root{
-            --ui-dark:#5a5a5a;
-            --ui-dark-2:#4f4f4f;
-            --ui-light:#f5f5f5;
-            --ui-border:#8a8a8a;
-        }
+@section('content')
+    <div class="d-flex justify-content-center">
+        <div class="w-100" style="max-width: 700px  ;">
+            <div class="p-4">
+                <form action="#" method="POST" enctype="multipart/form-data">
+                    @csrf
 
-        body{ background: #e9e9e9; }
+                    {{-- ================== DATOS DEL CLIENTE ================== --}}
+                    <h6 class="fw-bold mb-3">Datos del Cliente</h6>
 
-        .app-shell{ min-height: 100vh; display: flex; flex-direction: column; }
-        .app-main{ flex: 1; display: flex; }
-
-        .topbar{ background: var(--ui-dark); border-bottom: 1px solid rgba(255,255,255,.15); }
-        .brand-badge{
-            width: 44px; height: 44px; border-radius: 50%;
-            background: #ffffff; display: grid; place-items: center;
-            position: relative; overflow: hidden;
-        }
-        .brand-badge .bolt{
-            position: absolute; right: -2px; top: -2px;
-            width: 18px; height: 18px; border-radius: 4px;
-            background: #2bd15a; display: grid; place-items: center;
-            color: #fff; font-size: .85rem;
-        }
-        .topbar .welcome{ color:#fff; opacity:.9; font-size: .95rem; }
-
-        .sidebar{
-            width: 270px; background: var(--ui-dark); color: #fff;
-            border-right: 1px solid rgba(255,255,255,.15);
-        }
-        .sidebar-inner{ padding: 14px 14px 18px 14px; }
-        .sidebar .search{ background: #fff; border-radius: 999px; padding: 4px 10px; }
-
-        .nav-vertical .list-group-item{
-            background: transparent; border: 0; color: #fff;
-            padding: .55rem .75rem; border-radius: .35rem;
-            display: flex; align-items: center; gap: .6rem;
-        }
-        .nav-vertical .list-group-item:hover{ background: rgba(255,255,255,.10); }
-        .nav-vertical .list-group-item.active{ background: rgba(255,255,255,.18); color: #fff; }
-        .nav-vertical .icon{ width: 22px; text-align: center; opacity: .95; }
-        .nav-divider{ height: 1px; background: rgba(255,255,255,.18); margin: 12px 0; }
-
-        .content-area{ flex: 1; background: #fff; }
-        .content-card{ max-width: 820px; margin: 0 auto; padding: 34px 18px 30px 18px; }
-        .content-title{ text-align: center; font-weight: 700; margin-bottom: 20px; }
-        .content-text{ color: #333; font-size: .98rem; line-height: 1.6; }
-
-        .footer{ background: var(--ui-dark); color: #fff; }
-        .footer .muted{ opacity: .85; font-size: .9rem; }
-        .footer a{ color: #fff; text-decoration: none; opacity: .9; }
-        .footer a:hover{ opacity: 1; text-decoration: underline; }
-        .footer .footer-title{ font-weight: 700; margin-bottom: .6rem; }
-        .footer .social .btn{ width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; }
-
-        @media (max-width: 991.98px){
-            .sidebar{ display:none; }
-        }
-    </style>
-</head>
-
-<body>
-<div class="app-shell">
-
-    {{-- TOPBAR --}}
-    <nav class="navbar navbar-expand-lg topbar py-2">
-        <div class="container-fluid px-3">
-            <div class="d-flex align-items-center gap-2">
-                <div class="brand-badge">
-                    <i class="bi bi-bar-chart-fill text-dark"></i>
-                    <span class="bolt"><i class="bi bi-lightning-fill"></i></span>
-                </div>
-                <div class="text-white fw-semibold">Akraka Estudio</div>
-            </div>
-
-            <div class="d-none d-md-block welcome text-center flex-grow-1">
-                “Bienvenido a app.precios.unitarios.”
-            </div>
-
-            <div class="d-flex align-items-center gap-2">
-                {{-- Botón sidebar móvil --}}
-                <button class="btn btn-sm btn-outline-light d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
-                    <i class="bi bi-list"></i>
-                </button>
-
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
-                        Usuario Activo
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#">Mi perfil</a></li>
-                        <li><a class="dropdown-item" href="#">Configuración</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#">Cerrar sesión</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    {{-- MAIN --}}
-    <div class="app-main">
-
-        {{-- SIDEBAR (desktop) --}}
-        <aside class="sidebar">
-            <div class="sidebar-inner">
-                <div class="search mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-search text-secondary"></i>
-                    <input type="text" class="form-control form-control-sm border-0 shadow-none p-0" placeholder="Search">
-                </div>
-
-                <div class="list-group nav-vertical">
-                    <a href="{{ route('inicio') }}" class="list-group-item {{ request()->routeIs('inicio') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-house-door-fill"></i></span> Inicio
-                    </a>
-
-                    <a href="{{ route('proyectos') }}" class="list-group-item {{ request()->routeIs('proyectos') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-folder-fill"></i></span> Proyectos
-                    </a>
-
-                    <a href="{{ route('conceptos') }}" class="list-group-item {{ request()->routeIs('conceptos') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-diagram-3-fill"></i></span> C.Conceptos
-                    </a>
-
-                    <div class="nav-divider"></div>
-
-                    <a href="{{ route('generadores') }}" class="list-group-item {{ request()->routeIs('generadores') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-calculator-fill"></i></span> Generadores
-                    </a>
-
-                    <a href="{{ route('materiales') }}" class="list-group-item {{ request()->routeIs('materiales') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-box-seam-fill"></i></span> Materiales
-                    </a>
-
-                    <a href="{{ route('mano_obra') }}" class="list-group-item {{ request()->routeIs('mano_obra') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-person-badge-fill"></i></span> M.Obra
-                    </a>
-
-                    <a href="{{ route('maquinaria_equipo') }}" class="list-group-item {{ request()->routeIs('maquinaria_equipo') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-truck-front-fill"></i></span> Maquinaria y Equipo
-                    </a>
-
-                    <a href="{{ route('indirectos') }}" class="list-group-item {{ request()->routeIs('indirectos') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-percent"></i></span> C.Indirectos
-                    </a>
-
-                    <a href="{{ route('pu') }}" class="list-group-item {{ request()->routeIs('pu') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-cash-coin"></i></span> P.U
-                    </a>
-
-                    <a href="{{ route('presupuesto') }}" class="list-group-item {{ request()->routeIs('presupuesto') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-receipt-cutoff"></i></span> Presupuesto
-                    </a>
-
-                    <a href="{{ route('reportes') }}" class="list-group-item {{ request()->routeIs('reportes') ? 'active' : '' }}">
-                        <span class="icon"><i class="bi bi-file-earmark-text-fill"></i></span> Reportes
-                    </a>
-                </div>
-            </div>
-        </aside>
-
-        {{-- CONTENT --}}
-        <main class="content-area">
-            <div class="content-card">
-                <h3 class="content-title">¿Cuál es nuestro propósito?</h3>
-
-                <div class="content-text">
-                    <p>
-                        La App de Precios Unitarios es una herramienta digital diseñada para optimizar la elaboración, análisis y control de presupuestos en proyectos de construcción.
-                        Su propósito principal es facilitar el cálculo estructurado de costos directos e indirectos mediante la integración de materiales, mano de obra, maquinaria y rendimientos,
-                        permitiendo generar análisis de precio unitario (APU) de manera precisa y estandarizada.
-                    </p>
-
-                    <p>
-                        La aplicación centraliza la información técnica y financiera del proyecto en una plataforma intuitiva, ofreciendo control sobre catálogos de conceptos,
-                        desglose de insumos, generación automática de costos y visualización de reportes comparativos. Esto reduce errores manuales, mejora la trazabilidad de los cálculos
-                        y agiliza la toma de decisiones.
-                    </p>
-
-                    <p class="mb-0">
-                        Orientada a arquitectos, ingenieros civiles, contratistas y desarrolladores, esta solución digital transforma el proceso tradicional de presupuestación en un sistema
-                        eficiente, organizado y adaptable a diferentes tipos de obra.
-                    </p>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    {{-- FOOTER --}}
-    <footer class="footer py-4">
-        <div class="container">
-            <div class="row g-4 align-items-start">
-                <div class="col-12 col-md-3">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <div class="brand-badge" style="transform: scale(.92);">
-                            <i class="bi bi-bar-chart-fill text-dark"></i>
-                            <span class="bolt"><i class="bi bi-lightning-fill"></i></span>
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Nombre</label>
+                            <input type="text" name="cliente_nombre" class="form-control form-control-sm" placeholder="Placeholder">
                         </div>
-                        <div class="fw-semibold">Akiraka</div>
-                    </div>
-                    <div class="muted small">Dirección<br>Derechos reservados</div>
-                </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Razón Social</label>
+                            <input type="text" name="cliente_razon_social" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
 
-                <div class="col-12 col-md-5">
-                    <div class="footer-title">Contenido</div>
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="d-grid gap-1 small">
-                                <a href="{{ route('inicio') }}">Inicio</a>
-                                <a href="{{ route('proyectos') }}">Proyectos</a>
-                                <a href="{{ route('conceptos') }}">Conceptos</a>
-                                <a href="{{ route('generadores') }}">Generadores</a>
-                                <a href="{{ route('materiales') }}">Materiales</a>
-                            </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Dirección</label>
+                            <input type="text" name="cliente_direccion" class="form-control form-control-sm" placeholder="Placeholder">
                         </div>
-                        <div class="col-6">
-                            <div class="d-grid gap-1 small">
-                                <a href="{{ route('mano_obra') }}">Mano de obra</a>
-                                <a href="{{ route('maquinaria_equipo') }}">Maquinaria</a>
-                                <a href="{{ route('indirectos') }}">Indirectos</a>
-                                <a href="{{ route('presupuesto') }}">Presupuesto</a>
-                                <a href="{{ route('reportes') }}">Reportes</a>
-                            </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Teléfono</label>
+                            <input type="text" name="cliente_telefono" class="form-control form-control-sm" placeholder="Placeholder">
                         </div>
-                    </div>
-                </div>
 
-                <div class="col-12 col-md-4">
-                    <div class="footer-title">Contactos</div>
-                    <div class="small muted">
-                        <div class="d-flex justify-content-between border-bottom border-light border-opacity-25 py-1">
-                            <span>Teléfono</span><span>— — — —</span>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Correo</label>
+                            <input type="email" name="cliente_correo" class="form-control form-control-sm" placeholder="Placeholder">
                         </div>
-                        <div class="d-flex justify-content-between border-bottom border-light border-opacity-25 py-1">
-                            <span>Correo</span><span>— — — —</span>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">RFC</label>
+                            <input type="text" name="cliente_rfc" class="form-control form-control-sm" placeholder="Placeholder">
                         </div>
                     </div>
 
-                    <div class="social d-flex gap-2 mt-3">
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Web"><i class="bi bi-lightning-fill"></i></a>
+                    <div class="d-flex align-items-center gap-3 mt-2 mb-4">
+                        <div class="small fw-semibold me-2">Persona</div>
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="radio" name="cliente_persona" id="persona_fisica" value="fisica" checked>
+                            <label class="form-check-label small" for="persona_fisica">Física</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input" type="radio" name="cliente_persona" id="persona_moral" value="moral">
+                            <label class="form-check-label small" for="persona_moral">Moral</label>
+                        </div>
                     </div>
-                </div>
+
+                    {{-- ================== DATOS DE LA OBRA ================== --}}
+                    <h6 class="fw-bold mb-3">Datos de la obra</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Nombre del proyecto</label>
+                            <input type="text" name="obra_nombre" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Ubicación del proyecto</label>
+                            <input type="text" name="obra_ubicacion" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Tipo de obra</label>
+                            <input type="text" name="obra_tipo" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Superficie de terreno</label>
+                            <input type="text" name="obra_superficie" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Tipo de uso</label>
+                            <input type="text" name="obra_uso" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Fecha de inicio estimada</label>
+                            <input type="date" name="obra_fecha_inicio" class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Duración estimada</label>
+                            <input type="text" name="obra_duracion" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+                    </div>
+
+                    {{-- ================== DATOS DE LA EMPRESA ================== --}}
+                    <h6 class="fw-bold mb-3">Datos de la empresa</h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Nombre</label>
+                            <input type="text" name="empresa_nombre" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Logo</label>
+                            <input type="file" name="empresa_logo" class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Dirección</label>
+                            <input type="text" name="empresa_direccion" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Responsable técnico</label>
+                            <input type="text" name="empresa_responsable" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Cargo</label>
+                            <input type="text" name="empresa_cargo" class="form-control form-control-sm" placeholder="Placeholder">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Firma digital</label>
+                            <input type="file" name="firma_digital" class="form-control form-control-sm">
+                        </div>
+
+                        <div class="col-md-6 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-secondary btn-sm px-3">
+                                <i class="bi bi-plus-circle me-2"></i> Agregar Información
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
             </div>
-        </div>
-    </footer>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-{{-- OFFCANVAS SIDEBAR (mobile) --}}
-<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="sidebarOffcanvas">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Menú</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-        <div class="search mb-3 d-flex align-items-center gap-2">
-            <i class="bi bi-search text-secondary"></i>
-            <input type="text" class="form-control form-control-sm border-0 shadow-none p-0" placeholder="Search">
-        </div>
-
-        <div class="list-group nav-vertical">
-            <a href="{{ route('inicio') }}" class="list-group-item {{ request()->routeIs('inicio') ? 'active' : '' }}"><span class="icon"><i class="bi bi-house-door-fill"></i></span> Inicio</a>
-            <a href="{{ route('proyectos') }}" class="list-group-item {{ request()->routeIs('proyectos') ? 'active' : '' }}"><span class="icon"><i class="bi bi-folder-fill"></i></span> Proyectos</a>
-            <a href="{{ route('conceptos') }}" class="list-group-item {{ request()->routeIs('conceptos') ? 'active' : '' }}"><span class="icon"><i class="bi bi-diagram-3-fill"></i></span> C.Conceptos</a>
-            <div class="nav-divider"></div>
-            <a href="{{ route('generadores') }}" class="list-group-item {{ request()->routeIs('generadores') ? 'active' : '' }}"><span class="icon"><i class="bi bi-calculator-fill"></i></span> Generadores</a>
-            <a href="{{ route('materiales') }}" class="list-group-item {{ request()->routeIs('materiales') ? 'active' : '' }}"><span class="icon"><i class="bi bi-box-seam-fill"></i></span> Materiales</a>
-            <a href="{{ route('mano_obra') }}" class="list-group-item {{ request()->routeIs('mano_obra') ? 'active' : '' }}"><span class="icon"><i class="bi bi-person-badge-fill"></i></span> M.Obra</a>
-            <a href="{{ route('maquinaria_equipo') }}" class="list-group-item {{ request()->routeIs('maquinaria_equipo') ? 'active' : '' }}"><span class="icon"><i class="bi bi-truck-front-fill"></i></span> Maquinaria y Equipo</a>
-            <a href="{{ route('indirectos') }}" class="list-group-item {{ request()->routeIs('indirectos') ? 'active' : '' }}"><span class="icon"><i class="bi bi-percent"></i></span> C.Indirectos</a>
-            <a href="{{ route('pu') }}" class="list-group-item {{ request()->routeIs('pu') ? 'active' : '' }}"><span class="icon"><i class="bi bi-cash-coin"></i></span> P.U</a>
-            <a href="{{ route('presupuesto') }}" class="list-group-item {{ request()->routeIs('presupuesto') ? 'active' : '' }}"><span class="icon"><i class="bi bi-receipt-cutoff"></i></span> Presupuesto</a>
-            <a href="{{ route('reportes') }}" class="list-group-item {{ request()->routeIs('reportes') ? 'active' : '' }}"><span class="icon"><i class="bi bi-file-earmark-text-fill"></i></span> Reportes</a>
         </div>
     </div>
-</div>
-</body>
-</html>
+@endsection

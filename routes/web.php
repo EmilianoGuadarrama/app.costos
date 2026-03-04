@@ -23,3 +23,17 @@ Route::view('/pu', 'pu.index')->name('pu');
 Route::view('/presupuesto', 'presupuestos.index')->name('presupuesto');
 
 Route::view('/reportes', 'reportes.index')->name('reportes');
+
+
+
+
+
+
+
+// EDIT (solo vistas)
+Route::view('/conceptos/{id}/edit', 'conceptos.edit')->name('conceptos.edit');
+Route::view('/generadores/{id}/edit', 'generadores.edit')->name('generadores.edit');
+Route::view('/materiales/{id}/edit', 'materiales.edit')->name('materiales.edit');
+Route::view('/mano-obra/{id}/edit', 'mano_de_obras.edit')->name('mano_obra.edit');
+Route::view('/maquinaria-equipo/{id}/edit', 'maquinaria_equipos.edit')->name('maquinaria_equipo.edit');
+Route::view('/presupuesto/{id}/edit', 'presupuestos.edit')->name('presupuesto.edit');

@@ -1,14 +1,9 @@
-{{-- resources/views/presupuestos/index.blade.php --}}
 @extends('layout')
 
 @section('title','Presupuestos')
 
 @section('content')
     <style>
-        .panel-box{ background:#fff; border:1px solid rgba(0,0,0,.25); padding:26px; max-width:760px; margin:0 auto; }
-        .form-grid{ max-width:560px; margin:0 auto; }
-        .btn-mid{ display:flex; justify-content:center; margin:18px 0 22px; }
-
         .tbl-grid{
             width:100%;
             border-collapse:collapse;
@@ -16,60 +11,86 @@
             font-size:.92rem;
             background:#fff;
         }
-        .tbl-grid th,.tbl-grid td{ border:1px solid rgba(0,0,0,.12); padding:10px 8px; background:#fff; }
-        .tbl-grid thead th{ font-size:.78rem; font-weight:700; text-align:left; }
-        .actions{ display:flex; justify-content:flex-end; gap:10px; }
-        .icon-btn{ width:28px;height:28px;display:grid;place-items:center;border:0;background:transparent;border-radius:4px;padding:0;color:#111; }
+        .tbl-grid th,.tbl-grid td{
+            border:1px solid rgba(0,0,0,.35);
+            padding:10px 8px;
+            vertical-align:middle;
+            background:#fff;
+        }
+        .tbl-grid thead th{
+            text-transform:uppercase;
+            letter-spacing:.04em;
+            font-size:.72rem;
+            font-weight:800;
+            text-align:center;
+            padding:8px 6px;
+        }
+        .actions{
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+        }
+        .icon-btn{
+            width:28px;height:28px;
+            display:grid;place-items:center;
+            border:0;background:transparent;
+            border-radius:4px;padding:0;color:#111;
+        }
         .icon-btn:hover{ background:rgba(0,0,0,.06); }
-        .tbl-grid tbody td{ height:46px; }
+        .tbl-grid tbody td{ height:44px; }
     </style>
 
-    <div class="panel-box">
-        <div class="form-grid">
-            <div class="fw-bold mb-3">Presupuestos</div>
-
-            @php $fields = ['Clave','Concepto','Unidad','Cantidad','Costo directo','Importe']; @endphp
-            @foreach($fields as $f)
-                <div class="row align-items-center mb-2">
-                    <div class="col-5 small fw-semibold">{{ $f }}</div>
-                    <div class="col-7"><input class="form-control form-control-sm" placeholder="Placeholder"></div>
-                </div>
-            @endforeach
-
-            <div class="btn-mid">
-                <button class="btn btn-secondary btn-sm px-3" type="button">
-                    <i class="bi bi-plus-circle me-2"></i> Agregar Información
-                </button>
-            </div>
+    {{-- CABECERA --}}
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+            <h4 class="fw-bold mb-1">Presupuestos</h4>
+            <div class="text-secondary small">Listado general de presupuestos y su estado actual.</div>
         </div>
 
-        <div class="table-responsive mt-2">
-            <table class="tbl-grid">
-                <thead>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-funnel me-1"></i> Filtrar
+            </button>
+            <button class="btn btn-sm btn-secondary">
+                <i class="bi bi-plus-circle me-1"></i> Nuevo Presupuesto
+            </button>
+        </div>
+    </div>
+
+    {{-- TABLA CON LOS DATOS --}}
+    <div class="table-responsive">
+        <table class="tbl-grid">
+            <thead>
+            <tr>
+                <th>Clave</th>
+                <th>Concepto</th>
+                <th>Unidad</th>
+                <th>Cantidad</th>
+                <th>Costo directo</th>
+                <th>Importe</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            @for($i = 0; $i < 6; $i++)
+                @php
+                    $id = $i + 1;  // Definimos el id con un valor único
+                @endphp
                 <tr>
-                    <th>Clave</th>
-                    <th>Concepto</th>
-                    <th>Unidad</th>
-                    <th>Cantidad</th>
-                    <th>Costo directo</th>
-                    <th>Importe</th>
-                    <th>Acciones</th>
+                    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                    <td>
+                        <div class="actions">
+                            <a class="icon-btn" href="{{ route('presupuesto.edit', $id) }}" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button class="icon-btn" type="button" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
-                </thead>
-                <tbody>
-                @for($i=0;$i<4;$i++)
-                    <tr>
-                        <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
-                        <td>
-                            <div class="actions">
-                                <button class="icon-btn" type="button" title="Editar"><i class="bi bi-pencil"></i></button>
-                                <button class="icon-btn" type="button" title="Eliminar"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                @endfor
-                </tbody>
-            </table>
-        </div>
+            @endfor
+            </tbody>
+        </table>
     </div>
 @endsection

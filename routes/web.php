@@ -37,3 +37,16 @@ Route::view('/materiales/{id}/edit', 'materiales.edit')->name('materiales.edit')
 Route::view('/mano-obra/{id}/edit', 'mano_de_obras.edit')->name('mano_obra.edit');
 Route::view('/maquinaria-equipo/{id}/edit', 'maquinaria_equipos.edit')->name('maquinaria_equipo.edit');
 Route::view('/presupuesto/{id}/edit', 'presupuestos.edit')->name('presupuesto.edit');
+
+// Create (solo vistas)
+Route::view('/conceptos/create', 'conceptos.create')->name('conceptos.create');
+Route::view('/generadores/create', 'generadores.create')->name('generadores.create');
+Route::view('/materiales/create', 'materiales.create')->name('materiales.create');
+Route::view('/mano-obra/create', 'mano_de_obras.create')->name('mano_obra.create');
+Route::view('/maquinaria-equipo/create', 'maquinaria_equipos.create')->name('maquinaria_equipo.create');
+Route::view('/presupuesto/create', 'presupuestos.create')->name('presupuesto.create');
+
+Route::view('/proyectos', 'proyectos.index')->name('proyectos');
+Route::view('/proyectos/create', 'proyectos.create')->name('proyectos.create');
+Route::view('/proyectos/{id}/edit', 'proyectos.edit')->name('proyectos.edit');
+

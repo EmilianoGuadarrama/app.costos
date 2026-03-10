@@ -119,7 +119,7 @@
                     <i class="bi bi-bar-chart-fill text-dark"></i>
                     <span class="bolt"><i class="bi bi-lightning-fill"></i></span>
                 </div>
-                <div class="text-white fw-semibold">Akraka Estudio</div>
+                <div class="text-white fw-semibold">Akiraka Estudio</div>
             </div>
 
             <div class="d-none d-md-block welcome text-center flex-grow-1">

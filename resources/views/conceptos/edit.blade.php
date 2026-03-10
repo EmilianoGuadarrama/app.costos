@@ -1,58 +1,115 @@
 @extends('layout')
-@section('title','Editar Concepto')
+
+@section('title', 'Editar Concepto')
 
 @section('content')
     <style>
-        .panel-box{ background:#fff; border:1px solid rgba(0,0,0,.25); padding:26px; max-width:760px; margin:0 auto; }
-        .form-grid{ max-width:520px; margin:0 auto; }
+        .edit-wrapper{
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .edit-header{
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .edit-card{
+            background: #fff;
+            border: 1px solid rgba(0,0,0,.18);
+            padding: 32px;
+        }
+
+        .edit-form{
+            max-width: 620px;
+            margin: 0 auto;
+        }
+
+        .edit-form .form-label{
+            font-weight: 600;
+            color: #222;
+        }
+
+        .actions-bottom{
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+        }
     </style>
 
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-        <div>
-            <h4 class="fw-bold mb-1">Editar Concepto</h4>
-            <div class="text-secondary small">Modifica la información del registro (vista demo).</div>
+    <div class="edit-wrapper">
+        <div class="edit-header">
+            <div>
+                <h2 class="fw-bold mb-1">Editar Concepto</h2>
+                <p class="text-secondary mb-0">Modifica la información del registro (vista demo).</p>
+            </div>
+
+            <a href="{{ route('conceptos') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Volver
+            </a>
         </div>
-        <a href="{{ route('conceptos') }}" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Volver
-        </a>
-    </div>
 
-    <div class="panel-box">
-        <div class="form-grid">
-            <div class="row align-items-center mb-2">
-                <div class="col-4 small fw-semibold">Clave</div>
-                <div class="col-8"><input class="form-control form-control-sm" value="C-001"></div>
-            </div>
-            <div class="row align-items-center mb-2">
-                <div class="col-4 small fw-semibold">Subpartida</div>
-                <div class="col-8"><input class="form-control form-control-sm" value="SUB-01"></div>
-            </div>
-            <div class="row align-items-center mb-2">
-                <div class="col-4 small fw-semibold">Descripción</div>
-                <div class="col-8"><input class="form-control form-control-sm" value="Concepto demo"></div>
-            </div>
-            <div class="row align-items-center mb-2">
-                <div class="col-4 small fw-semibold">Unidad</div>
-                <div class="col-8"><input class="form-control form-control-sm" value="M2"></div>
-            </div>
-            <div class="row align-items-center mb-2">
-                <div class="col-4 small fw-semibold">Cantidad</div>
-                <div class="col-8"><input class="form-control form-control-sm" value="10"></div>
-            </div>
-            <div class="row align-items-center mb-2">
-                <div class="col-4 small fw-semibold">PU</div>
-                <div class="col-8"><input class="form-control form-control-sm" value="0.00"></div>
-            </div>
-            <div class="row align-items-center mb-3">
-                <div class="col-4 small fw-semibold">Importe</div>
-                <div class="col-8"><input class="form-control form-control-sm" value="0.00"></div>
-            </div>
+        <div class="edit-card">
+            <form class="edit-form">
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-4 form-label">Clave</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" value="C-001">
+                    </div>
+                </div>
 
-            <div class="d-flex justify-content-center">
-                <button type="button" class="btn btn-secondary btn-sm px-3">
-                    <i class="bi bi-save me-2"></i> Guardar cambios
-                </button>
-            </div>
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-4 form-label">Subpartida</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" value="SUB-01">
+                    </div>
+                </div>
+
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-4 form-label">Descripción</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" value="Concepto demo">
+                    </div>
+                </div>
+
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-4 form-label">Unidad</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" value="M2">
+                    </div>
+                </div>
+
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-4 form-label">Cantidad</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" value="10">
+                    </div>
+                </div>
+
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-4 form-label">PU</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" value="0.00">
+                    </div>
+                </div>
+
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-4 form-label">Importe</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" value="0.00">
+                    </div>
+                </div>
+
+                <div class="actions-bottom">
+                    <button type="button" class="btn btn-secondary px-4">
+                        <i class="bi bi-save me-2"></i> Guardar cambios
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 @endsection

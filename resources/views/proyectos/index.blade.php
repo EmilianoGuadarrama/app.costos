@@ -1,27 +1,8 @@
-{{-- resources/views/proyectos/index.blade.php --}}
 @extends('layout')
 
 @section('title','Proyectos')
 
 @section('content')
-
-    {{-- CABECERA --}}
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-        <div>
-            <h4 class="fw-bold mb-1">Proyectos</h4>
-            <div class="text-secondary small">Listado general de proyectos y su estado actual.</div>
-        </div>
-
-        <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-funnel me-1"></i> Filtrar
-            </button>
-            <button class="btn btn-sm btn-secondary">
-                <i class="bi bi-plus-circle me-1"></i> Nuevo Proyecto
-            </button>
-        </div>
-    </div>
-
     <style>
         .tbl-grid{
             width:100%;
@@ -45,72 +26,79 @@
             text-align:center;
             padding:8px 6px;
         }
-
-        .w-clave{width:10%}
-        .w-partida{width:12%}
-        .w-sub{width:12%}
-        .w-desc{width:26%}
-        .w-uni{width:9%}
-        .w-cant{width:9%}
-        .w-pu{width:10%}
-        .w-imp{width:10%}
-        .w-acc{width:12%}
-
-        .cell-center{ text-align:center; }
-        .cell-right{ text-align:right; }
-
         .actions{
             display:flex;
             justify-content:flex-end;
             gap:10px;
         }
         .icon-btn{
-            width:28px; height:28px;
-            display:grid; place-items:center;
-            border-radius:4px;
+            width:28px;
+            height:28px;
+            display:grid;
+            place-items:center;
             border:0;
             background:transparent;
-            color:#111;
+            border-radius:4px;
             padding:0;
+            color:#111;
+            text-decoration:none;
         }
-        .icon-btn:hover{ background:rgba(0,0,0,.06); }
-
-        .tbl-grid tbody td{ height:44px; }
+        .icon-btn:hover{
+            background:rgba(0,0,0,.06);
+            color:#111;
+        }
+        .tbl-grid tbody td{
+            height:44px;
+        }
     </style>
 
-    {{-- TABLA VACÍA (sin marco externo) --}}
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+            <h4 class="fw-bold mb-1">Proyectos</h4>
+            <div class="text-secondary small">Listado general de proyectos y datos principales de creación.</div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-funnel me-1"></i> Filtrar
+            </button>
+
+            <a href="{{ route('proyectos.create') }}" class="btn btn-sm btn-secondary">
+                <i class="bi bi-plus-circle me-1"></i> Nuevo Proyecto
+            </a>
+        </div>
+    </div>
+
     <div class="table-responsive">
         <table class="tbl-grid">
             <thead>
             <tr>
-                <th class="w-clave">CLAVE</th>
-                <th class="w-partida">PARTIDA</th>
-                <th class="w-sub">SUBPARTIDA</th>
-                <th class="w-desc">DESCRIPCIÓN</th>
-                <th class="w-uni">UNIDAD</th>
-                <th class="w-cant">CANTIDAD</th>
-                <th class="w-pu">PU</th>
-                <th class="w-imp">IMPORTE</th>
-                <th class="w-acc">ACCIONES</th>
+                <th>CLIENTE</th>
+                <th>RAZÓN SOCIAL</th>
+                <th>PROYECTO</th>
+                <th>UBICACIÓN</th>
+                <th>TIPO DE OBRA</th>
+                <th>FECHA INICIO</th>
+                <th>ESTADO</th>
+                <th>ACCIONES</th>
             </tr>
             </thead>
-
             <tbody>
-            @for($i=0; $i<8; $i++)
+            @for($i = 0; $i < 6; $i++)
+                @php($id = $i + 1)
                 <tr>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>
-                    <td class="cell-center">&nbsp;</td>
-                    <td class="cell-center">&nbsp;</td>
-                    <td class="cell-right">&nbsp;</td>
-                    <td class="cell-right">&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
                     <td>
                         <div class="actions">
-                            <button class="icon-btn" type="button" title="Editar">
+                            <a class="icon-btn" href="{{ route('proyectos.edit', $id) }}" title="Editar">
                                 <i class="bi bi-pencil"></i>
-                            </button>
+                            </a>
                             <button class="icon-btn" type="button" title="Eliminar">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -121,5 +109,4 @@
             </tbody>
         </table>
     </div>
-
 @endsection

@@ -31,33 +31,37 @@
             gap:10px;
         }
         .icon-btn{
-            width:28px;height:28px;
-            display:grid;place-items:center;
-            border:0;background:transparent;
-            border-radius:4px;padding:0;color:#111;
+            width:28px;
+            height:28px;
+            display:grid;
+            place-items:center;
+            border:0;
+            background:transparent;
+            border-radius:4px;
+            padding:0;
+            color:#111;
+            text-decoration:none;
         }
-        .icon-btn:hover{ background:rgba(0,0,0,.06); }
+        .icon-btn:hover{ background:rgba(0,0,0,.06); color:#111; }
         .tbl-grid tbody td{ height:44px; }
     </style>
 
-    {{-- CABECERA --}}
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <div>
             <h4 class="fw-bold mb-1">Conceptos</h4>
-            <div class="text-secondary small">Listado general de conceptos y su estado actual.</div>
+            <div class="text-secondary small">Listado general de conceptos.</div>
         </div>
 
         <div class="d-flex gap-2">
             <button class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-funnel me-1"></i> Filtrar
             </button>
-            <button class="btn btn-sm btn-secondary">
+            <a href="{{ route('conceptos.create') }}" class="btn btn-sm btn-secondary">
                 <i class="bi bi-plus-circle me-1"></i> Nuevo Concepto
-            </button>
+            </a>
         </div>
     </div>
 
-    {{-- TABLA CON LOS DATOS --}}
     <div class="table-responsive">
         <table class="tbl-grid">
             <thead>
@@ -75,9 +79,7 @@
             </thead>
             <tbody>
             @for($i = 0; $i < 6; $i++)
-                @php
-                    $id = $i + 1;  // Definimos el id con un valor único, por ejemplo, como índice
-                @endphp
+                @php($id = $i + 1)
                 <tr>
                     <td>&nbsp;</td>
                     <td>&nbsp;</td>

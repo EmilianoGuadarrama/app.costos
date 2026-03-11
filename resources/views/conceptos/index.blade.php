@@ -77,31 +77,36 @@
                 <th>ACCIONES</th>
             </tr>
             </thead>
-            <tbody>
-            @for($i = 0; $i < 6; $i++)
-                @php($id = $i + 1)
-                <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>
-                        <div class="actions">
-                            <a class="icon-btn" href="{{ route('conceptos.edit', $id) }}" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <button class="icon-btn" type="button" title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            @endfor
-            </tbody>
+           <tbody>
+@foreach($conceptos as $concepto)
+<tr>
+    <td>{{ $concepto->codigo }}</td>
+    <td></td>
+    <td></td>
+    <td>{{ $concepto->descripcion }}</td>
+    <td>{{ $concepto->id_unidad }}</td>
+    <td></td>
+    <td>{{ $concepto->precio_unitario }}</td>
+    <td></td>
+
+    <td>
+        <div class="actions">
+            <a class="icon-btn" href="{{ route('conceptos.edit', $concepto->id_concepto) }}" title="Editar">
+                <i class="bi bi-pencil"></i>
+            </a>
+
+            <form action="{{ route('conceptos.destroy',$concepto->id_concepto) }}" method="POST">
+                @csrf
+                @method('DELETE')
+                <button class="icon-btn" type="submit" title="Eliminar">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </form>
+        </div>
+    </td>
+</tr>
+@endforeach
+</tbody>
         </table>
     </div>
 @endsection

@@ -83,7 +83,7 @@
     $menu = [
         ['route'=>'inicio','label'=>'Inicio','icon'=>'bi-house-door-fill','match'=>'inicio'],
         ['route'=>'proyectos','label'=>'Proyectos','icon'=>'bi-folder-fill','match'=>'proyectos'],
-        ['route'=>'conceptos','label'=>'C.Conceptos','icon'=>'bi-diagram-3-fill','match'=>'conceptos'],
+       ['route'=>'conceptos.index','label'=>'C.Conceptos','icon'=>'bi-diagram-3-fill','match'=>'conceptos.*'],
         ['divider'=>true],
         ['route'=>'generadores','label'=>'Generadores','icon'=>'bi-calculator-fill','match'=>'generadores'],
         ['route'=>'materiales','label'=>'Materiales','icon'=>'bi-box-seam-fill','match'=>'materiales'],
@@ -193,7 +193,7 @@
                             <div class="d-grid gap-1 small">
                                 <a href="{{ route('inicio') }}">Inicio</a>
                                 <a href="{{ route('proyectos') }}">Proyectos</a>
-                                <a href="{{ route('conceptos') }}">Conceptos</a>
+                                <a href="{{ route('conceptos.index') }}">Conceptos</a>
                                 <a href="{{ route('generadores') }}">Generadores</a>
                                 <a href="{{ route('materiales') }}">Materiales</a>
                             </div>

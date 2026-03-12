@@ -67,7 +67,6 @@
             <thead>
             <tr>
                 <th>CLAVE</th>
-                <th>PARTIDA</th>
                 <th>SUBPARTIDA</th>
                 <th>DESCRIPCIÓN</th>
                 <th>UNIDAD</th>
@@ -77,36 +76,35 @@
                 <th>ACCIONES</th>
             </tr>
             </thead>
-           <tbody>
-@foreach($conceptos as $concepto)
-<tr>
-    <td>{{ $concepto->codigo }}</td>
-    <td></td>
-    <td></td>
-    <td>{{ $concepto->descripcion }}</td>
-    <td>{{ $concepto->id_unidad }}</td>
-    <td></td>
-    <td>{{ $concepto->precio_unitario }}</td>
-    <td></td>
+            <tbody>
+            @foreach($conceptos as $concepto)
+                <tr>
+                    <td>{{ $concepto->codigo }}</td>
+                    <td>{{ $concepto->subpartida ?? '' }}</td>
+                    <td>{{ $concepto->descripcion }}</td>
+                    <td>{{ $concepto->unidad ?? '' }}</td>
+                    <td>{{ $concepto->cantidad ?? '' }}</td>
+                    <td>{{ $concepto->pu ?? '' }}</td>
+                    <td>{{ $concepto->importe ?? '' }}</td>
 
-    <td>
-        <div class="actions">
-            <a class="icon-btn" href="{{ route('conceptos.edit', $concepto->id_concepto) }}" title="Editar">
-                <i class="bi bi-pencil"></i>
-            </a>
+                    <td>
+                        <div class="actions">
+                            <a class="icon-btn" href="{{ route('conceptos.edit', $concepto->id_concepto) }}" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
 
-            <form action="{{ route('conceptos.destroy',$concepto->id_concepto) }}" method="POST">
-                @csrf
-                @method('DELETE')
-                <button class="icon-btn" type="submit" title="Eliminar">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </form>
-        </div>
-    </td>
-</tr>
-@endforeach
-</tbody>
+                            <form action="{{ route('conceptos.destroy',$concepto->id_concepto) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button class="icon-btn" type="submit" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
         </table>
     </div>
 @endsection

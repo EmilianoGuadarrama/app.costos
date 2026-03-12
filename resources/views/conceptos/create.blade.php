@@ -23,64 +23,66 @@
             <p class="text-secondary mb-0">Captura la información del concepto.</p>
         </div>
 
-        <a href="{{ route('conceptos') }}" class="btn btn-outline-secondary">
+        <a href="{{ route('conceptos.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Volver
         </a>
     </div>
 
     <div class="form-card">
-        <form class="form-wrapper">
+        <form action="{{ route('conceptos.store') }}" method="POST" class="form-wrapper">
+            @csrf
+
             <div class="row mb-3 align-items-center">
                 <label class="col-md-4 fw-semibold">Clave</label>
                 <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Placeholder">
+                    <input name="codigo" type="text" class="form-control" placeholder="" required>
                 </div>
             </div>
 
             <div class="row mb-3 align-items-center">
                 <label class="col-md-4 fw-semibold">Subpartida</label>
                 <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Placeholder">
+                    <input name="subpartida" type="text" class="form-control" placeholder="">
                 </div>
             </div>
 
             <div class="row mb-3 align-items-center">
                 <label class="col-md-4 fw-semibold">Descripción</label>
                 <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Placeholder">
+                    <input name="descripcion" type="text" class="form-control" placeholder="" required>
                 </div>
             </div>
 
             <div class="row mb-3 align-items-center">
                 <label class="col-md-4 fw-semibold">Unidad</label>
                 <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Placeholder">
+                    <input name="unidad" type="text" class="form-control" placeholder="">
                 </div>
             </div>
 
             <div class="row mb-3 align-items-center">
                 <label class="col-md-4 fw-semibold">Cantidad</label>
                 <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Placeholder">
+                    <input name="cantidad" type="number" step="0.01" class="form-control" placeholder="">
                 </div>
             </div>
 
             <div class="row mb-3 align-items-center">
                 <label class="col-md-4 fw-semibold">PU</label>
                 <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Placeholder">
+                    <input name="pu" type="number" step="0.01" class="form-control" placeholder="">
                 </div>
             </div>
 
             <div class="row mb-4 align-items-center">
                 <label class="col-md-4 fw-semibold">Importe</label>
                 <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Placeholder">
+                    <input name="importe" type="number" step="0.01" class="form-control" placeholder="">
                 </div>
             </div>
 
             <div class="d-flex justify-content-center">
-                <button type="button" class="btn btn-secondary px-4">
+                <button type="submit" class="btn btn-secondary px-4">
                     <i class="bi bi-plus-circle me-2"></i> Agregar Información
                 </button>
             </div>

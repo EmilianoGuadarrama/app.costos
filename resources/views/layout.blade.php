@@ -81,19 +81,19 @@
 @php
     // Menú único (desktop + mobile)
     $menu = [
-        ['route'=>'inicio','label'=>'Inicio','icon'=>'bi-house-door-fill','match'=>'inicio'],
-        ['route'=>'proyectos','label'=>'Proyectos','icon'=>'bi-folder-fill','match'=>'proyectos'],
-       ['route'=>'conceptos.index','label'=>'C.Conceptos','icon'=>'bi-diagram-3-fill','match'=>'conceptos.*'],
-        ['divider'=>true],
-        ['route'=>'generadores','label'=>'Generadores','icon'=>'bi-calculator-fill','match'=>'generadores'],
-        ['route'=>'materiales','label'=>'Materiales','icon'=>'bi-box-seam-fill','match'=>'materiales'],
-        ['route'=>'mano_obra','label'=>'M.Obra','icon'=>'bi-person-badge-fill','match'=>'mano_obra'],
-        ['route'=>'maquinaria_equipo','label'=>'Maquinaria y Equipo','icon'=>'bi-truck-front-fill','match'=>'maquinaria_equipo'],
-        ['route'=>'indirectos','label'=>'C.Indirectos','icon'=>'bi-percent','match'=>'indirectos'],
-        ['route'=>'pu','label'=>'P.U','icon'=>'bi-cash-coin','match'=>'pu'],
-        ['route'=>'presupuesto','label'=>'Presupuesto','icon'=>'bi-receipt-cutoff','match'=>'presupuesto'],
-        ['route'=>'reportes','label'=>'Reportes','icon'=>'bi-file-earmark-text-fill','match'=>'reportes'],
-    ];
+    ['route'=>'inicio','label'=>'Inicio','icon'=>'bi-house-door-fill','match'=>'inicio'],
+    ['route'=>'proyectos','label'=>'Proyectos','icon'=>'bi-folder-fill','match'=>'proyectos'],
+    ['route'=>'conceptos.index','label'=>'C.Conceptos','icon'=>'bi-diagram-3-fill','match'=>'conceptos.*'],
+    ['divider'=>true],
+    ['route'=>'generadores.index','label'=>'Generadores','icon'=>'bi-calculator-fill','match'=>'generadores.*'],
+    ['route'=>'materiales','label'=>'Materiales','icon'=>'bi-box-seam-fill','match'=>'materiales'],
+    ['route'=>'mano_obra','label'=>'M.Obra','icon'=>'bi-person-badge-fill','match'=>'mano_obra'],
+    ['route'=>'maquinaria_equipo','label'=>'Maquinaria y Equipo','icon'=>'bi-truck-front-fill','match'=>'maquinaria_equipo'],
+    ['route'=>'indirectos','label'=>'C.Indirectos','icon'=>'bi-percent','match'=>'indirectos'],
+    ['route'=>'pu','label'=>'P.U','icon'=>'bi-cash-coin','match'=>'pu'],
+    ['route'=>'presupuesto','label'=>'Presupuesto','icon'=>'bi-receipt-cutoff','match'=>'presupuesto'],
+    ['route'=>'reportes','label'=>'Reportes','icon'=>'bi-file-earmark-text-fill','match'=>'reportes'],
+];
 
     $renderMenu = function() use ($menu) {
         foreach($menu as $item){

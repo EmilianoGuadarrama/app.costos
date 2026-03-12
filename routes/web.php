@@ -19,6 +19,7 @@ Route::view('/reportes', 'reportes.index')->name('reportes');
 
 // CRUD de conceptos
 Route::resource('conceptos', ConceptoController::class);
+Route::resource('generadores', GeneradorController::class);
 
 
 // Rutas de creación

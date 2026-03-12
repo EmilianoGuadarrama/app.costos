@@ -21,8 +21,9 @@ class ConceptoController extends Controller
 
     public function store(Request $request)
     {
-        Concepto::create($request->all());
-        return redirect()->route('conceptos.index');
+        Concepto::create($request->only([
+            'codigo','partida','subpartida','descripcion','unidad','cantidad','pu','importe'
+        ]));
     }
 
     public function show($id)

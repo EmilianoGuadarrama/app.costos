@@ -16,13 +16,15 @@
             padding:10px 8px;
             vertical-align:middle;
             background:#fff;
+            word-wrap:break-word;
         }
         .tbl-grid thead th{
+            text-transform:uppercase;
+            letter-spacing:.04em;
             font-size:.72rem;
             font-weight:800;
             text-align:center;
             padding:8px 6px;
-            text-transform:uppercase;
         }
         .actions{
             display:flex;
@@ -52,7 +54,7 @@
         </div>
 
         <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary">
+            <button class="btn btn-sm btn-outline-secondary" type="button">
                 <i class="bi bi-funnel me-1"></i> Filtrar
             </button>
             <a href="{{ route('generadores.create') }}" class="btn btn-sm btn-secondary">
@@ -60,6 +62,10 @@
             </a>
         </div>
     </div>
+
+    @if(session('ok'))
+        <div class="alert alert-success">{{ session('ok') }}</div>
+    @endif
 
     <div class="table-responsive">
         <table class="tbl-grid">
@@ -77,31 +83,44 @@
                 <th>ACCIONES</th>
             </tr>
             </thead>
+
             <tbody>
-            @for($i = 0; $i < 6; $i++)
-                @php($id = $i + 1)
+            @forelse($generadores as $g)
                 <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
+                    <td>{{ $g->concepto }}</td>
+                    <td>{{ $g->unidad }}</td>
+                    <td>{{ $g->localizacion }}</td>
+                    <td>{{ $g->ejes }}</td>
+                    <td class="text-center">{{ $g->no_piezas }}</td>
+                    <td class="text-center">{{ $g->ancho }}</td>
+                    <td class="text-center">{{ $g->largo }}</td>
+                    <td class="text-center">{{ $g->alto }}</td>
+                    <td class="text-center">{{ $g->resultado }}</td>
+
                     <td>
                         <div class="actions">
-                            <a class="icon-btn" href="{{ route('generadores.edit', $id) }}" title="Editar">
+                            <a class="icon-btn" href="{{ route('generadores.edit', $g->id_generador) }}" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
-                            <button class="icon-btn" type="button" title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </button>
+
+                            <form action="{{ route('generadores.destroy', $g->id_generador) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button class="icon-btn" type="submit" title="Eliminar"
+                                        onclick="return confirm('¿Eliminar este generador?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>
-            @endfor
+            @empty
+                <tr>
+                    <td colspan="10" class="text-center text-secondary py-4">
+                        No hay generadores registrados.
+                    </td>
+                </tr>
+            @endforelse
             </tbody>
         </table>
     </div>

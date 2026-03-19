@@ -1,256 +1,240 @@
-{{-- resources/views/layout.blade.php --}}
-    <!doctype html>
+<!doctype html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title','App Precios Unitarios')</title>
+    <title>@yield('title', 'App Precios Unitarios')</title>
 
-    {{-- Bootstrap 5 --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    {{-- Bootstrap Icons --}}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        :root{
-            --ui-dark:#5a5a5a;
-            --ui-dark-2:#4f4f4f;
-            --ui-light:#f5f5f5;
-            --ui-border:#8a8a8a;
+        body{
+            margin:0;
+            background:#f3f4f6;
+            font-family: "Helvetica Neue", Arial, sans-serif;
         }
 
-        body{ background: #e9e9e9; }
-
-        .app-shell{ min-height: 100vh; display: flex; flex-direction: column; }
-        .app-main{ flex: 1; display: flex; min-height: 0; }
-
-        .topbar{ background: var(--ui-dark); border-bottom: 1px solid rgba(255,255,255,.15); }
-        .brand-badge{
-            width: 44px; height: 44px; border-radius: 50%;
-            background: #ffffff; display: grid; place-items: center;
-            position: relative; overflow: hidden;
+        .app-layout{
+            min-height:100vh;
+            display:flex;
+            gap:20px;
+            padding:20px;
+            align-items:flex-start;
         }
-        .brand-badge .bolt{
-            position: absolute; right: -2px; top: -2px;
-            width: 18px; height: 18px; border-radius: 4px;
-            background: #2bd15a; display: grid; place-items: center;
-            color: #fff; font-size: .85rem;
-        }
-        .topbar .welcome{ color:#fff; opacity:.9; font-size: .95rem; }
 
-        /* SIDEBAR */
-        .sidebar{
-            width: 270px; background: var(--ui-dark); color: #fff;
-            border-right: 1px solid rgba(255,255,255,.15);
-            display:flex; flex-direction:column;
-            min-height: 0;
+        .sidebar {
+            width: 260px;
+            min-width: 260px;
+            background-color: #1c1c1c;
+            color: #fff;
+            padding: 30px 25px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 10;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+            min-height: calc(100vh - 40px);
+            position: sticky;
+            top: 20px;
         }
-        .sidebar-inner{
-            padding: 14px 14px 18px 14px;
-            overflow:auto;
+
+        .sidebar .text-center {
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .sidebar .search{ background: #fff; border-radius: 999px; padding: 4px 10px; }
 
-        .nav-vertical .list-group-item{
-            background: transparent; border: 0; color: #fff;
-            padding: .55rem .75rem; border-radius: .35rem;
-            display: flex; align-items: center; gap: .6rem;
+        .sidebar img.logo-sidebar {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            background-color: #ffffff;
+            border-radius: 50%;
+            padding: 22px 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
         }
-        .nav-vertical .list-group-item:hover{ background: rgba(255,255,255,.10); }
-        .nav-vertical .list-group-item.active{ background: rgba(255,255,255,.18); color: #fff; }
-        .nav-vertical .icon{ width: 22px; text-align: center; opacity: .95; }
-        .nav-divider{ height: 1px; background: rgba(255,255,255,.18); margin: 12px 0; }
 
-        .content-area{ flex: 1; background: #fff; min-height: 0; overflow:auto; }
-        .content-card{ max-width: 820px; margin: 0 auto; padding: 34px 18px 30px 18px; }
+        .sidebar p.small {
+            color: #ccc;
+        }
 
-        .footer{ background: var(--ui-dark); color: #fff; }
-        .footer .muted{ opacity: .85; font-size: .9rem; }
-        .footer a{ color: #fff; text-decoration: none; opacity: .9; }
-        .footer a:hover{ opacity: 1; text-decoration: underline; }
-        .footer .footer-title{ font-weight: 700; margin-bottom: .6rem; }
-        .footer .social .btn{ width: 40px; height: 40px; border-radius: 999px; display: grid; place-items: center; }
+        .sidebar .nav-link {
+            color: #e0e0e0;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent;
+            border-radius: 8px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .sidebar .nav-link i {
+            color: #888;
+            width: 20px;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: #2c2c2c;
+            color: #fff;
+        }
+
+        .sidebar .nav-link:hover i,
+        .sidebar .nav-link.active i {
+            color: #fff;
+        }
+
+        .sidebar .footer-text {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 20px;
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+
+        .main-content{
+            flex:1;
+            min-width:0;
+        }
+
+        .content-card{
+            background:#fff;
+            border-radius:12px;
+            box-shadow:0 8px 22px rgba(0,0,0,.08);
+            padding:30px;
+            min-height:calc(100vh - 40px);
+        }
 
         @media (max-width: 991.98px){
-            .sidebar{ display:none; }
+            .app-layout{
+                flex-direction:column;
+            }
+
+            .sidebar{
+                width:100%;
+                min-width:100%;
+                min-height:auto;
+                position:relative;
+                top:0;
+            }
+
+            .content-card{
+                min-height:auto;
+            }
         }
     </style>
 </head>
-
 <body>
-@php
-    // Menú único (desktop + mobile)
-    $menu = [
-    ['route'=>'inicio','label'=>'Inicio','icon'=>'bi-house-door-fill','match'=>'inicio'],
-    ['route'=>'proyectos','label'=>'Proyectos','icon'=>'bi-folder-fill','match'=>'proyectos'],
-    ['route'=>'conceptos.index','label'=>'C.Conceptos','icon'=>'bi-diagram-3-fill','match'=>'conceptos.*'],
-    ['divider'=>true],
-    ['route'=>'generadores.index','label'=>'Generadores','icon'=>'bi-calculator-fill','match'=>'generadores.*'],
-    ['route'=>'materiales','label'=>'Materiales','icon'=>'bi-box-seam-fill','match'=>'materiales'],
-    ['route'=>'mano_obra','label'=>'M.Obra','icon'=>'bi-person-badge-fill','match'=>'mano_obra'],
-    ['route'=>'maquinaria_equipo','label'=>'Maquinaria y Equipo','icon'=>'bi-truck-front-fill','match'=>'maquinaria_equipo'],
-    ['route'=>'indirectos','label'=>'C.Indirectos','icon'=>'bi-percent','match'=>'indirectos'],
-    ['route'=>'pu','label'=>'P.U','icon'=>'bi-cash-coin','match'=>'pu'],
-    ['route'=>'presupuesto','label'=>'Presupuesto','icon'=>'bi-receipt-cutoff','match'=>'presupuesto'],
-    ['route'=>'reportes','label'=>'Reportes','icon'=>'bi-file-earmark-text-fill','match'=>'reportes'],
-];
 
-    $renderMenu = function() use ($menu) {
-        foreach($menu as $item){
-            if(!empty($item['divider'])){
-                echo '<div class="nav-divider"></div>';
-                continue;
-            }
-            $active = request()->routeIs($item['match']) ? ' active' : '';
-            echo '<a href="'.route($item['route']).'" class="list-group-item'.$active.'">';
-            echo '<span class="icon"><i class="bi '.$item['icon'].'"></i></span> '.$item['label'];
-            echo '</a>';
-        }
-    };
-@endphp
+<div class="app-layout">
 
-<div class="app-shell">
-
-    {{-- TOPBAR --}}
-    <nav class="navbar navbar-expand-lg topbar py-2">
-        <div class="container-fluid px-3">
-            <div class="d-flex align-items-center gap-2">
-                <div class="brand-badge">
-                    <i class="bi bi-bar-chart-fill text-dark"></i>
-                    <span class="bolt"><i class="bi bi-lightning-fill"></i></span>
-                </div>
-                <div class="text-white fw-semibold">Akiraka Estudio</div>
+    <aside class="sidebar">
+        <div>
+            <div class="text-center">
+                <img src="{{ asset('images/logo_akiraka.png') }}" alt="Logo Akiraka" class="logo-sidebar">
+                <p class="small mb-4 text-uppercase" style="letter-spacing: 2px;">Akiraka Estudio</p>
             </div>
 
-            <div class="d-none d-md-block welcome text-center flex-grow-1">
-                @yield('topbar_welcome','“Bienvenido a app.precios.unitarios.”')
-            </div>
+            <ul class="nav flex-column" style="list-style: none; padding: 0;">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('inicio') ? 'active' : '' }}" href="{{ route('inicio') }}">
+                        <div><i class="fas fa-home me-3"></i> Inicio</div>
+                    </a>
+                </li>
 
-            <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-outline-light d-lg-none" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
-                    <i class="bi bi-list"></i>
-                </button>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('proyectos*') ? 'active' : '' }}" href="{{ route('proyectos') }}">
+                        <div><i class="fas fa-folder me-3"></i> Proyectos</div>
+                    </a>
+                </li>
 
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
-                        @yield('topbar_user','Usuario Activo')
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#">Mi perfil</a></li>
-                        <li><a class="dropdown-item" href="#">Configuración</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#">Cerrar sesión</a></li>
-                    </ul>
-                </div>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('conceptos*') ? 'active' : '' }}" href="{{ route('conceptos') }}">
+                        <div><i class="fas fa-diagram-project me-3"></i> Conceptos</div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('generadores*') ? 'active' : '' }}" href="{{ route('generadores') }}">
+                        <div><i class="fas fa-calculator me-3"></i> Generadores</div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('materiales*') ? 'active' : '' }}" href="{{ route('materiales') }}">
+                        <div><i class="fas fa-boxes-stacked me-3"></i> Materiales</div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('mano_obra*') ? 'active' : '' }}" href="{{ route('mano_obra') }}">
+                        <div><i class="fas fa-users-gear me-3"></i> Mano de Obra</div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('maquinaria_equipo*') ? 'active' : '' }}" href="{{ route('maquinaria_equipo') }}">
+                        <div><i class="fas fa-truck-monster me-3"></i> Maquinaria y Equipo</div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('indirectos*') ? 'active' : '' }}" href="{{ route('indirectos') }}">
+                        <div><i class="fas fa-percent me-3"></i> Indirectos</div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('pu*') ? 'active' : '' }}" href="{{ route('pu') }}">
+                        <div><i class="fas fa-file-invoice-dollar me-3"></i> P.U</div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('presupuesto*') ? 'active' : '' }}" href="{{ route('presupuesto') }}">
+                        <div><i class="fas fa-wallet me-3"></i> Presupuesto</div>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('reportes*') ? 'active' : '' }}" href="{{ route('reportes') }}">
+                        <div><i class="fas fa-chart-bar me-3"></i> Reportes</div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div>
+            <a href="{{ route('inicio') }}" class="nav-link">
+                <div><i class="fas fa-sign-out-alt me-3"></i> Salir</div>
+            </a>
+
+            <div class="text-center footer-text">
+                <p class="mb-1 text-uppercase" style="letter-spacing: 1px;">Akiraka Estudio</p>
+                <p class="mb-0">© {{ date('Y') }} Derechos reservados</p>
             </div>
         </div>
-    </nav>
+    </aside>
 
-    {{-- MAIN --}}
-    <div class="app-main">
-
-        {{-- SIDEBAR (desktop) --}}
-        <aside class="sidebar">
-            <div class="sidebar-inner">
-                <div class="search mb-3 d-flex align-items-center gap-2">
-                    <i class="bi bi-search text-secondary"></i>
-                    <input type="text" class="form-control form-control-sm border-0 shadow-none p-0" placeholder="Search">
-                </div>
-
-                <div class="list-group nav-vertical">
-                    {!! $renderMenu() !!}
-                </div>
-            </div>
-        </aside>
-
-        {{-- CONTENT --}}
-        <main class="content-area">
-            <div class="content-card">
-                @yield('content')
-            </div>
-        </main>
-    </div>
-
-    {{-- FOOTER --}}
-    <footer class="footer py-4">
-        <div class="container">
-            <div class="row g-4 align-items-start">
-                <div class="col-12 col-md-3">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <div class="brand-badge" style="transform: scale(.92);">
-                            <i class="bi bi-bar-chart-fill text-dark"></i>
-                            <span class="bolt"><i class="bi bi-lightning-fill"></i></span>
-                        </div>
-                        <div class="fw-semibold">Akiraka</div>
-                    </div>
-                    <div class="muted small">Dirección<br>Derechos reservados</div>
-                </div>
-
-                <div class="col-12 col-md-5">
-                    <div class="footer-title">Contenido</div>
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="d-grid gap-1 small">
-                                <a href="{{ route('inicio') }}">Inicio</a>
-                                <a href="{{ route('proyectos') }}">Proyectos</a>
-                                <a href="{{ route('conceptos.index') }}">Conceptos</a>
-                                <a href="{{ route('generadores') }}">Generadores</a>
-                                <a href="{{ route('materiales') }}">Materiales</a>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-grid gap-1 small">
-                                <a href="{{ route('mano_obra') }}">Mano de obra</a>
-                                <a href="{{ route('maquinaria_equipo') }}">Maquinaria</a>
-                                <a href="{{ route('indirectos') }}">Indirectos</a>
-                                <a href="{{ route('presupuesto') }}">Presupuesto</a>
-                                <a href="{{ route('reportes') }}">Reportes</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-4">
-                    <div class="footer-title">Contactos</div>
-                    <div class="small muted">
-                        <div class="d-flex justify-content-between border-bottom border-light border-opacity-25 py-1">
-                            <span>Teléfono</span><span>— — — —</span>
-                        </div>
-                        <div class="d-flex justify-content-between border-bottom border-light border-opacity-25 py-1">
-                            <span>Correo</span><span>— — — —</span>
-                        </div>
-                    </div>
-
-                    <div class="social d-flex gap-2 mt-3">
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        <a class="btn btn-outline-light btn-sm" href="#" aria-label="Web"><i class="bi bi-lightning-fill"></i></a>
-                    </div>
-                </div>
-            </div>
+    <main class="main-content">
+        <div class="content-card">
+            @yield('content')
         </div>
-    </footer>
+    </main>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-{{-- OFFCANVAS SIDEBAR (mobile) --}}
-<div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="sidebarOffcanvas">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Menú</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body">
-        <div class="search mb-3 d-flex align-items-center gap-2">
-            <i class="bi bi-search text-secondary"></i>
-            <input type="text" class="form-control form-control-sm border-0 shadow-none p-0" placeholder="Search">
-        </div>
-
-        <div class="list-group nav-vertical">
-            {!! $renderMenu() !!}
-        </div>
-    </div>
-</div>
 </body>
 </html>

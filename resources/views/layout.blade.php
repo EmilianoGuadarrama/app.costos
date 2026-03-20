@@ -93,6 +93,8 @@
     ['route'=>'pu','label'=>'P.U','icon'=>'bi-cash-coin','match'=>'pu'],
     ['route'=>'presupuesto','label'=>'Presupuesto','icon'=>'bi-receipt-cutoff','match'=>'presupuesto'],
     ['route'=>'reportes','label'=>'Reportes','icon'=>'bi-file-earmark-text-fill','match'=>'reportes'],
+    ['route'=>'unidad_medida.index','label'=>'Unidades de Medida','icon'=>'bi-file-earmark-text-fill','match'=>'unidad_medida'],
+    ['route'=>'partidas','label'=>'Partidas','icon'=>'bi-file-earmark-text-fill','match'=>'partidas'],
 ];
 
     $renderMenu = function() use ($menu) {
@@ -194,7 +196,7 @@
                                 <a href="{{ route('inicio') }}">Inicio</a>
                                 <a href="{{ route('proyectos') }}">Proyectos</a>
                                 <a href="{{ route('conceptos.index') }}">Conceptos</a>
-                                <a href="{{ route('generadores') }}">Generadores</a>
+                              
                                 <a href="{{ route('materiales') }}">Materiales</a>
                             </div>
                         </div>
@@ -205,6 +207,9 @@
                                 <a href="{{ route('indirectos') }}">Indirectos</a>
                                 <a href="{{ route('presupuesto') }}">Presupuesto</a>
                                 <a href="{{ route('reportes') }}">Reportes</a>
+                               
+                                <a href="{{ route('unidad_medida.index') }}">Unidad de Medida</a>
+                               
                             </div>
                         </div>
                     </div>

@@ -2,39 +2,88 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConceptoController;
+use App\Http\Controllers\GeneradorController;
+use App\Http\Controllers\UnidadMedidaController;
 
 Route::get('/', fn () => view('welcome'))->name('inicio');
 
-// Vistas principales
+
+// =========================
+// VISTAS PRINCIPALES
+// =========================
+
 Route::view('/proyectos', 'proyectos.index')->name('proyectos');
-Route::view('/generadores', 'generadores.index')->name('generadores');
+
 Route::view('/materiales', 'materiales.index')->name('materiales');
+
 Route::view('/mano-obra', 'mano_de_obras.index')->name('mano_obra');
-Route::view('/maquinaria-equipo', 'maquinaria_equipos.index')->name('maquinaria_equipo');
+
+Route::view('/maquinaria-equipo', 'maquinaria_equipos.index')
+    ->name('maquinaria_equipo');
+
 Route::view('/indirectos', 'indirectos.index')->name('indirectos');
-Route::view('/pu', 'pu.index')->name('pu');
+
 Route::view('/presupuesto', 'presupuestos.index')->name('presupuesto');
+
 Route::view('/reportes', 'reportes.index')->name('reportes');
 
+Route::view('/pu', 'pu.index')->name('pu');
 
-// CRUD de conceptos
+Route::view('/partidas', 'partidas.index')->name('partidas');
+
+
+// =========================
+// CRUD (CONTROLADORES)
+// =========================
+
 Route::resource('conceptos', ConceptoController::class);
+
 Route::resource('generadores', GeneradorController::class);
 
-
-// Rutas de creación
-Route::view('/generadores/create', 'generadores.create')->name('generadores.create');
-Route::view('/materiales/create', 'materiales.create')->name('materiales.create');
-Route::view('/mano-obra/create', 'mano_de_obras.create')->name('mano_obra.create');
-Route::view('/maquinaria-equipo/create', 'maquinaria_equipos.create')->name('maquinaria_equipo.create');
-Route::view('/presupuesto/create', 'presupuestos.create')->name('presupuesto.create');
-Route::view('/proyectos/create', 'proyectos.create')->name('proyectos.create');
+Route::resource('unidad_medida', UnidadMedidaController::class);
 
 
-// Rutas de edición
-Route::view('/generadores/{id}/edit', 'generadores.edit')->name('generadores.edit');
-Route::view('/materiales/{id}/edit', 'materiales.edit')->name('materiales.edit');
-Route::view('/mano-obra/{id}/edit', 'mano_de_obras.edit')->name('mano_obra.edit');
-Route::view('/maquinaria-equipo/{id}/edit', 'maquinaria_equipos.edit')->name('maquinaria_equipo.edit');
-Route::view('/presupuesto/{id}/edit', 'presupuestos.edit')->name('presupuesto.edit');
-Route::view('/proyectos/{id}/edit', 'proyectos.edit')->name('proyectos.edit');
+// =========================
+// CREATE (SOLO VISTAS)
+// =========================
+
+Route::view('/materiales/create', 'materiales.create')
+    ->name('materiales.create');
+
+Route::view('/mano-obra/create', 'mano_de_obras.create')
+    ->name('mano_obra.create');
+
+Route::view('/maquinaria-equipo/create', 'maquinaria_equipos.create')
+    ->name('maquinaria_equipo.create');
+
+Route::view('/presupuesto/create', 'presupuestos.create')
+    ->name('presupuesto.create');
+
+Route::view('/proyectos/create', 'proyectos.create')
+    ->name('proyectos.create');
+
+Route::view('/partidas/create', 'partidas.create')
+    ->name('partidas.create');
+
+
+// =========================
+// EDIT (SOLO VISTAS)
+// =========================
+
+Route::view('/materiales/{id}/edit', 'materiales.edit')
+    ->name('materiales.edit');
+
+Route::view('/mano-obra/{id}/edit', 'mano_de_obras.edit')
+    ->name('mano_obra.edit');
+
+Route::view('/maquinaria-equipo/{id}/edit', 'maquinaria_equipos.edit')
+    ->name('maquinaria_equipo.edit');
+
+Route::view('/presupuesto/{id}/edit', 'presupuestos.edit')
+    ->name('presupuesto.edit');
+
+Route::view('/proyectos/{id}/edit', 'proyectos.edit')
+    ->name('proyectos.edit');
+
+Route::view('/partidas/{id}/edit', 'partidas.edit')
+    ->name('partidas.edit');

@@ -49,22 +49,23 @@
         }
 
         .sidebar img.logo-sidebar{
-            width:100px;
-            height:100px;
+            width:160px;
+            height:90px;
             object-fit:contain;
             background-color:#ffffff;
-            border-radius:50%;
-            padding:22px 15px;
+            border-radius:14px;
+            padding:12px;
             margin-bottom:15px;
             box-shadow:0 4px 15px rgba(0,0,0,0.25);
         }
 
         .sidebar .brand-text{
             color:#ccc;
-            font-size:.82rem;
-            letter-spacing:2px;
+            font-size:.78rem;
+            letter-spacing:3px;
             text-transform:uppercase;
             margin:0;
+            text-align:center;
         }
 
         .sidebar-menu{
@@ -162,102 +163,97 @@
     <aside class="sidebar">
         <div>
             <div class="brand-box">
-                <img src="{{ asset('images/logo_akiraka.png') }}" alt="Logo Akiraka" class="logo-sidebar">
+                <img src="{{ asset('img/logo_akiraka.jpeg') }}" alt="Logo Akiraka" class="logo-sidebar">
                 <p class="brand-text">Akiraka Estudio</p>
             </div>
 
             <ul class="sidebar-menu">
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('inicio') ? 'active' : '' }}"
-                       href="{{ Route::has('inicio') ? route('inicio') : '#' }}">
+                    <a href="{{ route('inicio') }}" class="nav-link {{ request()->routeIs('inicio') ? 'active' : '' }}">
                         <i class="fas fa-home"></i>
                         <span>Inicio</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('proyectos*') ? 'active' : '' }}"
-                       href="{{ Route::has('proyectos') ? route('proyectos') : '#' }}">
+                    <a href="{{ route('proyectos') }}" class="nav-link {{ request()->routeIs('proyectos*') ? 'active' : '' }}">
                         <i class="fas fa-folder"></i>
                         <span>Proyectos</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('conceptos*') ? 'active' : '' }}"
-                       href="{{ Route::has('conceptos') ? route('conceptos') : '#' }}">
+                    <a href="{{ route('unidad_medida') }}" class="nav-link {{ request()->routeIs('unidad_medida*') ? 'active' : '' }}">
+                        <i class="fas fa-ruler-combined"></i>
+                        <span>Unidad de Medida</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{ route('conceptos') }}" class="nav-link {{ request()->routeIs('conceptos*') ? 'active' : '' }}">
                         <i class="fas fa-diagram-project"></i>
                         <span>Conceptos</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('generadores*') ? 'active' : '' }}"
-                       href="{{ Route::has('generadores') ? route('generadores') : '#' }}">
+                    <a href="{{ route('generadores') }}" class="nav-link {{ request()->routeIs('generadores*') ? 'active' : '' }}">
                         <i class="fas fa-calculator"></i>
                         <span>Generadores</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('materiales*') ? 'active' : '' }}"
-                       href="{{ Route::has('materiales') ? route('materiales') : '#' }}">
+                    <a href="{{ route('materiales') }}" class="nav-link {{ request()->routeIs('materiales*') ? 'active' : '' }}">
                         <i class="fas fa-cubes"></i>
                         <span>Materiales</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('mano_obra*') ? 'active' : '' }}"
-                       href="{{ Route::has('mano_obra') ? route('mano_obra') : '#' }}">
+                    <a href="{{ route('mano_obra') }}" class="nav-link {{ request()->routeIs('mano_obra*') ? 'active' : '' }}">
                         <i class="fas fa-users"></i>
                         <span>Mano de Obra</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('maquinaria_equipo*') ? 'active' : '' }}"
-                       href="{{ Route::has('maquinaria_equipo') ? route('maquinaria_equipo') : '#' }}">
+                    <a href="{{ route('maquinaria_equipo') }}" class="nav-link {{ request()->routeIs('maquinaria_equipo*') ? 'active' : '' }}">
                         <i class="fas fa-tractor"></i>
                         <span>Maquinaria y Equipo</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('indirectos*') ? 'active' : '' }}"
-                       href="{{ Route::has('indirectos') ? route('indirectos') : '#' }}">
+                    <a href="{{ route('indirectos') }}" class="nav-link {{ request()->routeIs('indirectos*') ? 'active' : '' }}">
                         <i class="fas fa-percent"></i>
                         <span>Indirectos</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('pu*') ? 'active' : '' }}"
-                       href="{{ Route::has('pu') ? route('pu') : '#' }}">
+                    <a href="{{ route('pu') }}" class="nav-link {{ request()->routeIs('pu*') ? 'active' : '' }}">
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span>P.U</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('presupuesto*') ? 'active' : '' }}"
-                       href="{{ Route::has('presupuesto') ? route('presupuesto') : '#' }}">
+                    <a href="{{ route('presupuesto') }}" class="nav-link {{ request()->routeIs('presupuesto*') ? 'active' : '' }}">
                         <i class="fas fa-wallet"></i>
                         <span>Presupuesto</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('reportes*') ? 'active' : '' }}"
-                       href="{{ Route::has('reportes') ? route('reportes') : '#' }}">
+                    <a href="{{ route('reportes') }}" class="nav-link {{ request()->routeIs('reportes*') ? 'active' : '' }}">
                         <i class="fas fa-chart-bar"></i>
                         <span>Reportes</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link"
-                       href="{{ Route::has('inicio') ? route('inicio') : '#' }}">
+                    <a href="{{ route('inicio') }}" class="nav-link">
                         <i class="fas fa-right-from-bracket"></i>
                         <span>Salir</span>
                     </a>

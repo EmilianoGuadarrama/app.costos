@@ -11,18 +11,20 @@
             font-size:.92rem;
             background:#fff;
         }
-        .tbl-grid th,.tbl-grid td{
+        .tbl-grid th,
+        .tbl-grid td{
             border:1px solid rgba(0,0,0,.35);
             padding:10px 8px;
             vertical-align:middle;
             background:#fff;
         }
         .tbl-grid thead th{
+            text-transform:uppercase;
+            letter-spacing:.04em;
             font-size:.72rem;
             font-weight:800;
             text-align:center;
             padding:8px 6px;
-            text-transform:uppercase;
         }
         .actions{
             display:flex;
@@ -41,8 +43,13 @@
             color:#111;
             text-decoration:none;
         }
-        .icon-btn:hover{ background:rgba(0,0,0,.06); color:#111; }
-        .tbl-grid tbody td{ height:44px; }
+        .icon-btn:hover{
+            background:rgba(0,0,0,.06);
+            color:#111;
+        }
+        .tbl-grid tbody td{
+            height:44px;
+        }
     </style>
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
@@ -55,7 +62,8 @@
             <button class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-funnel me-1"></i> Filtrar
             </button>
-            <a href="{{ route('materiales.create') }}" class="btn btn-sm btn-secondary">
+
+            <a href="{{ Route::has('materiales.create') ? route('materiales.create') : '#' }}" class="btn btn-sm btn-secondary">
                 <i class="bi bi-plus-circle me-1"></i> Nuevo Material
             </a>
         </div>
@@ -74,17 +82,16 @@
             </tr>
             </thead>
             <tbody>
-            @for($i = 0; $i < 6; $i++)
-                @php($id = $i + 1)
+            @forelse(($materiales ?? []) as $material)
                 <tr>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
-                    <td>&nbsp;</td>
+                    <td>{{ $material->clave ?? '' }}</td>
+                    <td>{{ $material->materiales ?? '' }}</td>
+                    <td>{{ $material->marca ?? '' }}</td>
+                    <td>{{ $material->unidad ?? '' }}</td>
+                    <td>{{ $material->precios ?? '' }}</td>
                     <td>
                         <div class="actions">
-                            <a class="icon-btn" href="{{ route('materiales.edit', $id) }}" title="Editar">
+                            <a class="icon-btn" href="{{ Route::has('materiales.edit') ? route('materiales.edit', $material->id ?? 1) : '#' }}" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <button class="icon-btn" type="button" title="Eliminar">
@@ -93,7 +100,24 @@
                         </div>
                     </td>
                 </tr>
-            @endfor
+            @empty
+                @for($i = 0; $i < 6; $i++)
+                    @php($id = $i + 1)
+                    <tr>
+                        <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                        <td>
+                            <div class="actions">
+                                <a class="icon-btn" href="{{ Route::has('materiales.edit') ? route('materiales.edit', $id) : '#' }}" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button class="icon-btn" type="button" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @endfor
+            @endforelse
             </tbody>
         </table>
     </div>

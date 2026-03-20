@@ -11,12 +11,15 @@
             font-size:.92rem;
             background:#fff;
         }
-        .tbl-grid th,.tbl-grid td{
+
+        .tbl-grid th,
+        .tbl-grid td{
             border:1px solid rgba(0,0,0,.35);
             padding:10px 8px;
             vertical-align:middle;
             background:#fff;
         }
+
         .tbl-grid thead th{
             text-transform:uppercase;
             letter-spacing:.04em;
@@ -25,11 +28,13 @@
             text-align:center;
             padding:8px 6px;
         }
+
         .actions{
             display:flex;
             justify-content:flex-end;
             gap:10px;
         }
+
         .icon-btn{
             width:28px;
             height:28px;
@@ -42,8 +47,15 @@
             color:#111;
             text-decoration:none;
         }
-        .icon-btn:hover{ background:rgba(0,0,0,.06); color:#111; }
-        .tbl-grid tbody td{ height:44px; }
+
+        .icon-btn:hover{
+            background:rgba(0,0,0,.06);
+            color:#111;
+        }
+
+        .tbl-grid tbody td{
+            height:44px;
+        }
     </style>
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
@@ -56,7 +68,8 @@
             <button class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-funnel me-1"></i> Filtrar
             </button>
-            <a href="{{ route('conceptos.create') }}" class="btn btn-sm btn-secondary">
+
+            <a href="{{ Route::has('conceptos.create') ? route('conceptos.create') : '#' }}" class="btn btn-sm btn-secondary">
                 <i class="bi bi-plus-circle me-1"></i> Nuevo Concepto
             </a>
         </div>
@@ -67,6 +80,7 @@
             <thead>
             <tr>
                 <th>CLAVE</th>
+                <th>PARTIDA</th>
                 <th>SUBPARTIDA</th>
                 <th>DESCRIPCIÓN</th>
                 <th>UNIDAD</th>
@@ -76,34 +90,60 @@
                 <th>ACCIONES</th>
             </tr>
             </thead>
+
             <tbody>
-            @foreach($conceptos as $concepto)
+            @forelse(($conceptos ?? []) as $concepto)
                 <tr>
-                    <td>{{ $concepto->codigo }}</td>
+                    <td>{{ $concepto->codigo ?? '' }}</td>
+                    <td>{{ $concepto->partida ?? '' }}</td>
                     <td>{{ $concepto->subpartida ?? '' }}</td>
-                    <td>{{ $concepto->descripcion }}</td>
+                    <td>{{ $concepto->descripcion ?? '' }}</td>
                     <td>{{ $concepto->unidad ?? '' }}</td>
                     <td>{{ $concepto->cantidad ?? '' }}</td>
                     <td>{{ $concepto->pu ?? '' }}</td>
                     <td>{{ $concepto->importe ?? '' }}</td>
-
                     <td>
                         <div class="actions">
-                            <a class="icon-btn" href="{{ route('conceptos.edit', $concepto->id_concepto) }}" title="Editar">
+                            <a class="icon-btn"
+                               href="{{ Route::has('conceptos.edit') ? route('conceptos.edit', $concepto->id ?? 1) : '#' }}"
+                               title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
 
-                            <form action="{{ route('conceptos.destroy',$concepto->id_concepto) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button class="icon-btn" type="submit" title="Eliminar">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <button class="icon-btn" type="button" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                @for($i = 0; $i < 6; $i++)
+                    @php($id = $i + 1)
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>
+                            <div class="actions">
+                                <a class="icon-btn"
+                                   href="{{ Route::has('conceptos.edit') ? route('conceptos.edit', $id) : '#' }}"
+                                   title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <button class="icon-btn" type="button" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @endfor
+            @endforelse
             </tbody>
         </table>
     </div>

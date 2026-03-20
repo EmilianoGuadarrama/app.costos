@@ -11,12 +11,12 @@
             font-size:.92rem;
             background:#fff;
         }
-        .tbl-grid th,.tbl-grid td{
+        .tbl-grid th,
+        .tbl-grid td{
             border:1px solid rgba(0,0,0,.35);
             padding:10px 8px;
             vertical-align:middle;
             background:#fff;
-            word-wrap:break-word;
         }
         .tbl-grid thead th{
             text-transform:uppercase;
@@ -43,8 +43,13 @@
             color:#111;
             text-decoration:none;
         }
-        .icon-btn:hover{ background:rgba(0,0,0,.06); color:#111; }
-        .tbl-grid tbody td{ height:44px; }
+        .icon-btn:hover{
+            background:rgba(0,0,0,.06);
+            color:#111;
+        }
+        .tbl-grid tbody td{
+            height:44px;
+        }
     </style>
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
@@ -54,18 +59,15 @@
         </div>
 
         <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" type="button">
+            <button class="btn btn-sm btn-outline-secondary">
                 <i class="bi bi-funnel me-1"></i> Filtrar
             </button>
-            <a href="{{ route('generadores.create') }}" class="btn btn-sm btn-secondary">
+
+            <a href="{{ Route::has('generadores.create') ? route('generadores.create') : '#' }}" class="btn btn-sm btn-secondary">
                 <i class="bi bi-plus-circle me-1"></i> Nuevo Generador
             </a>
         </div>
     </div>
-
-    @if(session('ok'))
-        <div class="alert alert-success">{{ session('ok') }}</div>
-    @endif
 
     <div class="table-responsive">
         <table class="tbl-grid">
@@ -83,43 +85,47 @@
                 <th>ACCIONES</th>
             </tr>
             </thead>
-
             <tbody>
-            @forelse($generadores as $g)
+            @forelse(($generadores ?? []) as $generador)
                 <tr>
-                    <td>{{ $g->concepto }}</td>
-                    <td>{{ $g->unidad }}</td>
-                    <td>{{ $g->localizacion }}</td>
-                    <td>{{ $g->ejes }}</td>
-                    <td class="text-center">{{ $g->no_piezas }}</td>
-                    <td class="text-center">{{ $g->ancho }}</td>
-                    <td class="text-center">{{ $g->largo }}</td>
-                    <td class="text-center">{{ $g->alto }}</td>
-                    <td class="text-center">{{ $g->resultado }}</td>
-
+                    <td>{{ $generador->concepto ?? '' }}</td>
+                    <td>{{ $generador->unidad ?? '' }}</td>
+                    <td>{{ $generador->localizacion ?? '' }}</td>
+                    <td>{{ $generador->ejes ?? '' }}</td>
+                    <td>{{ $generador->numero_piezas ?? '' }}</td>
+                    <td>{{ $generador->ancho ?? '' }}</td>
+                    <td>{{ $generador->largo ?? '' }}</td>
+                    <td>{{ $generador->alto ?? '' }}</td>
+                    <td>{{ $generador->resultado ?? '' }}</td>
                     <td>
                         <div class="actions">
-                            <a class="icon-btn" href="{{ route('generadores.edit', $g->id_generador) }}" title="Editar">
+                            <a class="icon-btn" href="{{ Route::has('generadores.edit') ? route('generadores.edit', $generador->id ?? 1) : '#' }}" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
-
-                            <form action="{{ route('generadores.destroy', $g->id_generador) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button class="icon-btn" type="submit" title="Eliminar"
-                                        onclick="return confirm('¿Eliminar este generador?')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                            <button class="icon-btn" type="button" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
             @empty
-                <tr>
-                    <td colspan="10" class="text-center text-secondary py-4">
-                        No hay generadores registrados.
-                    </td>
-                </tr>
+                @for($i = 0; $i < 6; $i++)
+                    @php($id = $i + 1)
+                    <tr>
+                        <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                        <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+                        <td>
+                            <div class="actions">
+                                <a class="icon-btn" href="{{ Route::has('generadores.edit') ? route('generadores.edit', $id) : '#' }}" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button class="icon-btn" type="button" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @endfor
             @endforelse
             </tbody>
         </table>

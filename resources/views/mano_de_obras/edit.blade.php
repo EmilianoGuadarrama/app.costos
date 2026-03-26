@@ -1,37 +1,63 @@
 @extends('layout')
+
 @section('title','Editar Mano de Obra')
 
 @section('content')
     <style>
-        .panel-box{ background:#fff; border:1px solid rgba(0,0,0,.25); padding:26px; max-width:760px; margin:0 auto; }
-        .form-grid{ max-width:520px; margin:0 auto; }
+        .page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px}
+        .page-title{font-size:2rem;font-weight:800;color:#1f2937;margin:0 0 4px}
+        .page-subtitle{color:#6b7280;margin:0;font-size:.98rem}
+        .form-card{max-width:900px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.05);padding:30px}
+        .form-grid{max-width:640px;margin:0 auto}
+        .form-label{font-weight:700;color:#374151;margin-bottom:8px}
+        .form-control{border-radius:12px;border:1px solid #d1d5db;padding:.78rem .95rem;box-shadow:none}
+        .form-control:focus{border-color:#9ca3af;box-shadow:0 0 0 .15rem rgba(107,114,128,.15)}
+        .btn-back{border-radius:12px;padding:.65rem 1rem;font-weight:600}
+        .btn-save{border:none;border-radius:12px;padding:.80rem 1.25rem;font-weight:700;background:#6b7280;color:#fff}
+        .btn-save:hover{background:#4b5563;color:#fff}
+        .btn-cancel{border-radius:12px;padding:.80rem 1.25rem;font-weight:700}
     </style>
 
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    @php
+        $campos = [
+            ['name' => 'clave', 'label' => 'Clave', 'value' => old('clave', $mano->clave ?? 'MO-001')],
+            ['name' => 'categoria', 'label' => 'Categoría', 'value' => old('categoria', $mano->categoria ?? 'Oficial')],
+            ['name' => 'unidad', 'label' => 'Unidad', 'value' => old('unidad', $mano->unidad ?? 'Jor')],
+            ['name' => 'salario', 'label' => 'Salario', 'value' => old('salario', $mano->salario ?? '500.00')],
+        ];
+    @endphp
+
+    <div class="page-header">
         <div>
-            <h4 class="fw-bold mb-1">Editar Mano de Obra</h4>
-            <div class="text-secondary small">Vista demo para edición.</div>
+            <h2 class="page-title">Editar Mano de Obra</h2>
+            <p class="page-subtitle">Modifica la información registrada de mano de obra.</p>
         </div>
-        <a href="{{ route('mano_obra') }}" class="btn btn-sm btn-outline-secondary">
+
+        <a href="{{ route('mano_obra') }}" class="btn btn-outline-secondary btn-back">
             <i class="bi bi-arrow-left me-1"></i> Volver
         </a>
     </div>
 
-    <div class="panel-box">
-        <div class="form-grid">
-            @php $fields = ['Clave','Categoria','Unidad','Salario']; @endphp
-            @foreach($fields as $f)
-                <div class="row align-items-center mb-2">
-                    <div class="col-5 small fw-semibold">{{ $f }}</div>
-                    <div class="col-7"><input class="form-control form-control-sm" value="Demo"></div>
+    <div class="form-card">
+        <form action="{{ Route::has('mano_obra.update') ? route('mano_obra.update', $mano->id ?? 1) : '#' }}" method="POST" class="form-grid">
+            @csrf
+            @method('PUT')
+
+            @foreach($campos as $campo)
+                <div class="row mb-3 align-items-center">
+                    <label class="col-md-4 form-label">{{ $campo['label'] }}</label>
+                    <div class="col-md-8">
+                        <input type="text" name="{{ $campo['name'] }}" class="form-control" value="{{ $campo['value'] }}">
+                    </div>
                 </div>
             @endforeach
 
-            <div class="d-flex justify-content-center mt-3">
-                <button type="button" class="btn btn-secondary btn-sm px-3">
-                    <i class="bi bi-save me-2"></i> Guardar cambios
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ route('mano_obra') }}" class="btn btn-outline-secondary btn-cancel">Cancelar</a>
+                <button type="submit" class="btn btn-save">
+                    <i class="bi bi-save me-2"></i> Guardar Cambios
                 </button>
             </div>
-        </div>
+        </form>
     </div>
 @endsection

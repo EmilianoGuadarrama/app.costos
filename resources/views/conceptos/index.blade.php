@@ -4,147 +4,130 @@
 
 @section('content')
     <style>
-        .tbl-grid{
-            width:100%;
-            border-collapse:collapse;
-            table-layout:fixed;
-            font-size:.92rem;
-            background:#fff;
-        }
-
-        .tbl-grid th,
-        .tbl-grid td{
-            border:1px solid rgba(0,0,0,.35);
-            padding:10px 8px;
-            vertical-align:middle;
-            background:#fff;
-        }
-
-        .tbl-grid thead th{
-            text-transform:uppercase;
-            letter-spacing:.04em;
-            font-size:.72rem;
-            font-weight:800;
-            text-align:center;
-            padding:8px 6px;
-        }
-
-        .actions{
-            display:flex;
-            justify-content:flex-end;
-            gap:10px;
-        }
-
-        .icon-btn{
-            width:28px;
-            height:28px;
-            display:grid;
-            place-items:center;
-            border:0;
-            background:transparent;
-            border-radius:4px;
-            padding:0;
-            color:#111;
-            text-decoration:none;
-        }
-
-        .icon-btn:hover{
-            background:rgba(0,0,0,.06);
-            color:#111;
-        }
-
-        .tbl-grid tbody td{
-            height:44px;
-        }
+        .page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px}
+        .page-title{font-size:2rem;font-weight:800;color:#1f2937;margin:0 0 4px}
+        .page-subtitle{color:#6b7280;margin:0;font-size:.98rem}
+        .panel-card{background:#fff;border:1px solid #e5e7eb;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.05);padding:28px}
+        .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+        .toolbar .btn{border-radius:12px;font-weight:600;padding:.65rem 1rem}
+        .btn-soft{background:#fff;border:1px solid #d1d5db;color:#374151}
+        .btn-soft:hover{background:#f9fafb;color:#111827}
+        .btn-dark-custom{background:#6b7280;border:1px solid #6b7280;color:#fff}
+        .btn-dark-custom:hover{background:#4b5563;border-color:#4b5563;color:#fff}
+        .table-wrap{overflow-x:auto}
+        .table-custom{width:100%;min-width:1200px;margin:0;border-collapse:separate;border-spacing:0}
+        .table-custom thead th{background:#f9fafb;color:#111827;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;text-align:center;padding:14px 10px;border-top:1px solid #d1d5db;border-bottom:1px solid #d1d5db;border-right:1px solid #d1d5db}
+        .table-custom thead th:first-child{border-left:1px solid #d1d5db;border-top-left-radius:14px}
+        .table-custom thead th:last-child{border-top-right-radius:14px}
+        .table-custom tbody td{padding:14px 10px;vertical-align:middle;border-bottom:1px solid #e5e7eb;border-right:1px solid #e5e7eb;background:#fff;color:#374151;font-size:.95rem}
+        .table-custom tbody tr td:first-child{border-left:1px solid #e5e7eb}
+        .table-custom tbody tr:hover td{background:#fafafa}
+        .table-custom tbody tr:last-child td:first-child{border-bottom-left-radius:14px}
+        .table-custom tbody tr:last-child td:last-child{border-bottom-right-radius:14px}
+        .action-group{display:flex;align-items:center;justify-content:center;gap:8px}
+        .action-btn{width:34px;height:34px;border:none;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:.2s ease;font-size:1rem}
+        .action-btn.view{background:#eef2ff;color:#4338ca}
+        .action-btn.view:hover{background:#e0e7ff;color:#312e81}
+        .action-btn.edit{background:#f3f4f6;color:#374151}
+        .action-btn.edit:hover{background:#e5e7eb;color:#111827}
+        .action-btn.delete{background:#fef2f2;color:#dc2626}
+        .action-btn.delete:hover{background:#fee2e2;color:#991b1b}
+        .empty-text{color:#9ca3af;text-align:center}
     </style>
 
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div class="page-header">
         <div>
-            <h4 class="fw-bold mb-1">Conceptos</h4>
-            <div class="text-secondary small">Listado general de conceptos.</div>
+            <h2 class="page-title">Conceptos</h2>
+            <p class="page-subtitle">Listado general de conceptos registrados.</p>
         </div>
 
-        <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary">
+        <div class="toolbar">
+            <button class="btn btn-soft" type="button">
                 <i class="bi bi-funnel me-1"></i> Filtrar
             </button>
 
-            <a href="{{ Route::has('conceptos.create') ? route('conceptos.create') : '#' }}" class="btn btn-sm btn-secondary">
+            <a href="{{ Route::has('conceptos.create') ? route('conceptos.create') : '#' }}" class="btn btn-dark-custom">
                 <i class="bi bi-plus-circle me-1"></i> Nuevo Concepto
             </a>
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="tbl-grid">
-            <thead>
-            <tr>
-                <th>CLAVE</th>
-                <th>PARTIDA</th>
-                <th>SUBPARTIDA</th>
-                <th>DESCRIPCIÓN</th>
-                <th>UNIDAD</th>
-                <th>CANTIDAD</th>
-                <th>PU</th>
-                <th>IMPORTE</th>
-                <th>ACCIONES</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            @forelse(($conceptos ?? []) as $concepto)
+    <div class="panel-card">
+        <div class="table-wrap">
+            <table class="table-custom">
+                <thead>
                 <tr>
-                    <td>{{ $concepto->codigo ?? '' }}</td>
-                    <td>{{ $concepto->partida ?? '' }}</td>
-                    <td>{{ $concepto->subpartida ?? '' }}</td>
-                    <td>{{ $concepto->descripcion ?? '' }}</td>
-                    <td>{{ $concepto->unidad ?? '' }}</td>
-                    <td>{{ $concepto->cantidad ?? '' }}</td>
-                    <td>{{ $concepto->pu ?? '' }}</td>
-                    <td>{{ $concepto->importe ?? '' }}</td>
-                    <td>
-                        <div class="actions">
-                            <a class="icon-btn"
-                               href="{{ Route::has('conceptos.edit') ? route('conceptos.edit', $concepto->id ?? 1) : '#' }}"
-                               title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-
-                            <button class="icon-btn" type="button" title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+                    <th>Clave</th>
+                    <th>Partida</th>
+                    <th>Subpartida</th>
+                    <th>Descripción</th>
+                    <th>Unidad</th>
+                    <th>Cantidad</th>
+                    <th>PU</th>
+                    <th>Importe</th>
+                    <th style="width:160px;">Acciones</th>
                 </tr>
-            @empty
-                @for($i = 0; $i < 6; $i++)
-                    @php($id = $i + 1)
+                </thead>
+                <tbody>
+                @forelse(($conceptos ?? []) as $concepto)
                     <tr>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
-                        <td>&nbsp;</td>
+                        <td>{{ $concepto->codigo ?? '' }}</td>
+                        <td>{{ $concepto->partida ?? '' }}</td>
+                        <td>{{ $concepto->subpartida ?? '' }}</td>
+                        <td>{{ $concepto->descripcion ?? '' }}</td>
+                        <td>{{ $concepto->unidad ?? '' }}</td>
+                        <td>{{ $concepto->cantidad ?? '' }}</td>
+                        <td>{{ $concepto->pu ?? '' }}</td>
+                        <td>{{ $concepto->importe ?? '' }}</td>
                         <td>
-                            <div class="actions">
-                                <a class="icon-btn"
-                                   href="{{ Route::has('conceptos.edit') ? route('conceptos.edit', $id) : '#' }}"
-                                   title="Editar">
+                            <div class="action-group">
+                                <a class="action-btn view" href="{{ Route::has('conceptos.show') ? route('conceptos.show', $concepto->id ?? 1) : '#' }}" title="Ver">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                <a class="action-btn edit" href="{{ Route::has('conceptos.edit') ? route('conceptos.edit', $concepto->id ?? 1) : '#' }}" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
 
-                                <button class="icon-btn" type="button" title="Eliminar">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                <form action="{{ Route::has('conceptos.destroy') ? route('conceptos.destroy', $concepto->id ?? 1) : '#' }}" method="POST" onsubmit="return confirm('¿Deseas eliminar este concepto?');" style="display:inline-block;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="action-btn delete" type="submit" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
-                @endfor
-            @endforelse
-            </tbody>
-        </table>
+                @empty
+                    @for($i = 1; $i <= 6; $i++)
+                        <tr>
+                            <td class="empty-text">—</td>
+                            <td class="empty-text">—</td>
+                            <td class="empty-text">—</td>
+                            <td class="empty-text">—</td>
+                            <td class="empty-text">—</td>
+                            <td class="empty-text">—</td>
+                            <td class="empty-text">—</td>
+                            <td class="empty-text">—</td>
+                            <td>
+                                <div class="action-group">
+                                    <a class="action-btn view" href="{{ Route::has('conceptos.show') ? route('conceptos.show', $i) : '#' }}" title="Ver">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a class="action-btn edit" href="{{ Route::has('conceptos.edit') ? route('conceptos.edit', $i) : '#' }}" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button class="action-btn delete" type="button" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endfor
+                @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 @endsection

@@ -4,22 +4,108 @@
 
 @section('content')
     <style>
+        .page-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            flex-wrap:wrap;
+            gap:16px;
+            margin-bottom:20px;
+        }
+
+        .page-title{
+            font-size:2rem;
+            font-weight:800;
+            color:#1f2937;
+            margin-bottom:4px;
+        }
+
+        .page-subtitle{
+            color:#6b7280;
+            margin:0;
+            font-size:.98rem;
+        }
+
         .form-card{
-            max-width: 980px;
-            margin: 0 auto;
-            background: #fff;
-            border: 1px solid rgba(0,0,0,.18);
-            padding: 32px;
+            max-width:1100px;
+            margin:0 auto;
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:24px;
+            box-shadow:0 10px 30px rgba(0,0,0,.05);
+            padding:30px;
+        }
+
+        .section-title{
+            font-size:1.08rem;
+            font-weight:800;
+            color:#111827;
+            margin-bottom:18px;
+            padding-bottom:10px;
+            border-bottom:1px solid #e5e7eb;
+        }
+
+        .form-label{
+            font-weight:700;
+            color:#374151;
+            margin-bottom:8px;
+        }
+
+        .form-control,
+        .form-select{
+            border-radius:12px;
+            border:1px solid #d1d5db;
+            padding:.78rem .95rem;
+            box-shadow:none;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            border-color:#9ca3af;
+            box-shadow:0 0 0 .15rem rgba(107,114,128,.15);
+        }
+
+        .radio-group{
+            background:#f9fafb;
+            border:1px solid #e5e7eb;
+            border-radius:14px;
+            padding:14px 18px;
+        }
+
+        .btn-back{
+            border-radius:12px;
+            padding:.65rem 1rem;
+            font-weight:600;
+        }
+
+        .btn-save{
+            border:none;
+            border-radius:12px;
+            padding:.80rem 1.25rem;
+            font-weight:700;
+            background:#6b7280;
+            color:#fff;
+        }
+
+        .btn-save:hover{
+            background:#4b5563;
+            color:#fff;
+        }
+
+        .btn-cancel{
+            border-radius:12px;
+            padding:.80rem 1.25rem;
+            font-weight:700;
         }
     </style>
 
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div class="page-header">
         <div>
-            <h2 class="fw-bold mb-1">Nuevo Proyecto</h2>
-            <p class="text-secondary mb-0">Captura la información general del proyecto.</p>
+            <h2 class="page-title">Nuevo Proyecto</h2>
+            <p class="page-subtitle">Captura la información general del proyecto.</p>
         </div>
 
-        <a href="{{ route('proyectos') }}" class="btn btn-outline-secondary">
+        <a href="{{ route('proyectos') }}" class="btn btn-outline-secondary btn-back">
             <i class="bi bi-arrow-left me-1"></i> Volver
         </a>
     </div>
@@ -28,130 +114,133 @@
         <form action="#" method="POST" enctype="multipart/form-data">
             @csrf
 
-            <h5 class="fw-bold mb-3">Datos del Cliente</h5>
+            <h5 class="section-title">Datos del Cliente</h5>
 
-            <div class="row g-3 mb-2">
+            <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Nombre</label>
-                    <input type="text" name="cliente_nombre" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="cliente_nombre" class="form-control" placeholder="Ingresa el nombre del cliente">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Razón Social</label>
-                    <input type="text" name="cliente_razon_social" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Razón Social</label>
+                    <input type="text" name="cliente_razon_social" class="form-control" placeholder="Ingresa la razón social">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Dirección</label>
-                    <input type="text" name="cliente_direccion" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Dirección</label>
+                    <input type="text" name="cliente_direccion" class="form-control" placeholder="Ingresa la dirección">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Teléfono</label>
-                    <input type="text" name="cliente_telefono" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" name="cliente_telefono" class="form-control" placeholder="Ingresa el teléfono">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Correo</label>
-                    <input type="email" name="cliente_correo" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Correo</label>
+                    <input type="email" name="cliente_correo" class="form-control" placeholder="Ingresa el correo">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">RFC</label>
-                    <input type="text" name="cliente_rfc" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">RFC</label>
+                    <input type="text" name="cliente_rfc" class="form-control" placeholder="Ingresa el RFC">
                 </div>
             </div>
 
-            <div class="d-flex align-items-center gap-4 mt-2 mb-4">
-                <span class="fw-semibold">Persona</span>
+            <div class="radio-group d-flex align-items-center gap-4 flex-wrap mb-4">
+                <span class="fw-bold text-dark">Persona</span>
 
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="tipo_persona" id="fisica" checked>
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="tipo_persona" id="fisica" value="Física" checked>
                     <label class="form-check-label" for="fisica">Física</label>
                 </div>
 
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="tipo_persona" id="moral">
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="radio" name="tipo_persona" id="moral" value="Moral">
                     <label class="form-check-label" for="moral">Moral</label>
                 </div>
             </div>
 
-            <h5 class="fw-bold mb-3">Datos de la obra</h5>
+            <h5 class="section-title">Datos de la Obra</h5>
 
-            <div class="row g-3 mb-2">
+            <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Nombre del proyecto</label>
-                    <input type="text" name="obra_nombre" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Nombre del proyecto</label>
+                    <input type="text" name="obra_nombre" class="form-control" placeholder="Ingresa el nombre del proyecto">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Ubicación del proyecto</label>
-                    <input type="text" name="obra_ubicacion" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Ubicación del proyecto</label>
+                    <input type="text" name="obra_ubicacion" class="form-control" placeholder="Ingresa la ubicación">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Tipo de obra</label>
-                    <input type="text" name="obra_tipo" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Tipo de obra</label>
+                    <input type="text" name="obra_tipo" class="form-control" placeholder="Ingresa el tipo de obra">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Superficie de terreno</label>
-                    <input type="text" name="obra_superficie" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Superficie de terreno</label>
+                    <input type="text" name="obra_superficie" class="form-control" placeholder="Ingresa la superficie">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Tipo de uso</label>
-                    <input type="text" name="obra_uso" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Tipo de uso</label>
+                    <input type="text" name="obra_uso" class="form-control" placeholder="Ingresa el tipo de uso">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Fecha de inicio estimada</label>
+                    <label class="form-label">Fecha de inicio estimada</label>
                     <input type="date" name="obra_fecha_inicio" class="form-control">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Duración estimada</label>
-                    <input type="text" name="obra_duracion" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Duración estimada</label>
+                    <input type="text" name="obra_duracion" class="form-control" placeholder="Ingresa la duración estimada">
                 </div>
             </div>
 
-            <h5 class="fw-bold mt-4 mb-3">Datos de la empresa</h5>
+            <h5 class="section-title">Datos de la Empresa</h5>
 
-            <div class="row g-3 mb-2">
+            <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Nombre</label>
-                    <input type="text" name="empresa_nombre" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" name="empresa_nombre" class="form-control" placeholder="Ingresa el nombre de la empresa">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Logo</label>
+                    <label class="form-label">Logo</label>
                     <input type="file" name="empresa_logo" class="form-control">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Dirección</label>
-                    <input type="text" name="empresa_direccion" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Dirección</label>
+                    <input type="text" name="empresa_direccion" class="form-control" placeholder="Ingresa la dirección de la empresa">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Responsable técnico</label>
-                    <input type="text" name="empresa_responsable" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Responsable técnico</label>
+                    <input type="text" name="empresa_responsable" class="form-control" placeholder="Ingresa el responsable técnico">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Cargo</label>
-                    <input type="text" name="empresa_cargo" class="form-control" placeholder="Placeholder">
+                    <label class="form-label">Cargo</label>
+                    <input type="text" name="empresa_cargo" class="form-control" placeholder="Ingresa el cargo">
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label fw-semibold">Firma digital</label>
+                    <label class="form-label">Firma digital</label>
                     <input type="file" name="firma_digital" class="form-control">
                 </div>
             </div>
 
-            <div class="d-flex justify-content-end mt-4">
-                <button type="button" class="btn btn-secondary px-4">
-                    <i class="bi bi-plus-circle me-2"></i> Agregar Información
+            <div class="d-flex justify-content-end gap-2 mt-4">
+                <a href="{{ route('proyectos') }}" class="btn btn-outline-secondary btn-cancel">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-save">
+                    <i class="bi bi-plus-circle me-2"></i> Guardar Proyecto
                 </button>
             </div>
         </form>

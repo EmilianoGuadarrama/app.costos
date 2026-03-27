@@ -3,111 +3,134 @@
 @section('title', 'Editar Unidad')
 
 @section('content')
+    <style>
+        .page-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            flex-wrap:wrap;
+            gap:16px;
+            margin-bottom:20px;
+        }
 
-<style>
-.edit-wrapper{
-    max-width: 900px;
-    margin: 0 auto;
-}
+        .page-title{
+            font-size:2rem;
+            font-weight:800;
+            color:#1f2937;
+            margin-bottom:4px;
+        }
 
-.edit-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:start;
-    gap:12px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
-}
+        .page-subtitle{
+            color:#6b7280;
+            margin:0;
+            font-size:.98rem;
+        }
 
-.edit-card{
-    background:#fff;
-    border:1px solid rgba(0,0,0,.18);
-    padding:32px;
-}
+        .form-card{
+            max-width:900px;
+            margin:0 auto;
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:24px;
+            box-shadow:0 10px 30px rgba(0,0,0,.05);
+            padding:30px;
+        }
 
-.edit-form{
-    max-width:620px;
-    margin:0 auto;
-}
+        .form-wrapper{
+            max-width:650px;
+            margin:0 auto;
+        }
 
-.edit-form .form-label{
-    font-weight:600;
-    color:#222;
-}
+        .section-title{
+            font-size:1.08rem;
+            font-weight:800;
+            color:#111827;
+            margin-bottom:18px;
+            padding-bottom:10px;
+            border-bottom:1px solid #e5e7eb;
+        }
 
-.actions-bottom{
-    display:flex;
-    justify-content:center;
-    margin-top:24px;
-}
-</style>
+        .form-label{
+            font-weight:700;
+            color:#374151;
+            margin-bottom:8px;
+        }
 
-<div class="edit-wrapper">
+        .form-control{
+            border-radius:12px;
+            border:1px solid #d1d5db;
+            padding:.78rem .95rem;
+            box-shadow:none;
+        }
 
-<div class="edit-header">
+        .form-control:focus{
+            border-color:#9ca3af;
+            box-shadow:0 0 0 .15rem rgba(107,114,128,.15);
+        }
 
-<div>
-<h2 class="fw-bold mb-1">Editar Unidad de Medida</h2>
-<p class="text-secondary mb-0">Modifica la información de la unidad.</p>
-</div>
+        .btn-back{
+            border-radius:12px;
+            padding:.65rem 1rem;
+            font-weight:600;
+        }
 
-<a href="{{ route('unidad_medida.index') }}" class="btn btn-outline-secondary">
-<i class="bi bi-arrow-left me-1"></i> Volver
-</a>
+        .btn-save{
+            border:none;
+            border-radius:12px;
+            padding:.80rem 1.25rem;
+            font-weight:700;
+            background:#6b7280;
+            color:#fff;
+        }
 
-</div>
+        .btn-save:hover{
+            background:#4b5563;
+            color:#fff;
+        }
 
+        .btn-cancel{
+            border-radius:12px;
+            padding:.80rem 1.25rem;
+            font-weight:700;
+        }
+    </style>
 
-<div class="edit-card">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Editar Unidad de Medida</h2>
+            <p class="page-subtitle">Modifica la información registrada de la unidad.</p>
+        </div>
 
-<form class="edit-form" method="POST" action="{{ route('unidad_medida.update',$unidad->id_unidad) }}">
+        <a href="{{ route('unidad_medida.index') }}" class="btn btn-outline-secondary btn-back">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+    </div>
 
-@csrf
-@method('PUT')
+    <div class="form-card">
+        <form class="form-wrapper" method="POST" action="{{ route('unidad_medida.update', $unidad->id_unidad) }}">
+            @csrf
+            @method('PUT')
 
-<div class="row mb-3 align-items-center">
+            <h5 class="section-title">Datos de la Unidad</h5>
 
-<label class="col-md-4 form-label">Nombre</label>
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" name="nombre" class="form-control" value="{{ $unidad->nombre }}" required>
+            </div>
 
-<div class="col-md-8">
-<input
-type="text"
-name="nombre"
-class="form-control"
-value="{{ $unidad->nombre }}"
-required>
-</div>
+            <div class="mb-4">
+                <label class="form-label">Descripción</label>
+                <input type="text" name="descripcion" class="form-control" value="{{ $unidad->descripcion }}">
+            </div>
 
-</div>
-
-
-<div class="row mb-3 align-items-center">
-
-<label class="col-md-4 form-label">Descripción</label>
-
-<div class="col-md-8">
-<input
-type="text"
-name="descripcion"
-class="form-control"
-value="{{ $unidad->descripcion }}">
-</div>
-
-</div>
-
-
-<div class="actions-bottom">
-
-<button type="submit" class="btn btn-secondary px-4">
-<i class="bi bi-save me-2"></i> Guardar cambios
-</button>
-
-</div>
-
-</form>
-
-</div>
-
-</div>
-
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ route('unidad_medida.index') }}" class="btn btn-outline-secondary btn-cancel">
+                    Cancelar
+                </a>
+                <button type="submit" class="btn btn-save">
+                    <i class="bi bi-save me-2"></i> Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
 @endsection

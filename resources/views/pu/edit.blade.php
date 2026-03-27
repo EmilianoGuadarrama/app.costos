@@ -1,8 +1,12 @@
 @extends('layout')
 
-@section('title','Crear P.U')
+@section('title','Editar P.U')
 
 @section('content')
+    @php
+        $registro = $puItem ?? $item ?? null;
+    @endphp
+
     <style>
         .page-header{
             display:flex;
@@ -92,8 +96,8 @@
 
     <div class="page-header">
         <div>
-            <h2 class="page-title">Nuevo P.U</h2>
-            <p class="page-subtitle">Captura el análisis de precio unitario por concepto.</p>
+            <h2 class="page-title">Editar P.U</h2>
+            <p class="page-subtitle">Modifica el análisis de precio unitario registrado.</p>
         </div>
 
         <a href="{{ route('pu') }}" class="btn btn-outline-secondary btn-back">
@@ -102,30 +106,31 @@
     </div>
 
     <div class="form-card">
-        <form action="{{ Route::has('pu.store') ? route('pu.store') : '#' }}" method="POST">
+        <form action="{{ Route::has('pu.update') ? route('pu.update', $registro->id_concepto ?? 1) : '#' }}" method="POST">
             @csrf
+            @method('PUT')
 
             <h5 class="section-title">Datos del Concepto</h5>
 
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="form-label">Código</label>
-                    <input type="text" name="codigo" class="form-control" placeholder="Ej. CON-001">
+                    <input type="text" name="codigo" class="form-control" value="{{ $registro->codigo ?? '12344' }}">
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Unidad</label>
-                    <input type="text" name="unidad" class="form-control" placeholder="Ej. m2">
+                    <input type="text" name="unidad" class="form-control" value="{{ $registro->unidad ?? 'M' }}">
                 </div>
 
                 <div class="col-md-12">
                     <label class="form-label">Descripción</label>
-                    <input type="text" name="descripcion" class="form-control" placeholder="Descripción del concepto">
+                    <input type="text" name="descripcion" class="form-control" value="{{ $registro->descripcion ?? 'block' }}">
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Precio Unitario</label>
-                    <input type="text" name="precio_unitario" class="form-control" placeholder="0.00">
+                    <input type="text" name="precio_unitario" class="form-control" value="{{ $registro->precio_unitario ?? '0.00' }}">
                 </div>
             </div>
 
@@ -134,22 +139,22 @@
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="form-label">Material Principal</label>
-                    <input type="text" name="material_principal" class="form-control" placeholder="Material">
+                    <input type="text" name="material_principal" class="form-control" value="{{ $registro->material_principal ?? 'Material demo' }}">
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Cantidad Material</label>
-                    <input type="text" name="cantidad_material" class="form-control" placeholder="0.00">
+                    <input type="text" name="cantidad_material" class="form-control" value="{{ $registro->cantidad_material ?? '1.00' }}">
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Mano de Obra</label>
-                    <input type="text" name="mano_obra" class="form-control" placeholder="Puesto">
+                    <input type="text" name="mano_obra" class="form-control" value="{{ $registro->mano_obra ?? 'Operador demo' }}">
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label">Cantidad Mano de Obra</label>
-                    <input type="text" name="cantidad_mano_obra" class="form-control" placeholder="0.00">
+                    <input type="text" name="cantidad_mano_obra" class="form-control" value="{{ $registro->cantidad_mano_obra ?? '1.00' }}">
                 </div>
             </div>
 
@@ -158,7 +163,7 @@
                     Cancelar
                 </a>
                 <button type="submit" class="btn btn-save">
-                    <i class="bi bi-plus-circle me-2"></i> Guardar P.U
+                    <i class="bi bi-save me-2"></i> Guardar Cambios
                 </button>
             </div>
         </form>

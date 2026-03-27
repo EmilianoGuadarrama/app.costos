@@ -3,99 +3,113 @@
 @section('title','Maquinaria y Equipo')
 
 @section('content')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
-        .page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px}
-        .page-title{font-size:2rem;font-weight:800;color:#1f2937;margin:0 0 4px}
-        .page-subtitle{color:#6b7280;margin:0;font-size:.98rem}
-        .panel-card{background:#fff;border:1px solid #e5e7eb;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.05);padding:28px}
-        .toolbar{display:flex;gap:10px;flex-wrap:wrap}
-        .toolbar .btn{border-radius:12px;font-weight:600;padding:.65rem 1rem}
-        .btn-soft{background:#fff;border:1px solid #d1d5db;color:#374151}
-        .btn-soft:hover{background:#f9fafb;color:#111827}
-        .btn-dark-custom{background:#6b7280;border:1px solid #6b7280;color:#fff}
-        .btn-dark-custom:hover{background:#4b5563;border-color:#4b5563;color:#fff}
-        .table-wrap{overflow-x:auto}
-        .table-custom{width:100%;min-width:950px;margin:0;border-collapse:separate;border-spacing:0}
-        .table-custom thead th{background:#f9fafb;color:#111827;font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;text-align:center;padding:14px 10px;border-top:1px solid #d1d5db;border-bottom:1px solid #d1d5db;border-right:1px solid #d1d5db}
-        .table-custom thead th:first-child{border-left:1px solid #d1d5db;border-top-left-radius:14px}
-        .table-custom thead th:last-child{border-top-right-radius:14px}
-        .table-custom tbody td{padding:14px 10px;vertical-align:middle;border-bottom:1px solid #e5e7eb;border-right:1px solid #e5e7eb;background:#fff;color:#374151;font-size:.95rem}
-        .table-custom tbody tr td:first-child{border-left:1px solid #e5e7eb}
-        .table-custom tbody tr:hover td{background:#fafafa}
-        .table-custom tbody tr:last-child td:first-child{border-bottom-left-radius:14px}
-        .table-custom tbody tr:last-child td:last-child{border-bottom-right-radius:14px}
-        .action-group{display:flex;align-items:center;justify-content:center;gap:8px}
-        .action-btn{width:34px;height:34px;border:none;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;transition:.2s ease;font-size:1rem}
-        .action-btn.view{background:#eef2ff;color:#4338ca}
-        .action-btn.view:hover{background:#e0e7ff;color:#312e81}
-        .action-btn.edit{background:#f3f4f6;color:#374151}
-        .action-btn.edit:hover{background:#e5e7eb;color:#111827}
-        .action-btn.delete{background:#fef2f2;color:#dc2626}
-        .action-btn.delete:hover{background:#fee2e2;color:#991b1b}
-        .empty-text{color:#9ca3af;text-align:center}
+        .dash-index-view{ min-height:100%; background:#f8f8f8; font-family:"Garamond","Baskerville",serif; color:#111; padding:20px; }
+        .index-panel{ background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.05); }
+        .header-section{ border-bottom:1px solid #eaeaea; padding-bottom:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+        .header-section h1{ font-size:2.2rem; font-weight:700; margin:0; }
+        .header-section p{ margin:6px 0 0; color:#666; font-family:Arial,sans-serif; font-size:.92rem; }
+        .header-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+        .btn-filter{ background:#fff; color:#111; border:1px solid #d9d9d9; padding:10px 16px; border-radius:6px; font-size:.8rem; letter-spacing:1px; text-transform:uppercase; font-family:Arial,sans-serif; }
+        .btn-add-new{ background:#111; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-size:.8rem; letter-spacing:1px; text-transform:uppercase; text-decoration:none; font-family:Arial,sans-serif; }
+        .btn-add-new:hover{ background:#333; color:#fff; }
+        .project-table{ width:100%; border-collapse:separate; border-spacing:0 12px; }
+        .project-table thead th{ text-align:left; color:#888; font-size:.75rem; letter-spacing:2px; text-transform:uppercase; padding:0 20px 10px; font-family:Arial,sans-serif; }
+        .project-row{ background:#fff; outline:1px solid #eee; transition:all .3s ease; }
+        .project-row:hover{ transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.05); }
+        .project-row td{ padding:15px 20px; vertical-align:middle; }
+        .title-main{ font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px; }
+        .badge-dark-mini{ font-family:Arial,sans-serif; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:6px; background:#111; color:#fff; }
+        .badge-soft{ display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:12px; background:#eee; color:#333; font-family:Arial,sans-serif; font-size:.75rem; font-weight:700; }
+        .desc-text{ color:#666; font-size:.85rem; line-height:1.4; margin-top:5px; font-family:Arial,sans-serif; }
+        .info-stack{ font-family:Arial,sans-serif; font-size:.9rem; color:#555; line-height:1.55; }
+        .action-cell{ text-align:right; white-space:nowrap; }
+        .btn-icon-action{ background:none; border:none; font-size:1.15rem; cursor:pointer; transition:transform .2s ease, color .3s ease; padding:5px; margin-left:10px; display:inline-flex; align-items:center; justify-content:center; color:#888; text-decoration:none; }
+        .btn-icon-action:hover{ transform:scale(1.15); color:#111; }
+        .empty-state{ text-align:center; padding:28px 18px !important; color:#777; font-style:italic; font-family:Arial,sans-serif; background:#fff; }
+        @media (max-width: 992px){ .index-panel{ padding:24px; } .project-table{ min-width:980px; } }
     </style>
 
-    <div class="page-header">
-        <div>
-            <h2 class="page-title">Maquinaria y Equipo</h2>
-            <p class="page-subtitle">Listado general de maquinaria y equipo registrado.</p>
-        </div>
+    <div class="dash-index-view">
+        <div class="index-panel">
+            <div class="header-section">
+                <div>
+                    <h1>Maquinaria y Equipo</h1>
+                    <p>Listado general de equipos, unidad de uso y costo por hora.</p>
+                </div>
 
-        <div class="toolbar">
-            <button class="btn btn-soft" type="button"><i class="bi bi-funnel me-1"></i> Filtrar</button>
-            <a href="{{ Route::has('maquinaria_equipo.create') ? route('maquinaria_equipo.create') : '#' }}" class="btn btn-dark-custom">
-                <i class="bi bi-plus-circle me-1"></i> Nueva Maquinaria
-            </a>
-        </div>
-    </div>
+                <div class="header-actions">
+                    <button class="btn-filter" type="button">
+                        <i class="bi bi-funnel me-1"></i> Filtrar
+                    </button>
 
-    <div class="panel-card">
-        <div class="table-wrap">
-            <table class="table-custom">
-                <thead>
-                <tr>
-                    <th>Clave</th>
-                    <th>Equipo</th>
-                    <th>Unidad</th>
-                    <th>Costo por hora</th>
-                    <th style="width:160px;">Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                @forelse(($maquinarias ?? []) as $maquinaria)
+                    <a href="{{ Route::has('maquinaria_equipo.create') ? route('maquinaria_equipo.create') : '#' }}" class="btn-add-new">
+                        <i class="bi bi-plus-circle me-1"></i> Nueva Maquinaria
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="project-table">
+                    <thead>
                     <tr>
-                        <td>{{ $maquinaria->clave ?? '' }}</td>
-                        <td>{{ $maquinaria->equipo ?? '' }}</td>
-                        <td>{{ $maquinaria->unidad ?? '' }}</td>
-                        <td>{{ $maquinaria->costo_por_hora ?? '' }}</td>
-                        <td>
-                            <div class="action-group">
-                                <a class="action-btn view" href="{{ Route::has('maquinaria_equipo.show') ? route('maquinaria_equipo.show', $maquinaria->id ?? 1) : '#' }}" title="Ver"><i class="bi bi-eye"></i></a>
-                                <a class="action-btn edit" href="{{ Route::has('maquinaria_equipo.edit') ? route('maquinaria_equipo.edit', $maquinaria->id ?? 1) : '#' }}" title="Editar"><i class="bi bi-pencil"></i></a>
-                                <form action="{{ Route::has('maquinaria_equipo.destroy') ? route('maquinaria_equipo.destroy', $maquinaria->id ?? 1) : '#' }}" method="POST" onsubmit="return confirm('¿Deseas eliminar este registro?');" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="action-btn delete" type="submit" title="Eliminar"><i class="bi bi-trash"></i></button>
-                                </form>
-                            </div>
-                        </td>
+                        <th style="width:35%;">Detalle del Equipo</th>
+                        <th>Costo</th>
+                        <th>Unidad</th>
+                        <th style="text-align:right;">Acciones</th>
                     </tr>
-                @empty
-                    @for($i = 1; $i <= 6; $i++)
-                        <tr>
-                            <td class="empty-text">—</td><td class="empty-text">—</td><td class="empty-text">—</td><td class="empty-text">—</td>
+                    </thead>
+                    <tbody>
+                    @forelse(($maquinarias ?? $maquinaria_equipo ?? []) as $maquinaria)
+                        @php $maquinariaId = $maquinaria->id ?? $maquinaria->id_maquinaria ?? 1; @endphp
+                        <tr class="project-row">
                             <td>
-                                <div class="action-group">
-                                    <a class="action-btn view" href="{{ Route::has('maquinaria_equipo.show') ? route('maquinaria_equipo.show', $i) : '#' }}" title="Ver"><i class="bi bi-eye"></i></a>
-                                    <a class="action-btn edit" href="{{ Route::has('maquinaria_equipo.edit') ? route('maquinaria_equipo.edit', $i) : '#' }}" title="Editar"><i class="bi bi-pencil"></i></a>
-                                    <button class="action-btn delete" type="button" title="Eliminar"><i class="bi bi-trash"></i></button>
+                                <div class="title-main">
+                                    {{ $maquinaria->equipo ?? 'Equipo sin nombre' }}
+                                    <span class="badge-dark-mini">{{ $maquinaria->clave ?? 'MQ' }}</span>
+                                </div>
+                                <div class="desc-text">Registro de maquinaria y equipo para análisis de costo horario.</div>
+                            </td>
+                            <td>
+                                <div class="info-stack">
+                                    <div><strong>Costo por hora:</strong> {{ $maquinaria->costo_por_hora ?? '0.00' }}</div>
                                 </div>
                             </td>
+                            <td>
+                                <span class="badge-soft">{{ $maquinaria->unidad ?? data_get($maquinaria, 'unidadMedida.abreviatura') ?? 'N/D' }}</span>
+                            </td>
+                            <td class="action-cell">
+                                <a href="{{ Route::has('maquinaria_equipo.show') ? route('maquinaria_equipo.show', $maquinariaId) : '#' }}" class="btn-icon-action" title="Ver">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ Route::has('maquinaria_equipo.edit') ? route('maquinaria_equipo.edit', $maquinariaId) : '#' }}" class="btn-icon-action" title="Editar">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                @if(Route::has('maquinaria_equipo.destroy'))
+                                    <form action="{{ route('maquinaria_equipo.destroy', $maquinariaId) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este equipo?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-icon-action" title="Eliminar">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                @else
+                                    <button type="button" class="btn-icon-action" title="Eliminar">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                @endif
+                            </td>
                         </tr>
-                    @endfor
-                @endforelse
-                </tbody>
-            </table>
+                    @empty
+                        <tr class="project-row">
+                            <td colspan="4" class="empty-state">No hay maquinaria o equipo registrados.</td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 @endsection

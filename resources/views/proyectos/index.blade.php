@@ -3,327 +3,303 @@
 @section('title','Proyectos')
 
 @section('content')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
-        .page-header{
+        .dash-index-view{
+            min-height:100%;
+            background:#f8f8f8;
+            font-family:"Garamond","Baskerville",serif;
+            color:#111;
+            padding:20px;
+        }
+        .index-panel{
+            background:#fff;
+            padding:40px;
+            border-radius:12px;
+            box-shadow:0 4px 10px rgba(0,0,0,.05);
+        }
+        .header-section{
+            border-bottom:1px solid #eaeaea;
+            padding-bottom:20px;
+            margin-bottom:30px;
             display:flex;
-            align-items:center;
             justify-content:space-between;
-            flex-wrap:wrap;
+            align-items:flex-end;
             gap:16px;
-            margin-bottom:20px;
+            flex-wrap:wrap;
         }
-
-        .page-title{
-            font-size:2rem;
-            font-weight:800;
-            color:#1f2937;
-            margin-bottom:4px;
-        }
-
-        .page-subtitle{
-            color:#6b7280;
+        .header-section h1{
+            font-size:2.2rem;
+            font-weight:700;
             margin:0;
-            font-size:.98rem;
         }
-
-        .panel-card{
-            background:#ffffff;
-            border-radius:24px;
-            border:1px solid #e5e7eb;
-            box-shadow:0 10px 30px rgba(0,0,0,.05);
-            padding:28px;
+        .header-section p{
+            margin:6px 0 0;
+            color:#666;
+            font-family:Arial,sans-serif;
+            font-size:.92rem;
         }
-
-        .toolbar{
+        .header-actions{
             display:flex;
             gap:10px;
             flex-wrap:wrap;
         }
-
-        .toolbar .btn{
-            border-radius:12px;
-            font-weight:600;
-            padding:.65rem 1rem;
-        }
-
-        .btn-soft{
+        .btn-filter{
             background:#fff;
-            border:1px solid #d1d5db;
-            color:#374151;
-        }
-
-        .btn-soft:hover{
-            background:#f9fafb;
-            color:#111827;
-        }
-
-        .btn-dark-custom{
-            background:#6b7280;
-            border:1px solid #6b7280;
-            color:#fff;
-        }
-
-        .btn-dark-custom:hover{
-            background:#4b5563;
-            border-color:#4b5563;
-            color:#fff;
-        }
-
-        .table-wrap{
-            overflow-x:auto;
-        }
-
-        .table-custom{
-            width:100%;
-            min-width:1100px;
-            margin:0;
-            border-collapse:separate;
-            border-spacing:0;
-        }
-
-        .table-custom thead th{
-            background:#f9fafb;
-            color:#111827;
-            font-size:.78rem;
-            font-weight:800;
+            color:#111;
+            border:1px solid #d9d9d9;
+            padding:10px 16px;
+            border-radius:6px;
+            font-size:.8rem;
+            letter-spacing:1px;
             text-transform:uppercase;
-            letter-spacing:.04em;
-            text-align:center;
-            padding:14px 10px;
-            border-top:1px solid #d1d5db;
-            border-bottom:1px solid #d1d5db;
-            border-right:1px solid #d1d5db;
+            font-family:Arial,sans-serif;
         }
-
-        .table-custom thead th:first-child{
-            border-left:1px solid #d1d5db;
-            border-top-left-radius:14px;
+        .btn-add-new{
+            background:#111;
+            color:#fff;
+            border:none;
+            padding:10px 20px;
+            border-radius:6px;
+            font-size:.8rem;
+            letter-spacing:1px;
+            text-transform:uppercase;
+            text-decoration:none;
+            font-family:Arial,sans-serif;
+            cursor:pointer;
+            transition:background .3s ease;
         }
-
-        .table-custom thead th:last-child{
-            border-top-right-radius:14px;
+        .btn-add-new:hover{ background:#333; color:#fff; }
+        .project-table{
+            width:100%;
+            border-collapse:separate;
+            border-spacing:0 12px;
         }
-
-        .table-custom tbody td{
-            padding:14px 10px;
-            vertical-align:middle;
-            border-bottom:1px solid #e5e7eb;
-            border-right:1px solid #e5e7eb;
+        .project-table thead th{
+            text-align:left;
+            color:#888;
+            font-size:.75rem;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            padding:0 20px 10px;
+            font-family:Arial,sans-serif;
+        }
+        .project-row{
             background:#fff;
-            color:#374151;
-            font-size:.95rem;
+            outline:1px solid #eee;
+            transition:all .3s ease;
         }
-
-        .table-custom tbody tr td:first-child{
-            border-left:1px solid #e5e7eb;
+        .project-row:hover{
+            transform:translateY(-2px);
+            box-shadow:0 5px 15px rgba(0,0,0,.05);
         }
-
-        .table-custom tbody tr:hover td{
-            background:#fafafa;
+        .project-row td{
+            padding:15px 20px;
+            vertical-align:middle;
         }
-
-        .table-custom tbody tr:last-child td:first-child{
-            border-bottom-left-radius:14px;
-        }
-
-        .table-custom tbody tr:last-child td:last-child{
-            border-bottom-right-radius:14px;
-        }
-
-        .status-badge{
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            min-width:95px;
-            padding:.40rem .85rem;
-            border-radius:999px;
-            font-size:.80rem;
+        .title-main{
             font-weight:700;
-        }
-
-        .status-activo{
-            background:#ecfdf3;
-            color:#027a48;
-        }
-
-        .status-pendiente{
-            background:#fff7ed;
-            color:#c2410c;
-        }
-
-        .status-proceso{
-            background:#eff6ff;
-            color:#1d4ed8;
-        }
-
-        .action-group{
+            font-size:1.05rem;
             display:flex;
             align-items:center;
-            justify-content:center;
             gap:8px;
         }
-
-        .action-btn{
-            width:34px;
-            height:34px;
-            border:none;
-            border-radius:10px;
+        .badge-dark-mini{
+            font-family:Arial,sans-serif;
+            font-size:.7rem;
+            font-weight:700;
+            padding:2px 8px;
+            border-radius:6px;
+            background:#111;
+            color:#fff;
+        }
+        .badge-soft{
             display:inline-flex;
             align-items:center;
             justify-content:center;
+            padding:4px 10px;
+            border-radius:12px;
+            background:#eee;
+            color:#333;
+            font-family:Arial,sans-serif;
+            font-size:.75rem;
+            font-weight:700;
+        }
+        .desc-text{
+            color:#666;
+            font-size:.85rem;
+            line-height:1.4;
+            margin-top:5px;
+            font-family:Arial,sans-serif;
+        }
+        .info-stack{
+            font-family:Arial,sans-serif;
+            font-size:.9rem;
+            color:#555;
+            line-height:1.55;
+        }
+        .action-cell{
+            text-align:right;
+            white-space:nowrap;
+        }
+        .btn-icon-action{
+            background:none;
+            border:none;
+            font-size:1.15rem;
+            cursor:pointer;
+            transition:transform .2s ease, color .3s ease;
+            padding:5px;
+            margin-left:10px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            color:#888;
             text-decoration:none;
-            transition:.2s ease;
-            font-size:1rem;
         }
-
-        .action-btn.view{
-            background:#eef2ff;
-            color:#4338ca;
+        .btn-icon-action:hover{
+            transform:scale(1.15);
+            color:#111;
         }
-
-        .action-btn.view:hover{
-            background:#e0e7ff;
-            color:#312e81;
-        }
-
-        .action-btn.edit{
-            background:#f3f4f6;
-            color:#374151;
-        }
-
-        .action-btn.edit:hover{
-            background:#e5e7eb;
-            color:#111827;
-        }
-
-        .action-btn.delete{
-            background:#fef2f2;
-            color:#dc2626;
-        }
-
-        .action-btn.delete:hover{
-            background:#fee2e2;
-            color:#991b1b;
-        }
-
-        .empty-text{
-            color:#9ca3af;
+        .empty-state{
             text-align:center;
+            padding:28px 18px !important;
+            color:#777;
+            font-style:italic;
+            font-family:Arial,sans-serif;
+            background:#fff;
+        }
+        @media (max-width: 992px){
+            .index-panel{ padding:24px; }
+            .project-table{ min-width:980px; }
         }
     </style>
 
-    <div class="page-header">
-        <div>
-            <h2 class="page-title">Proyectos</h2>
-            <p class="page-subtitle">Listado general de proyectos y datos principales de creación.</p>
-        </div>
+    <div class="dash-index-view">
+        <div class="index-panel">
+            <div class="header-section">
+                <div>
+                    <h1>Proyectos</h1>
+                    <p>Gestión de proyectos, clientes, ubicación y estado general de obra.</p>
+                </div>
 
-        <div class="toolbar">
-            <button class="btn btn-soft" type="button">
-                <i class="bi bi-funnel me-1"></i> Filtrar
-            </button>
+                <div class="header-actions">
+                    <button class="btn-filter" type="button">
+                        <i class="bi bi-funnel me-1"></i> Filtrar
+                    </button>
 
-            <a href="{{ route('proyectos.create') }}" class="btn btn-dark-custom">
-                <i class="bi bi-plus-circle me-1"></i> Nuevo Proyecto
-            </a>
-        </div>
-    </div>
+                    <a href="{{ route('proyectos.create') }}" class="btn-add-new">
+                        <i class="bi bi-plus-circle me-1"></i> Nuevo Proyecto
+                    </a>
+                </div>
+            </div>
 
-    <div class="panel-card">
-        <div class="table-wrap">
-            <table class="table-custom">
-                <thead>
-                <tr>
-                    <th>Cliente</th>
-                    <th>Razón Social</th>
-                    <th>Proyecto</th>
-                    <th>Ubicación</th>
-                    <th>Tipo de Obra</th>
-                    <th>Fecha Inicio</th>
-                    <th>Estado</th>
-                    <th style="width:150px;">Acciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                @php
-                    $lista = $proyectos ?? [];
-                @endphp
+            @if(session('success'))
+                <div class="alert alert-dark mb-4" style="font-family: Arial; font-size: 0.85rem;">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-                @forelse($lista as $proyecto)
-                    @php
-                        $estado = strtolower($proyecto->estado ?? 'pendiente');
-                        $claseEstado = 'status-pendiente';
+            @if($errors->any())
+                <div class="alert alert-danger mb-4" style="font-family: Arial; font-size: 0.85rem;">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-                        if ($estado === 'activo' || $estado === 'finalizado') {
-                            $claseEstado = 'status-activo';
-                        } elseif ($estado === 'en proceso') {
-                            $claseEstado = 'status-proceso';
-                        }
-                    @endphp
+            <div class="table-responsive">
+                <table class="project-table">
+                    <thead>
                     <tr>
-                        <td>{{ $proyecto->cliente_nombre ?? '—' }}</td>
-                        <td>{{ $proyecto->cliente_razon_social ?? '—' }}</td>
-                        <td>{{ $proyecto->obra_nombre ?? '—' }}</td>
-                        <td>{{ $proyecto->obra_ubicacion ?? '—' }}</td>
-                        <td>{{ $proyecto->obra_tipo ?? '—' }}</td>
-                        <td>{{ $proyecto->obra_fecha_inicio ?? '—' }}</td>
-                        <td class="text-center">
-                                <span class="status-badge {{ $claseEstado }}">
-                                    {{ $proyecto->estado ?? 'Pendiente' }}
-                                </span>
-                        </td>
-                        <td>
-                            <div class="action-group">
-                                <a class="action-btn view" href="{{ route('proyectos.show', $proyecto->id) }}" title="Ver">
+                        <th style="width:35%;">Detalles del Proyecto</th>
+                        <th>Datos Generales</th>
+                        <th>Estado</th>
+                        <th style="text-align:right;">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @forelse(($proyectos ?? []) as $proyecto)
+                        @php
+                            $proyectoId = $proyecto->id ?? $proyecto->id_proyecto ?? 1;
+                            $estadoNombre = data_get($proyecto, 'estado.nombre_estado') ?? ($proyecto->estado ?? null);
+
+                            if (!$estadoNombre && !empty($estados)) {
+                                foreach ($estados as $estado) {
+                                    if (($estado->id_estado ?? null) == ($proyecto->id_estado ?? null)) {
+                                        $estadoNombre = $estado->nombre_estado ?? 'Sin estado';
+                                        break;
+                                    }
+                                }
+                            }
+
+                            $estadoNombre = $estadoNombre ?: 'Sin estado';
+                        @endphp
+                        <tr class="project-row">
+                            <td>
+                                <div class="title-main">
+                                    {{ $proyecto->obra_nombre ?? $proyecto->titulo ?? $proyecto->nombre ?? 'Proyecto sin nombre' }}
+                                    @if(!empty($proyecto->obra_fecha_inicio))
+                                        <span class="badge-dark-mini">{{ $proyecto->obra_fecha_inicio }}</span>
+                                    @elseif(!empty($proyecto->anio))
+                                        <span class="badge-dark-mini">{{ $proyecto->anio }}</span>
+                                    @elseif(!empty($proyecto->fecha_inicio))
+                                        <span class="badge-dark-mini">{{ $proyecto->fecha_inicio }}</span>
+                                    @endif
+                                </div>
+                                <div class="desc-text">
+                                    Cliente: {{ $proyecto->cliente_nombre ?? data_get($proyecto, 'cliente.nombre') ?? 'Sin cliente' }} ·
+                                    Razón social: {{ $proyecto->cliente_razon_social ?? data_get($proyecto, 'cliente.razon_social') ?? 'No registrada' }}<br>
+                                    Ubicación: {{ $proyecto->obra_ubicacion ?? $proyecto->ubicacion ?? 'No registrada' }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="info-stack">
+                                    <div><strong>Tipo de obra:</strong> {{ $proyecto->obra_tipo ?? $proyecto->tipo_obra ?? 'No especificado' }}</div>
+                                    <div><strong>Uso:</strong> {{ $proyecto->obra_uso ?? $proyecto->tipo_uso ?? 'No especificado' }}</div>
+                                    <div><strong>Duración:</strong> {{ $proyecto->obra_duracion ?? $proyecto->duracion_estimada ?? 'No especificada' }}</div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge-soft">{{ $estadoNombre }}</span>
+                            </td>
+
+                            <td class="action-cell">
+                                <a href="{{ Route::has('proyectos.show') ? route('proyectos.show', $proyectoId) : '#' }}" class="btn-icon-action" title="Ver">
                                     <i class="bi bi-eye"></i>
                                 </a>
 
-                                <a class="action-btn edit" href="{{ route('proyectos.edit', $proyecto->id) }}" title="Editar">
-                                    <i class="bi bi-pencil"></i>
+                                <a href="{{ Route::has('proyectos.edit') ? route('proyectos.edit', $proyectoId) : '#' }}" class="btn-icon-action" title="Editar">
+                                    <i class="bi bi-pencil-square"></i>
                                 </a>
 
-                                <form action="{{ route('proyectos.destroy', $proyecto->id) }}" method="POST" onsubmit="return confirm('¿Deseas eliminar este proyecto?');" style="display:inline-block;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="action-btn delete" type="submit" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
+                                @if(Route::has('proyectos.destroy'))
+                                    <form action="{{ route('proyectos.destroy', $proyectoId) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este proyecto definitivamente?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-icon-action" title="Eliminar">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                @else
+                                    <button type="button" class="btn-icon-action" title="Eliminar">
+                                        <i class="bi bi-trash3"></i>
                                     </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    @for($i = 1; $i <= 6; $i++)
-                        <tr>
-                            <td class="empty-text">—</td>
-                            <td class="empty-text">—</td>
-                            <td class="empty-text">—</td>
-                            <td class="empty-text">—</td>
-                            <td class="empty-text">—</td>
-                            <td class="empty-text">—</td>
-                            <td class="text-center">
-                                <span class="status-badge status-pendiente">Pendiente</span>
-                            </td>
-                            <td>
-                                <div class="action-group">
-                                    <a class="action-btn view" href="{{ route('proyectos.show', $i) }}" title="Ver">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-
-                                    <a class="action-btn edit" href="{{ route('proyectos.edit', $i) }}" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-
-                                    <button class="action-btn delete" type="button" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+                                @endif
                             </td>
                         </tr>
-                    @endfor
-                @endforelse
-                </tbody>
-            </table>
+                    @empty
+                        <tr class="project-row">
+                            <td colspan="4" class="empty-state">No hay proyectos registrados por el momento.</td>
+                        </tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 @endsection

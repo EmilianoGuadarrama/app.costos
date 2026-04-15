@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Http\Controllers;
 
-use App\Models\ReporteGenerado;
+use App\Http\Controllers\Controller;
 use App\Models\Presupuesto;
+use App\Models\ReporteGenerado;
 use Illuminate\Http\Request;
 
 class ReporteGeneradoController extends Controller

@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Http\Controllers;
 
-use App\Models\Proyecto;
+use App\Http\Controllers\Controller;
 use App\Models\Cliente;
-use App\Models\ResponsableTecnico;
 use App\Models\EstadoProyecto;
+use App\Models\Proyecto;
+use App\Models\ResponsableTecnico;
 use Illuminate\Http\Request;
 
 class ProyectoController extends Controller

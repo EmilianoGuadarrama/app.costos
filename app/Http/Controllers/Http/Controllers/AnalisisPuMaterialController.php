@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Http\Controllers;
 
-use App\Models\AnalisisPuMaterial;
+use App\Http\Controllers\Controller;
 use App\Models\AnalisisPu;
+use App\Models\AnalisisPuMaterial;
 use App\Models\Material;
 use Illuminate\Http\Request;
 

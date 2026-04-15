@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Controllers\Http\Controllers\ConceptoController;
+use App\Http\Controllers\Http\Controllers\GeneradorController;
+use App\Http\Controllers\Http\Controllers\UnidadMedidaController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ConceptoController;
-use App\Http\Controllers\GeneradorController;
-use App\Http\Controllers\UnidadMedidaController;
 
 // =========================
 // INICIO

@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Http\Controllers;
 
-use App\Models\PresupuestoDetalle;
-use App\Models\Presupuesto;
+use App\Http\Controllers\Controller;
 use App\Models\Concepto;
+use App\Models\Presupuesto;
+use App\Models\PresupuestoDetalle;
 use Illuminate\Http\Request;
 
 class PresupuestoDetalleController extends Controller

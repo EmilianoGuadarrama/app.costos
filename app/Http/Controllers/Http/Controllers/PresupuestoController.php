@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Presupuesto;
 use App\Models\Proyecto;
 use Illuminate\Http\Request;

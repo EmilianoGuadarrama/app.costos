@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Http\Controllers;
 
-use App\Models\ResponsableTecnico;
+use App\Http\Controllers\Controller;
 use App\Models\Empresa;
+use App\Models\ResponsableTecnico;
 use Illuminate\Http\Request;
 
 class ResponsableTecnicoController extends Controller

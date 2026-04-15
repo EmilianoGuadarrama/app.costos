@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\AnalisisPu;
 use App\Models\Concepto;
 use Illuminate\Http\Request;

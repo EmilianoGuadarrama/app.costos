@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Generador;
 use App\Models\PresupuestoDetalle;
 use Illuminate\Http\Request;

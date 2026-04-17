@@ -14,7 +14,6 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\ManoObraController;
 use App\Http\Controllers\MaquinariaEquipoController;
 use App\Http\Controllers\IndirectoController;
-
 // Controladores de Entidades Principales
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EmpresaController;

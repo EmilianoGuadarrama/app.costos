@@ -105,7 +105,7 @@
             <p class="page-subtitle">Captura la información general del proyecto.</p>
         </div>
 
-        <a href="{{ route('proyectos') }}" class="btn btn-outline-secondary btn-back">
+        <a href="{{ route('proyectos.index') }}" class="btn btn-outline-secondary btn-back">
             <i class="bi bi-arrow-left me-1"></i> Volver
         </a>
     </div>
@@ -236,7 +236,7 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2 mt-4">
-                <a href="{{ route('proyectos') }}" class="btn btn-outline-secondary btn-cancel">
+                <a href="{{ route('proyectos.index') }}" class="btn btn-outline-secondary btn-cancel">
                     Cancelar
                 </a>
                 <button type="submit" class="btn btn-save">

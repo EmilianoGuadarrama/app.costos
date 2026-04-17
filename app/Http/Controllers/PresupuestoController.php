@@ -10,17 +10,14 @@ class PresupuestoController extends Controller
 {
     public function index()
     {
-        $presupuestos = Presupuesto::with(['proyecto', 'detalles.concepto'])
-            ->latest()
-            ->get();
-
-        return view('presupuesto.index', compact('presupuestos'));
+        $presupuestos = Presupuesto::with('proyecto')->latest()->get();
+        return view('presupuestos.index', compact('presupuestos'));
     }
 
     public function create()
     {
         $proyectos = Proyecto::orderBy('nombre')->get();
-        return view('presupuesto.create', compact('proyectos'));
+        return view('presupuestos.create', compact('proyectos'));
     }
 
     public function store(Request $request)
@@ -28,19 +25,18 @@ class PresupuestoController extends Controller
         $data = $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
             'nombre' => 'required|string|max:150',
-            'fecha' => 'required|date',
-            'observaciones' => 'nullable|string',
+            'estado' => 'nullable|string|max:50',
         ]);
 
         Presupuesto::create($data);
 
-        return redirect()->route('presupuesto.index')->with('success', 'Presupuesto creado correctamente.');
+        return redirect()->route('presupuestos.index')->with('success', 'Presupuesto creado correctamente.');
     }
 
     public function show($id)
     {
         $presupuesto = Presupuesto::with(['proyecto', 'detalles.concepto'])->findOrFail($id);
-        return view('presupuesto.show', compact('presupuesto'));
+        return view('presupuestos.show', compact('presupuesto'));
     }
 
     public function edit($id)
@@ -48,7 +44,7 @@ class PresupuestoController extends Controller
         $presupuesto = Presupuesto::findOrFail($id);
         $proyectos = Proyecto::orderBy('nombre')->get();
 
-        return view('presupuesto.edit', compact('presupuesto', 'proyectos'));
+        return view('presupuestos.edit', compact('presupuesto', 'proyectos'));
     }
 
     public function update(Request $request, $id)
@@ -58,13 +54,12 @@ class PresupuestoController extends Controller
         $data = $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
             'nombre' => 'required|string|max:150',
-            'fecha' => 'required|date',
-            'observaciones' => 'nullable|string',
+            'estado' => 'nullable|string|max:50',
         ]);
 
         $presupuesto->update($data);
 
-        return redirect()->route('presupuesto.index')->with('success', 'Presupuesto actualizado correctamente.');
+        return redirect()->route('presupuestos.index')->with('success', 'Presupuesto actualizado correctamente.');
     }
 
     public function destroy($id)
@@ -72,6 +67,6 @@ class PresupuestoController extends Controller
         $presupuesto = Presupuesto::findOrFail($id);
         $presupuesto->delete();
 
-        return redirect()->route('presupuesto.index')->with('success', 'Presupuesto eliminado correctamente.');
+        return redirect()->route('presupuestos.index')->with('success', 'Presupuesto eliminado correctamente.');
     }
 }

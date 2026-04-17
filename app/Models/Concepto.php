@@ -10,9 +10,28 @@ class Concepto extends Model
     use HasFactory;
 
     protected $table = 'conceptos';
-    protected $primaryKey = 'id_concepto';
 
     protected $fillable = [
-        'codigo','subpartida','descripcion','unidad','cantidad','pu','importe'
+        'clave',
+        'area_id',
+        'partida',
+        'subpartida',
+        'descripcion',
+        'unidad_medida_id',
     ];
+
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
+    }
+
+    public function unidadMedida()
+    {
+        return $this->belongsTo(UnidadMedida::class);
+    }
+
+    public function generadores()
+    {
+        return $this->hasMany(Generador::class);
+    }
 }

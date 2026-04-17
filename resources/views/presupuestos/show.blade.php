@@ -1,132 +1,33 @@
 @extends('layout')
-
-@section('title','Detalle del Presupuesto')
-
+@section('title','Detalle Presupuesto')
 @section('content')
-    <style>
-        .page-header{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            flex-wrap:wrap;
-            gap:16px;
-            margin-bottom:20px;
-        }
-
-        .page-title{
-            font-size:2rem;
-            font-weight:800;
-            color:#1f2937;
-            margin-bottom:4px;
-        }
-
-        .page-subtitle{
-            color:#6b7280;
-            margin:0;
-            font-size:.98rem;
-        }
-
-        .detail-card{
-            max-width:950px;
-            margin:0 auto;
-            background:#fff;
-            border:1px solid #e5e7eb;
-            border-radius:24px;
-            box-shadow:0 10px 30px rgba(0,0,0,.05);
-            padding:30px;
-        }
-
-        .section-title{
-            font-size:1.08rem;
-            font-weight:800;
-            color:#111827;
-            margin-bottom:18px;
-            padding-bottom:10px;
-            border-bottom:1px solid #e5e7eb;
-        }
-
-        .form-label{
-            font-weight:700;
-            color:#374151;
-            margin-bottom:8px;
-        }
-
-        .form-control[readonly]{
-            background:#f9fafb;
-            border:1px solid #d1d5db;
-            border-radius:12px;
-            padding:.78rem .95rem;
-            color:#374151;
-        }
-
-        .btn-back{
-            border-radius:12px;
-            padding:.65rem 1rem;
-            font-weight:600;
-        }
-
-        .btn-edit{
-            border:none;
-            border-radius:12px;
-            padding:.75rem 1.1rem;
-            font-weight:700;
-            background:#6b7280;
-            color:#fff;
-        }
-
-        .btn-edit:hover{
-            background:#4b5563;
-            color:#fff;
-        }
-    </style>
-
-    <div class="page-header">
-        <div>
-            <h2 class="page-title">Detalle del Presupuesto</h2>
-            <p class="page-subtitle">Consulta la información registrada del presupuesto.</p>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .dash-form-view{ min-height:100%; background:#f8f8f8; font-family:"Arial",sans-serif; color:#111; padding:20px; }
+    .form-panel{ background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.05); max-width:800px; margin:0 auto; }
+    .header-section{ border-bottom:1px solid #eaeaea; padding-bottom:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; }
+    .header-section h1{ font-size:1.8rem; font-weight:700; margin:0; font-family:"Garamond","Baskerville",serif; }
+    .detail-row{ display:flex; padding:12px 0; border-bottom:1px solid #f0f0f0; }
+    .detail-label{ width:180px; font-weight:700; color:#555; font-size:.9rem; }
+    .detail-value{ flex:1; font-size:.95rem; }
+    .btn-back{ display:inline-block; margin-bottom:20px; color:#666; text-decoration:none; font-size:.9rem; }
+</style>
+<div class="dash-form-view">
+    <a href="{{ route('presupuestos.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Volver</a>
+    <div class="form-panel">
+        <div class="header-section">
+            <h1>{{ $presupuesto->nombre }}</h1>
+            <a href="{{ route('presupuestos.edit', $presupuesto) }}" class="btn btn-sm btn-outline-dark"><i class="bi bi-pencil"></i> Editar</a>
         </div>
-
-        <div class="d-flex gap-2">
-            <a href="{{ route('presupuesto') }}" class="btn btn-outline-secondary btn-back">
-                <i class="bi bi-arrow-left me-1"></i> Volver
-            </a>
-            <a href="{{ Route::has('presupuesto.edit') ? route('presupuesto.edit', $presupuesto->id ?? 1) : '#' }}" class="btn btn-edit">
-                <i class="bi bi-pencil-square me-1"></i> Editar
-            </a>
-        </div>
+        <div class="detail-row"><div class="detail-label">Proyecto</div><div class="detail-value">{{ $presupuesto->proyecto->nombre ?? 'N/A' }}</div></div>
+        <div class="detail-row"><div class="detail-label">Nombre</div><div class="detail-value">{{ $presupuesto->nombre }}</div></div>
+        <div class="detail-row"><div class="detail-label">Estado</div><div class="detail-value">
+            <span class="badge bg-{{ $presupuesto->estado == 'Aprobado' ? 'success' : ($presupuesto->estado == 'Rechazado' ? 'danger' : 'secondary') }}">
+                {{ $presupuesto->estado ?? 'Borrador' }}
+            </span>
+        </div></div>
+        <div class="detail-row"><div class="detail-label">Total Detalles</div><div class="detail-value">{{ $presupuesto->detalles ? $presupuesto->detalles->count() : 0 }}</div></div>
+        <div class="detail-row"><div class="detail-label">Creado</div><div class="detail-value">{{ $presupuesto->created_at?->format('d/m/Y H:i') ?? '—' }}</div></div>
     </div>
-
-    <div class="detail-card">
-        <h5 class="section-title">Datos del Presupuesto</h5>
-
-        <div class="mb-3">
-            <label class="form-label">Clave</label>
-            <input type="text" class="form-control" readonly value="{{ $presupuesto->clave ?? 'PRE-001' }}">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Concepto</label>
-            <input type="text" class="form-control" readonly value="{{ $presupuesto->concepto ?? 'Concepto demo' }}">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Unidad</label>
-            <input type="text" class="form-control" readonly value="{{ $presupuesto->unidad ?? 'm2' }}">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Cantidad</label>
-            <input type="text" class="form-control" readonly value="{{ $presupuesto->cantidad ?? '0.00' }}">
-        </div>
-
-        <div class="mb-3">
-            <label class="form-label">Costo Directo</label>
-            <input type="text" class="form-control" readonly value="{{ $presupuesto->costo_directo ?? '0.00' }}">
-        </div>
-
-        <div class="mb-0">
-            <label class="form-label">Importe</label>
-            <input type="text" class="form-control" readonly value="{{ $presupuesto->importe ?? '0.00' }}">
-        </div>
-    </div>
+</div>
 @endsection

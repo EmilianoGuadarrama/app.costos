@@ -34,6 +34,10 @@
 
     <div class="dash-index-view">
         <div class="index-panel">
+            @if(session('success'))
+                <div class="alert alert-success" style="font-family:Arial,sans-serif;">{{ session('success') }}</div>
+            @endif
+
             <div class="header-section">
                 <div>
                     <h1>Unidad de Medida</h1>
@@ -41,11 +45,7 @@
                 </div>
 
                 <div class="header-actions">
-                    <button class="btn-filter" type="button">
-                        <i class="bi bi-funnel me-1"></i> Filtrar
-                    </button>
-
-                    <a href="{{ Route::has('unidad_medida.create') ? route('unidad_medida.create') : '#' }}" class="btn-add-new">
+                    <a href="{{ route('unidad_medida.create') }}" class="btn-add-new">
                         <i class="bi bi-plus-circle me-1"></i> Nueva Unidad
                     </a>
                 </div>
@@ -57,18 +57,17 @@
                     <tr>
                         <th style="width:34%;">Unidad</th>
                         <th>Descripción</th>
-                        <th>ID</th>
+                        <th>Abreviatura</th>
                         <th style="text-align:right;">Acciones</th>
                     </tr>
                     </thead>
                     <tbody>
-                    @forelse(($unidades ?? []) as $unidad)
-                        @php $unidadId = $unidad->id_unidad ?? $unidad->id ?? 1; @endphp
+                    @forelse($unidades as $unidad)
                         <tr class="project-row">
                             <td>
                                 <div class="title-main">
-                                    {{ $unidad->nombre ?? 'Unidad sin nombre' }}
-                                    <span class="badge-dark-mini">#{{ $unidadId }}</span>
+                                    {{ $unidad->nombre }}
+                                    <span class="badge-dark-mini">#{{ $unidad->id }}</span>
                                 </div>
                                 <div class="desc-text">Registro de catálogo para uso en conceptos, materiales y análisis.</div>
                             </td>
@@ -78,28 +77,19 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="badge-soft">ID {{ $unidadId }}</span>
+                                <span class="badge-soft">{{ $unidad->abreviatura }}</span>
                             </td>
                             <td class="action-cell">
-                                <a href="{{ Route::has('unidad_medida.show') ? route('unidad_medida.show', $unidadId) : '#' }}" class="btn-icon-action" title="Ver">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ Route::has('unidad_medida.edit') ? route('unidad_medida.edit', $unidadId) : '#' }}" class="btn-icon-action" title="Editar">
+                                <a href="{{ route('unidad_medida.edit', $unidad->id) }}" class="btn-icon-action" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                @if(Route::has('unidad_medida.destroy'))
-                                    <form action="{{ route('unidad_medida.destroy', $unidadId) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar esta unidad de medida?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon-action" title="Eliminar">
-                                            <i class="bi bi-trash3"></i>
-                                        </button>
-                                    </form>
-                                @else
-                                    <button type="button" class="btn-icon-action" title="Eliminar">
+                                <form action="{{ route('unidad_medida.destroy', $unidad->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar esta unidad de medida?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-icon-action" title="Eliminar">
                                         <i class="bi bi-trash3"></i>
                                     </button>
-                                @endif
+                                </form>
                             </td>
                         </tr>
                     @empty

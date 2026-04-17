@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnalisisPu;
 use App\Models\Concepto;
+use App\Models\Proyecto;
 use Illuminate\Http\Request;
 
 class AnalisisPuController extends Controller
@@ -13,8 +14,8 @@ class AnalisisPuController extends Controller
         $puItems = AnalisisPu::with([
             'concepto.unidadMedida',
             'materiales',
-            'manoObra',
-            'maquinaria',
+            'manoObras',
+            'maquinarias',
             'indirectos'
         ])->latest()->get();
 
@@ -24,19 +25,20 @@ class AnalisisPuController extends Controller
     public function create()
     {
         $conceptos = Concepto::with('unidadMedida')->orderBy('descripcion')->get();
-        return view('pu.create', compact('conceptos'));
+        $proyectos = Proyecto::orderBy('nombre')->get();
+        return view('pu.create', compact('conceptos', 'proyectos'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'concepto_id' => 'required|exists:conceptos,id|unique:analisis_pu,concepto_id',
-            'observaciones' => 'nullable|string',
+            'concepto_id' => 'required|exists:conceptos,id',
+            'proyecto_id' => 'required|exists:proyectos,id',
         ]);
 
         AnalisisPu::create($data);
 
-        return redirect()->route('pu.index')->with('success', 'Análisis P.U creado correctamente.');
+        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U creado correctamente.');
     }
 
     public function show($id)
@@ -44,8 +46,8 @@ class AnalisisPuController extends Controller
         $puItem = AnalisisPu::with([
             'concepto.unidadMedida',
             'materiales.material',
-            'manoObra.manoObra',
-            'maquinaria.maquinariaEquipo',
+            'manoObras.manoObra',
+            'maquinarias.maquinariaEquipo',
             'indirectos.indirecto'
         ])->findOrFail($id);
 
@@ -56,8 +58,9 @@ class AnalisisPuController extends Controller
     {
         $puItem = AnalisisPu::findOrFail($id);
         $conceptos = Concepto::with('unidadMedida')->orderBy('descripcion')->get();
+        $proyectos = Proyecto::orderBy('nombre')->get();
 
-        return view('pu.edit', compact('puItem', 'conceptos'));
+        return view('pu.edit', compact('puItem', 'conceptos', 'proyectos'));
     }
 
     public function update(Request $request, $id)
@@ -65,13 +68,13 @@ class AnalisisPuController extends Controller
         $puItem = AnalisisPu::findOrFail($id);
 
         $data = $request->validate([
-            'concepto_id' => 'required|exists:conceptos,id|unique:analisis_pu,concepto_id,' . $puItem->id,
-            'observaciones' => 'nullable|string',
+            'concepto_id' => 'required|exists:conceptos,id',
+            'proyecto_id' => 'required|exists:proyectos,id',
         ]);
 
         $puItem->update($data);
 
-        return redirect()->route('pu.index')->with('success', 'Análisis P.U actualizado correctamente.');
+        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U actualizado correctamente.');
     }
 
     public function destroy($id)
@@ -79,6 +82,6 @@ class AnalisisPuController extends Controller
         $puItem = AnalisisPu::findOrFail($id);
         $puItem->delete();
 
-        return redirect()->route('pu.index')->with('success', 'Análisis P.U eliminado correctamente.');
+        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U eliminado correctamente.');
     }
 }

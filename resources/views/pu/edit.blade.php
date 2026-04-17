@@ -1,171 +1,50 @@
 @extends('layout')
-
-@section('title','Editar P.U')
-
+@section('title','Editar Análisis P.U.')
 @section('content')
-    @php
-        $registro = $puItem ?? $item ?? null;
-    @endphp
-
-    <style>
-        .page-header{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            flex-wrap:wrap;
-            gap:16px;
-            margin-bottom:20px;
-        }
-
-        .page-title{
-            font-size:2rem;
-            font-weight:800;
-            color:#1f2937;
-            margin-bottom:4px;
-        }
-
-        .page-subtitle{
-            color:#6b7280;
-            margin:0;
-            font-size:.98rem;
-        }
-
-        .form-card{
-            max-width:1100px;
-            margin:0 auto;
-            background:#fff;
-            border:1px solid #e5e7eb;
-            border-radius:24px;
-            box-shadow:0 10px 30px rgba(0,0,0,.05);
-            padding:30px;
-        }
-
-        .section-title{
-            font-size:1.08rem;
-            font-weight:800;
-            color:#111827;
-            margin-bottom:18px;
-            padding-bottom:10px;
-            border-bottom:1px solid #e5e7eb;
-        }
-
-        .form-label{
-            font-weight:700;
-            color:#374151;
-            margin-bottom:8px;
-        }
-
-        .form-control{
-            border-radius:12px;
-            border:1px solid #d1d5db;
-            padding:.78rem .95rem;
-            box-shadow:none;
-        }
-
-        .form-control:focus{
-            border-color:#9ca3af;
-            box-shadow:0 0 0 .15rem rgba(107,114,128,.15);
-        }
-
-        .btn-back{
-            border-radius:12px;
-            padding:.65rem 1rem;
-            font-weight:600;
-        }
-
-        .btn-save{
-            border:none;
-            border-radius:12px;
-            padding:.80rem 1.25rem;
-            font-weight:700;
-            background:#6b7280;
-            color:#fff;
-        }
-
-        .btn-save:hover{
-            background:#4b5563;
-            color:#fff;
-        }
-
-        .btn-cancel{
-            border-radius:12px;
-            padding:.80rem 1.25rem;
-            font-weight:700;
-        }
-    </style>
-
-    <div class="page-header">
-        <div>
-            <h2 class="page-title">Editar P.U</h2>
-            <p class="page-subtitle">Modifica el análisis de precio unitario registrado.</p>
-        </div>
-
-        <a href="{{ route('pu') }}" class="btn btn-outline-secondary btn-back">
-            <i class="bi bi-arrow-left me-1"></i> Volver
-        </a>
-    </div>
-
-    <div class="form-card">
-        <form action="{{ Route::has('pu.update') ? route('pu.update', $registro->id_concepto ?? 1) : '#' }}" method="POST">
-            @csrf
-            @method('PUT')
-
-            <h5 class="section-title">Datos del Concepto</h5>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label">Código</label>
-                    <input type="text" name="codigo" class="form-control" value="{{ $registro->codigo ?? '12344' }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Unidad</label>
-                    <input type="text" name="unidad" class="form-control" value="{{ $registro->unidad ?? 'M' }}">
-                </div>
-
-                <div class="col-md-12">
-                    <label class="form-label">Descripción</label>
-                    <input type="text" name="descripcion" class="form-control" value="{{ $registro->descripcion ?? 'block' }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Precio Unitario</label>
-                    <input type="text" name="precio_unitario" class="form-control" value="{{ $registro->precio_unitario ?? '0.00' }}">
-                </div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .dash-form-view{ min-height:100%; background:#f8f8f8; font-family:"Arial",sans-serif; color:#111; padding:20px; }
+    .form-panel{ background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.05); max-width:600px; margin:0 auto; }
+    .header-section{ border-bottom:1px solid #eaeaea; padding-bottom:20px; margin-bottom:30px; }
+    .header-section h1{ font-size:1.8rem; font-weight:700; margin:0; font-family:"Garamond","Baskerville",serif; }
+    .form-group{ margin-bottom:20px; }
+    .form-group label{ display:block; margin-bottom:8px; font-weight:600; font-size:.9rem; color:#333; }
+    .form-control,.form-select{ width:100%; padding:10px 15px; border:1px solid #ccc; border-radius:6px; font-size:1rem; }
+    .btn-submit{ background:#111; color:#fff; border:none; padding:12px 25px; border-radius:6px; font-size:.9rem; font-weight:600; cursor:pointer; width:100%; }
+    .btn-submit:hover{ background:#333; }
+    .btn-back{ display:inline-block; margin-bottom:20px; color:#666; text-decoration:none; font-size:.9rem; }
+    .text-danger{ color:#dc3545; font-size:.85rem; margin-top:5px; display:block; }
+</style>
+<div class="dash-form-view">
+    <a href="{{ route('analisis_pu.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Volver</a>
+    <div class="form-panel">
+        <div class="header-section"><h1>Editar Análisis P.U.</h1></div>
+        <form action="{{ route('analisis_pu.update', $puItem) }}" method="POST">
+            @csrf @method('PUT')
+            <div class="form-group">
+                <label for="proyecto_id">Proyecto *</label>
+                <select id="proyecto_id" name="proyecto_id" class="form-select" required>
+                    <option value="">Seleccione un proyecto</option>
+                    @foreach($proyectos as $p)
+                        <option value="{{ $p->id }}" {{ old('proyecto_id', $puItem->proyecto_id) == $p->id ? 'selected' : '' }}>{{ $p->nombre }}</option>
+                    @endforeach
+                </select>
+                @error('proyecto_id') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
-
-            <h5 class="section-title">Desglose</h5>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label">Material Principal</label>
-                    <input type="text" name="material_principal" class="form-control" value="{{ $registro->material_principal ?? 'Material demo' }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Cantidad Material</label>
-                    <input type="text" name="cantidad_material" class="form-control" value="{{ $registro->cantidad_material ?? '1.00' }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Mano de Obra</label>
-                    <input type="text" name="mano_obra" class="form-control" value="{{ $registro->mano_obra ?? 'Operador demo' }}">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">Cantidad Mano de Obra</label>
-                    <input type="text" name="cantidad_mano_obra" class="form-control" value="{{ $registro->cantidad_mano_obra ?? '1.00' }}">
-                </div>
+            <div class="form-group">
+                <label for="concepto_id">Concepto *</label>
+                <select id="concepto_id" name="concepto_id" class="form-select" required>
+                    <option value="">Seleccione un concepto</option>
+                    @foreach($conceptos as $c)
+                        <option value="{{ $c->id }}" {{ old('concepto_id', $puItem->concepto_id) == $c->id ? 'selected' : '' }}>
+                            {{ $c->clave }} — {{ Str::limit($c->descripcion, 60) }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('concepto_id') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
-
-            <div class="d-flex justify-content-end gap-2">
-                <a href="{{ route('pu') }}" class="btn btn-outline-secondary btn-cancel">
-                    Cancelar
-                </a>
-                <button type="submit" class="btn btn-save">
-                    <i class="bi bi-save me-2"></i> Guardar Cambios
-                </button>
-            </div>
+            <button type="submit" class="btn-submit">Actualizar Análisis</button>
         </form>
     </div>
+</div>
 @endsection

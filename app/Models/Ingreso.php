@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Ingreso extends Model
+{
+    use HasFactory;
+
+    protected $table = 'ingresos';
+
+    protected $fillable = [
+        'proyecto_id',
+        'cliente_id',
+        'concepto',
+        'monto',
+        'fecha',
+        'comprobante',
+    ];
+
+    public function proyecto()
+    {
+        return $this->belongsTo(Proyecto::class);
+    }
+
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class);
+    }
+}

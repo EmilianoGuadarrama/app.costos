@@ -1,152 +1,31 @@
 @extends('layout')
-
-@section('title','Detalle P.U')
-
+@section('title','Detalle Análisis P.U.')
 @section('content')
-    @php
-        $registro = $puItem ?? $item ?? null;
-    @endphp
-
-    <style>
-        .page-header{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            flex-wrap:wrap;
-            gap:16px;
-            margin-bottom:20px;
-        }
-
-        .page-title{
-            font-size:2rem;
-            font-weight:800;
-            color:#1f2937;
-            margin-bottom:4px;
-        }
-
-        .page-subtitle{
-            color:#6b7280;
-            margin:0;
-            font-size:.98rem;
-        }
-
-        .detail-card{
-            max-width:1100px;
-            margin:0 auto;
-            background:#fff;
-            border:1px solid #e5e7eb;
-            border-radius:24px;
-            box-shadow:0 10px 30px rgba(0,0,0,.05);
-            padding:30px;
-        }
-
-        .section-title{
-            font-size:1.08rem;
-            font-weight:800;
-            color:#111827;
-            margin-bottom:18px;
-            padding-bottom:10px;
-            border-bottom:1px solid #e5e7eb;
-        }
-
-        .form-label{
-            font-weight:700;
-            color:#374151;
-            margin-bottom:8px;
-        }
-
-        .form-control[readonly]{
-            background:#f9fafb;
-            border:1px solid #d1d5db;
-            border-radius:12px;
-            padding:.78rem .95rem;
-            color:#374151;
-        }
-
-        .btn-back{
-            border-radius:12px;
-            padding:.65rem 1rem;
-            font-weight:600;
-        }
-
-        .btn-edit{
-            border:none;
-            border-radius:12px;
-            padding:.75rem 1.1rem;
-            font-weight:700;
-            background:#6b7280;
-            color:#fff;
-        }
-
-        .btn-edit:hover{
-            background:#4b5563;
-            color:#fff;
-        }
-    </style>
-
-    <div class="page-header">
-        <div>
-            <h2 class="page-title">Detalle P.U</h2>
-            <p class="page-subtitle">Consulta el análisis de precio unitario por concepto.</p>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .dash-form-view{ min-height:100%; background:#f8f8f8; font-family:"Arial",sans-serif; color:#111; padding:20px; }
+    .form-panel{ background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.05); max-width:800px; margin:0 auto; }
+    .header-section{ border-bottom:1px solid #eaeaea; padding-bottom:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; }
+    .header-section h1{ font-size:1.8rem; font-weight:700; margin:0; font-family:"Garamond","Baskerville",serif; }
+    .detail-row{ display:flex; padding:12px 0; border-bottom:1px solid #f0f0f0; }
+    .detail-label{ width:180px; font-weight:700; color:#555; font-size:.9rem; }
+    .detail-value{ flex:1; font-size:.95rem; }
+    .btn-back{ display:inline-block; margin-bottom:20px; color:#666; text-decoration:none; font-size:.9rem; }
+</style>
+<div class="dash-form-view">
+    <a href="{{ route('analisis_pu.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Volver</a>
+    <div class="form-panel">
+        <div class="header-section">
+            <h1>Análisis #{{ $puItem->id }}</h1>
+            <a href="{{ route('analisis_pu.edit', $puItem) }}" class="btn btn-sm btn-outline-dark"><i class="bi bi-pencil"></i> Editar</a>
         </div>
-
-        <div class="d-flex gap-2">
-            <a href="{{ route('pu') }}" class="btn btn-outline-secondary btn-back">
-                <i class="bi bi-arrow-left me-1"></i> Volver
-            </a>
-            <a href="{{ route('pu.edit', $registro->id_concepto ?? 1) }}" class="btn btn-edit">
-                <i class="bi bi-pencil-square me-1"></i> Editar
-            </a>
-        </div>
+        <div class="detail-row"><div class="detail-label">Concepto</div><div class="detail-value">{{ $puItem->concepto->clave ?? 'N/A' }} - {{ $puItem->concepto->descripcion ?? '' }}</div></div>
+        <div class="detail-row"><div class="detail-label">Unidad</div><div class="detail-value">{{ $puItem->concepto->unidadMedida->nombre ?? 'N/A' }}</div></div>
+        <div class="detail-row"><div class="detail-label">Materiales Asignados</div><div class="detail-value">{{ $puItem->materiales ? $puItem->materiales->count() : 0 }}</div></div>
+        <div class="detail-row"><div class="detail-label">Mano de Obra</div><div class="detail-value">{{ $puItem->manoObras ? $puItem->manoObras->count() : 0 }}</div></div>
+        <div class="detail-row"><div class="detail-label">Maquinaria</div><div class="detail-value">{{ $puItem->maquinarias ? $puItem->maquinarias->count() : 0 }}</div></div>
+        <div class="detail-row"><div class="detail-label">Indirectos</div><div class="detail-value">{{ $puItem->indirectos ? $puItem->indirectos->count() : 0 }}</div></div>
+        <div class="detail-row"><div class="detail-label">Creado</div><div class="detail-value">{{ $puItem->created_at?->format('d/m/Y H:i') ?? '—' }}</div></div>
     </div>
-
-    <div class="detail-card">
-        <h5 class="section-title">Datos del Concepto</h5>
-
-        <div class="row g-3 mb-4">
-            <div class="col-md-6">
-                <label class="form-label">Código</label>
-                <input type="text" class="form-control" readonly value="{{ $registro->codigo ?? '12344' }}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Unidad</label>
-                <input type="text" class="form-control" readonly value="{{ $registro->unidad ?? 'M' }}">
-            </div>
-
-            <div class="col-md-12">
-                <label class="form-label">Descripción</label>
-                <input type="text" class="form-control" readonly value="{{ $registro->descripcion ?? 'block' }}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Precio Unitario</label>
-                <input type="text" class="form-control" readonly value="{{ $registro->precio_unitario ?? '0.00' }}">
-            </div>
-        </div>
-
-        <h5 class="section-title">Desglose</h5>
-
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Material Principal</label>
-                <input type="text" class="form-control" readonly value="{{ $registro->material_principal ?? 'Material demo' }}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Cantidad Material</label>
-                <input type="text" class="form-control" readonly value="{{ $registro->cantidad_material ?? '1.00' }}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Mano de Obra</label>
-                <input type="text" class="form-control" readonly value="{{ $registro->mano_obra ?? 'Operador demo' }}">
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">Cantidad Mano de Obra</label>
-                <input type="text" class="form-control" readonly value="{{ $registro->cantidad_mano_obra ?? '1.00' }}">
-            </div>
-        </div>
-    </div>
+</div>
 @endsection

@@ -94,7 +94,7 @@
         </div>
 
         <div class="d-flex gap-2">
-            <a href="{{ route('proyectos') }}" class="btn btn-outline-secondary btn-back">
+            <a href="{{ route('proyectos.index') }}" class="btn btn-outline-secondary btn-back">
                 <i class="bi bi-arrow-left me-1"></i> Volver
             </a>
             <a href="{{ route('proyectos.edit', $proyecto->id ?? 1) }}" class="btn btn-edit">

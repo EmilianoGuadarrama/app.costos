@@ -1,60 +1,31 @@
 @extends('layout')
-
 @section('title','Detalle del Concepto')
-
 @section('content')
-    <style>
-        .page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px}
-        .page-title{font-size:2rem;font-weight:800;color:#1f2937;margin:0 0 4px}
-        .page-subtitle{color:#6b7280;margin:0;font-size:.98rem}
-        .detail-card{max-width:950px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.05);padding:30px}
-        .form-grid{max-width:680px;margin:0 auto}
-        .form-label{font-weight:700;color:#374151;margin-bottom:8px}
-        .form-control[readonly]{background:#f9fafb;border:1px solid #d1d5db;border-radius:12px;padding:.78rem .95rem;color:#374151}
-        .btn-back{border-radius:12px;padding:.65rem 1rem;font-weight:600}
-        .btn-edit{border:none;border-radius:12px;padding:.75rem 1.1rem;font-weight:700;background:#6b7280;color:#fff}
-        .btn-edit:hover{background:#4b5563;color:#fff}
-    </style>
-
-    @php
-        $campos = [
-            ['label' => 'Clave', 'value' => $concepto->codigo ?? 'C-001'],
-            ['label' => 'Partida', 'value' => $concepto->partida ?? 'PART-01'],
-            ['label' => 'Subpartida', 'value' => $concepto->subpartida ?? 'SUB-01'],
-            ['label' => 'Descripción', 'value' => $concepto->descripcion ?? 'Concepto demo'],
-            ['label' => 'Unidad', 'value' => $concepto->unidad ?? 'M2'],
-            ['label' => 'Cantidad', 'value' => $concepto->cantidad ?? '10'],
-            ['label' => 'PU', 'value' => $concepto->pu ?? '0.00'],
-            ['label' => 'Importe', 'value' => $concepto->importe ?? '0.00'],
-        ];
-    @endphp
-
-    <div class="page-header">
-        <div>
-            <h2 class="page-title">Detalle del Concepto</h2>
-            <p class="page-subtitle">Consulta la información general registrada del concepto.</p>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+    .dash-form-view{ min-height:100%; background:#f8f8f8; font-family:"Arial",sans-serif; color:#111; padding:20px; }
+    .form-panel{ background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.05); max-width:700px; margin:0 auto; }
+    .header-section{ border-bottom:1px solid #eaeaea; padding-bottom:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; }
+    .header-section h1{ font-size:1.8rem; font-weight:700; margin:0; font-family:"Garamond","Baskerville",serif; }
+    .detail-row{ display:flex; padding:12px 0; border-bottom:1px solid #f0f0f0; }
+    .detail-label{ width:180px; font-weight:700; color:#555; font-size:.9rem; }
+    .detail-value{ flex:1; font-size:.95rem; }
+    .btn-back{ display:inline-block; margin-bottom:20px; color:#666; text-decoration:none; font-size:.9rem; }
+</style>
+<div class="dash-form-view">
+    <a href="{{ route('conceptos.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Volver</a>
+    <div class="form-panel">
+        <div class="header-section">
+            <h1>Concepto {{ $concepto->clave }}</h1>
+            <a href="{{ route('conceptos.edit', $concepto) }}" class="btn btn-sm btn-outline-dark"><i class="bi bi-pencil"></i> Editar</a>
         </div>
-
-        <div class="d-flex gap-2">
-            <a href="{{ route('conceptos') }}" class="btn btn-outline-secondary btn-back">
-                <i class="bi bi-arrow-left me-1"></i> Volver
-            </a>
-            <a href="{{ Route::has('conceptos.edit') ? route('conceptos.edit', $concepto->id ?? 1) : '#' }}" class="btn btn-edit">
-                <i class="bi bi-pencil-square me-1"></i> Editar
-            </a>
-        </div>
+        <div class="detail-row"><div class="detail-label">Clave</div><div class="detail-value">{{ $concepto->clave }}</div></div>
+        <div class="detail-row"><div class="detail-label">Área</div><div class="detail-value">{{ $concepto->area->nombre ?? 'N/A' }}</div></div>
+        <div class="detail-row"><div class="detail-label">Partida</div><div class="detail-value">{{ $concepto->partida ?? '—' }}</div></div>
+        <div class="detail-row"><div class="detail-label">Subpartida</div><div class="detail-value">{{ $concepto->subpartida ?? '—' }}</div></div>
+        <div class="detail-row"><div class="detail-label">Descripción</div><div class="detail-value">{{ $concepto->descripcion }}</div></div>
+        <div class="detail-row"><div class="detail-label">Unidad</div><div class="detail-value">{{ $concepto->unidadMedida->nombre ?? 'N/A' }} ({{ $concepto->unidadMedida->abreviatura ?? '' }})</div></div>
+        <div class="detail-row"><div class="detail-label">Creado</div><div class="detail-value">{{ $concepto->created_at?->format('d/m/Y H:i') ?? '—' }}</div></div>
     </div>
-
-    <div class="detail-card">
-        <div class="form-grid">
-            @foreach($campos as $campo)
-                <div class="row mb-3 align-items-center">
-                    <label class="col-md-4 form-label">{{ $campo['label'] }}</label>
-                    <div class="col-md-8">
-                        <input type="text" class="form-control" readonly value="{{ $campo['value'] }}">
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
+</div>
 @endsection

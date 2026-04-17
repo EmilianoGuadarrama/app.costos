@@ -2,22 +2,28 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Generador extends Model
 {
+    use HasFactory;
+
     protected $table = 'generadores';
-    protected $primaryKey = 'id_generador';
 
     protected $fillable = [
-        'concepto',
-        'unidad',
+        'concepto_id',
         'localizacion',
         'ejes',
         'no_piezas',
-        'ancho',
         'largo',
+        'ancho',
         'alto',
         'resultado',
     ];
+
+    public function concepto()
+    {
+        return $this->belongsTo(Concepto::class);
+    }
 }

@@ -10,20 +10,22 @@ class ConceptoController extends Controller
 {
     public function index()
     {
-        $conceptos = Concepto::with('unidadMedida')->latest()->get();
+        $conceptos = Concepto::with(['unidadMedida', 'area'])->latest()->get();
         return view('conceptos.index', compact('conceptos'));
     }
 
     public function create()
     {
         $unidades = UnidadMedida::orderBy('nombre')->get();
-        return view('conceptos.create', compact('unidades'));
+        $areas = \App\Models\Area::orderBy('nombre')->get();
+        return view('conceptos.create', compact('unidades', 'areas'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'clave' => 'required|string|max:50|unique:conceptos,clave',
+            'area_id' => 'nullable|exists:areas,id',
             'partida' => 'nullable|string|max:100',
             'subpartida' => 'nullable|string|max:100',
             'descripcion' => 'required|string|max:255',
@@ -37,7 +39,7 @@ class ConceptoController extends Controller
 
     public function show($id)
     {
-        $concepto = Concepto::with('unidadMedida')->findOrFail($id);
+        $concepto = Concepto::with(['unidadMedida', 'area'])->findOrFail($id);
         return view('conceptos.show', compact('concepto'));
     }
 
@@ -45,8 +47,9 @@ class ConceptoController extends Controller
     {
         $concepto = Concepto::findOrFail($id);
         $unidades = UnidadMedida::orderBy('nombre')->get();
+        $areas = \App\Models\Area::orderBy('nombre')->get();
 
-        return view('conceptos.edit', compact('concepto', 'unidades'));
+        return view('conceptos.edit', compact('concepto', 'unidades', 'areas'));
     }
 
     public function update(Request $request, $id)
@@ -55,6 +58,7 @@ class ConceptoController extends Controller
 
         $data = $request->validate([
             'clave' => 'required|string|max:50|unique:conceptos,clave,' . $concepto->id,
+            'area_id' => 'nullable|exists:areas,id',
             'partida' => 'nullable|string|max:100',
             'subpartida' => 'nullable|string|max:100',
             'descripcion' => 'required|string|max:255',

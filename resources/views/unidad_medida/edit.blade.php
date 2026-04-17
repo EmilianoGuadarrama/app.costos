@@ -107,20 +107,28 @@
     </div>
 
     <div class="form-card">
-        <form class="form-wrapper" method="POST" action="{{ route('unidad_medida.update', $unidad->id_unidad) }}">
+        <form class="form-wrapper" method="POST" action="{{ route('unidad_medida.update', $unidad->id) }}">
             @csrf
             @method('PUT')
 
             <h5 class="section-title">Datos de la Unidad</h5>
 
             <div class="mb-3">
-                <label class="form-label">Nombre</label>
-                <input type="text" name="nombre" class="form-control" value="{{ $unidad->nombre }}" required>
+                <label class="form-label">Nombre *</label>
+                <input type="text" name="nombre" class="form-control" value="{{ old('nombre', $unidad->nombre) }}" required maxlength="100">
+                @error('nombre') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Abreviatura *</label>
+                <input type="text" name="abreviatura" class="form-control" value="{{ old('abreviatura', $unidad->abreviatura) }}" required maxlength="20">
+                @error('abreviatura') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-4">
                 <label class="form-label">Descripción</label>
-                <input type="text" name="descripcion" class="form-control" value="{{ $unidad->descripcion }}">
+                <input type="text" name="descripcion" class="form-control" value="{{ old('descripcion', $unidad->descripcion) }}" maxlength="180">
+                @error('descripcion') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
             </div>
 
             <div class="d-flex justify-content-end gap-2">

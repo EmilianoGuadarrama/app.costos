@@ -113,13 +113,21 @@
             <h5 class="section-title">Datos de la Unidad</h5>
 
             <div class="mb-3">
-                <label class="form-label">Nombre</label>
-                <input name="nombre" type="text" class="form-control" placeholder="Ej. metro, kilogramo, pieza" required>
+                <label class="form-label">Nombre *</label>
+                <input name="nombre" type="text" class="form-control" placeholder="Ej. Metro cuadrado, Pieza" value="{{ old('nombre') }}" required maxlength="100">
+                @error('nombre') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Abreviatura *</label>
+                <input name="abreviatura" type="text" class="form-control" placeholder="Ej. m2, pza" value="{{ old('abreviatura') }}" required maxlength="20">
+                @error('abreviatura') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-4">
                 <label class="form-label">Descripción</label>
-                <input name="descripcion" type="text" class="form-control" placeholder="Descripción breve de la unidad">
+                <input name="descripcion" type="text" class="form-control" placeholder="Descripción breve de la unidad" value="{{ old('descripcion') }}" maxlength="180">
+                @error('descripcion') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
             </div>
 
             <div class="d-flex justify-content-end gap-2">

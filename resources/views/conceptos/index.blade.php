@@ -34,6 +34,9 @@
 
     <div class="dash-index-view">
         <div class="index-panel">
+            @if(session('success'))
+                <div class="alert alert-success" style="font-family:Arial,sans-serif;">{{ session('success') }}</div>
+            @endif
             <div class="header-section">
                 <div>
                     <h1>Conceptos</h1>
@@ -45,7 +48,7 @@
                         <i class="bi bi-funnel me-1"></i> Filtrar
                     </button>
 
-                    <a href="{{ Route::has('conceptos.create') ? route('conceptos.create') : '#' }}" class="btn-add-new">
+                    <a href="{{ route('conceptos.create') }}" class="btn-add-new">
                         <i class="bi bi-plus-circle me-1"></i> Nuevo Concepto
                     </a>
                 </div>
@@ -62,13 +65,12 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @forelse(($conceptos ?? []) as $concepto)
-                        @php $conceptoId = $concepto->id ?? $concepto->id_concepto ?? 1; @endphp
+                    @forelse($conceptos as $concepto)
                         <tr class="project-row">
                             <td>
                                 <div class="title-main">
-                                    {{ $concepto->descripcion ?? 'Concepto sin descripción' }}
-                                    <span class="badge-dark-mini">{{ $concepto->codigo ?? $concepto->clave ?? 'SIN-COD' }}</span>
+                                    {{ $concepto->descripcion }}
+                                    <span class="badge-dark-mini">{{ $concepto->clave }}</span>
                                 </div>
                                 <div class="desc-text">
                                     Partida: {{ $concepto->partida ?? 'N/D' }} ·
@@ -77,35 +79,26 @@
                             </td>
                             <td>
                                 <div class="info-stack">
-                                    <div><strong>Unidad:</strong> {{ $concepto->unidad ?? data_get($concepto, 'unidadMedida.abreviatura') ?? 'N/D' }}</div>
-                                    <div><strong>Cantidad:</strong> {{ $concepto->cantidad ?? '0' }}</div>
-                                    <div><strong>P.U:</strong> {{ $concepto->pu ?? '0.00' }}</div>
-                                    <div><strong>Importe:</strong> {{ $concepto->importe ?? '0.00' }}</div>
+                                    <div><strong>Unidad:</strong> {{ optional($concepto->unidadMedida)->abreviatura ?? 'N/D' }}</div>
                                 </div>
                             </td>
                             <td>
-                                <span class="badge-soft">{{ $concepto->partida ?? 'General' }}</span>
+                                <span class="badge-soft">{{ optional($concepto->area)->nombre ?? 'Sin Área' }}</span>
                             </td>
                             <td class="action-cell">
-                                <a href="{{ Route::has('conceptos.show') ? route('conceptos.show', $conceptoId) : '#' }}" class="btn-icon-action" title="Ver">
+                                <a href="{{ route('conceptos.show', $concepto->id) }}" class="btn-icon-action" title="Ver">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ Route::has('conceptos.edit') ? route('conceptos.edit', $conceptoId) : '#' }}" class="btn-icon-action" title="Editar">
+                                <a href="{{ route('conceptos.edit', $concepto->id) }}" class="btn-icon-action" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                @if(Route::has('conceptos.destroy'))
-                                    <form action="{{ route('conceptos.destroy', $conceptoId) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este concepto?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-icon-action" title="Eliminar">
-                                            <i class="bi bi-trash3"></i>
-                                        </button>
-                                    </form>
-                                @else
-                                    <button type="button" class="btn-icon-action" title="Eliminar">
+                                <form action="{{ route('conceptos.destroy', $concepto->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este concepto?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-icon-action" title="Eliminar">
                                         <i class="bi bi-trash3"></i>
                                     </button>
-                                @endif
+                                </form>
                             </td>
                         </tr>
                     @empty

@@ -85,11 +85,12 @@
             gap:14px;
             background:transparent;
             border-radius:12px;
-            padding:14px 16px;
+            padding:12px 16px;
             transition:all .25s ease;
             font-weight:500;
             text-decoration:none;
-            font-size:0.95rem;
+            font-size:0.92rem;
+            cursor: pointer;
         }
 
         .sidebar .nav-link i{
@@ -109,6 +110,41 @@
         .sidebar .nav-link:hover i,
         .sidebar .nav-link.active i{
             color:#fff;
+        }
+
+        /* Dropdown custom styles */
+        .sidebar .dropdown-toggle::after {
+            display: inline-block;
+            margin-left: auto;
+            vertical-align: middle;
+            content: "";
+            border-top: 0.3em solid;
+            border-right: 0.3em solid transparent;
+            border-bottom: 0;
+            border-left: 0.3em solid transparent;
+            transition: transform .25s ease;
+        }
+        .sidebar .dropdown-toggle[aria-expanded="true"]::after {
+            transform: rotate(180deg);
+        }
+
+        .submenu {
+            list-style: none;
+            padding: 0 0 0 15px;
+            margin: 5px 0 10px 0;
+            border-left: 1px solid #333;
+        }
+
+        .submenu .nav-link {
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            color: #aaa;
+        }
+
+        .submenu .nav-link:hover,
+        .submenu .nav-link.active {
+            color: #fff;
+            background-color: transparent;
         }
 
         .sidebar .footer-text{
@@ -175,84 +211,81 @@
                     </a>
                 </li>
 
+                {{-- GESTION TECNICA --}}
                 <li class="nav-item">
-                    <a href="{{ route('proyectos') }}" class="nav-link {{ request()->routeIs('proyectos*') ? 'active' : '' }}">
-                        <i class="fas fa-folder"></i>
-                        <span>Proyectos</span>
+                    @php $isTecnica = request()->routeIs(['proyectos*', 'conceptos*', 'generadores*', 'analisis_pu*', 'presupuestos*', 'reportes*']); @endphp
+                    <a class="nav-link dropdown-toggle {{ $isTecnica ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#menuTecnica" aria-expanded="{{ $isTecnica ? 'true' : 'false' }}">
+                        <i class="fas fa-gear"></i>
+                        <span>Gestión Técnica</span>
                     </a>
+                    <div class="collapse {{ $isTecnica ? 'show' : '' }}" id="menuTecnica">
+                        <ul class="submenu">
+                            <li><a href="{{ route('proyectos.index') }}" class="nav-link {{ request()->routeIs('proyectos*') ? 'active' : '' }}">Proyectos</a></li>
+                            <li><a href="{{ route('conceptos.index') }}" class="nav-link {{ request()->routeIs('conceptos*') ? 'active' : '' }}">Conceptos</a></li>
+                            <li><a href="{{ route('generadores.index') }}" class="nav-link {{ request()->routeIs('generadores*') ? 'active' : '' }}">Generadores</a></li>
+                            <li><a href="{{ route('analisis_pu.index') }}" class="nav-link {{ request()->routeIs('analisis_pu*') ? 'active' : '' }}">P.U</a></li>
+                            <li><a href="{{ route('presupuestos.index') }}" class="nav-link {{ request()->routeIs('presupuestos*') ? 'active' : '' }}">Presupuesto</a></li>
+                            <li><a href="{{ route('reportes.index') }}" class="nav-link {{ request()->routeIs('reportes*') ? 'active' : '' }}">Reportes</a></li>
+                        </ul>
+                    </div>
                 </li>
 
+                {{-- RECURSOS --}}
                 <li class="nav-item">
-                    <a href="{{ route('unidad_medida') }}" class="nav-link {{ request()->routeIs('unidad_medida*') ? 'active' : '' }}">
-                        <i class="fas fa-ruler-combined"></i>
-                        <span>Unidad de Medida</span>
+                    @php $isRecursos = request()->routeIs(['materiales*', 'mano_obra*', 'maquinaria_equipo*', 'indirectos*', 'unidad_medida*', 'areas*']); @endphp
+                    <a class="nav-link dropdown-toggle {{ $isRecursos ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#menuRecursos" aria-expanded="{{ $isRecursos ? 'true' : 'false' }}">
+                        <i class="fas fa-boxes-stacked"></i>
+                        <span>Recursos</span>
                     </a>
+                    <div class="collapse {{ $isRecursos ? 'show' : '' }}" id="menuRecursos">
+                        <ul class="submenu">
+                            <li><a href="{{ route('materiales.index') }}" class="nav-link {{ request()->routeIs('materiales*') ? 'active' : '' }}">Materiales</a></li>
+                            <li><a href="{{ route('mano_obra.index') }}" class="nav-link {{ request()->routeIs('mano_obra*') ? 'active' : '' }}">Mano de Obra</a></li>
+                            <li><a href="{{ route('maquinaria_equipo.index') }}" class="nav-link {{ request()->routeIs('maquinaria_equipo*') ? 'active' : '' }}">Maquinaria</a></li>
+                            <li><a href="{{ route('indirectos.index') }}" class="nav-link {{ request()->routeIs('indirectos*') ? 'active' : '' }}">Indirectos</a></li>
+                            <li><a href="{{ route('unidad_medida.index') }}" class="nav-link {{ request()->routeIs('unidad_medida*') ? 'active' : '' }}">Unidades</a></li>
+                            <li><a href="{{ route('areas.index') }}" class="nav-link {{ request()->routeIs('areas*') ? 'active' : '' }}">Áreas</a></li>
+                        </ul>
+                    </div>
                 </li>
 
+                {{-- ADMINISTRACION --}}
                 <li class="nav-item">
-                    <a href="{{ route('conceptos') }}" class="nav-link {{ request()->routeIs('conceptos*') ? 'active' : '' }}">
-                        <i class="fas fa-diagram-project"></i>
-                        <span>Conceptos</span>
+                    @php $isAdmin = request()->routeIs(['clientes*', 'empresas*', 'proveedores*', 'responsables_tecnicos*', 'estados_proyecto*']); @endphp
+                    <a class="nav-link dropdown-toggle {{ $isAdmin ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#menuAdmin" aria-expanded="{{ $isAdmin ? 'true' : 'false' }}">
+                        <i class="fas fa-id-card"></i>
+                        <span>Administración</span>
                     </a>
+                    <div class="collapse {{ $isAdmin ? 'show' : '' }}" id="menuAdmin">
+                        <ul class="submenu">
+                            <li><a href="{{ route('clientes.index') }}" class="nav-link {{ request()->routeIs('clientes*') ? 'active' : '' }}">Clientes</a></li>
+                            <li><a href="{{ route('empresas.index') }}" class="nav-link {{ request()->routeIs('empresas*') ? 'active' : '' }}">Empresas</a></li>
+                            <li><a href="{{ route('proveedores.index') }}" class="nav-link {{ request()->routeIs('proveedores*') ? 'active' : '' }}">Proveedores</a></li>
+                            <li><a href="{{ route('responsables_tecnicos.index') }}" class="nav-link {{ request()->routeIs('responsables_tecnicos*') ? 'active' : '' }}">Responsables</a></li>
+                            <li><a href="{{ route('estados_proyecto.index') }}" class="nav-link {{ request()->routeIs('estados_proyecto*') ? 'active' : '' }}">Estados</a></li>
+                        </ul>
+                    </div>
                 </li>
 
+                {{-- FINANZAS --}}
                 <li class="nav-item">
-                    <a href="{{ route('generadores') }}" class="nav-link {{ request()->routeIs('generadores*') ? 'active' : '' }}">
-                        <i class="fas fa-calculator"></i>
-                        <span>Generadores</span>
+                    @php $isFinanzas = request()->routeIs(['cajas_chicas*', 'ingresos*', 'egresos*', 'categorias_egreso*', 'compras*']); @endphp
+                    <a class="nav-link dropdown-toggle {{ $isFinanzas ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#menuFinanzas" aria-expanded="{{ $isFinanzas ? 'true' : 'false' }}">
+                        <i class="fas fa-coins"></i>
+                        <span>Finanzas</span>
                     </a>
+                    <div class="collapse {{ $isFinanzas ? 'show' : '' }}" id="menuFinanzas">
+                        <ul class="submenu">
+                            <li><a href="{{ route('cajas_chicas.index') }}" class="nav-link {{ request()->routeIs('cajas_chicas*') ? 'active' : '' }}">Cajas Chicas</a></li>
+                            <li><a href="{{ route('ingresos.index') }}" class="nav-link {{ request()->routeIs('ingresos*') ? 'active' : '' }}">Ingresos</a></li>
+                            <li><a href="{{ route('egresos.index') }}" class="nav-link {{ request()->routeIs('egresos*') ? 'active' : '' }}">Egresos</a></li>
+                            <li><a href="{{ route('categorias_egreso.index') }}" class="nav-link {{ request()->routeIs('categorias_egreso*') ? 'active' : '' }}">Cat. Egresos</a></li>
+                            <li><a href="{{ route('compras.index') }}" class="nav-link {{ request()->routeIs('compras*') ? 'active' : '' }}">Compras</a></li>
+                        </ul>
+                    </div>
                 </li>
 
-                <li class="nav-item">
-                    <a href="{{ route('materiales') }}" class="nav-link {{ request()->routeIs('materiales*') ? 'active' : '' }}">
-                        <i class="fas fa-cubes"></i>
-                        <span>Materiales</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('mano_obra') }}" class="nav-link {{ request()->routeIs('mano_obra*') ? 'active' : '' }}">
-                        <i class="fas fa-users"></i>
-                        <span>Mano de Obra</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('maquinaria_equipo') }}" class="nav-link {{ request()->routeIs('maquinaria_equipo*') ? 'active' : '' }}">
-                        <i class="fas fa-tractor"></i>
-                        <span>Maquinaria y Equipo</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('indirectos') }}" class="nav-link {{ request()->routeIs('indirectos*') ? 'active' : '' }}">
-                        <i class="fas fa-percent"></i>
-                        <span>Indirectos</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('pu') }}" class="nav-link {{ request()->routeIs('pu*') ? 'active' : '' }}">
-                        <i class="fas fa-file-invoice-dollar"></i>
-                        <span>P.U</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('presupuesto') }}" class="nav-link {{ request()->routeIs('presupuesto*') ? 'active' : '' }}">
-                        <i class="fas fa-wallet"></i>
-                        <span>Presupuesto</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('reportes') }}" class="nav-link {{ request()->routeIs('reportes*') ? 'active' : '' }}">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Reportes</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
+                <li class="nav-item" style="margin-top: 20px;">
                     <a href="{{ route('inicio') }}" class="nav-link">
                         <i class="fas fa-right-from-bracket"></i>
                         <span>Salir</span>

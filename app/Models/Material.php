@@ -14,12 +14,13 @@ class Material extends Model
     protected $fillable = [
         'clave',
         'descripcion',
+        'marca',
         'unidad_medida_id',
         'precio_unitario',
     ];
 
     public function unidadMedida()
     {
-        return $this->belongsTo(UnidadMedida::class);
+        return $this->belongsTo(UnidadMedida::class, 'unidad_medida_id');
     }
 }

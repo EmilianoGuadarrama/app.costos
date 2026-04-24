@@ -1,7 +1,9 @@
 @extends('layout')
 @section('title','Nuevo Material')
+
 @section('content')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 <style>
     .dash-form-view{ min-height:100%; background:#f8f8f8; font-family:"Arial",sans-serif; color:#111; padding:20px; }
     .form-panel{ background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.05); max-width:600px; margin:0 auto; }
@@ -15,42 +17,55 @@
     .btn-back{ display:inline-block; margin-bottom:20px; color:#666; text-decoration:none; font-size:.9rem; }
     .text-danger{ color:#dc3545; font-size:.85rem; margin-top:5px; display:block; }
 </style>
+
 <div class="dash-form-view">
     <a href="{{ route('materiales.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Volver</a>
+
     <div class="form-panel">
-        <div class="header-section"><h1>Nuevo Material</h1></div>
+        <div class="header-section">
+            <h1>Nuevo Material</h1>
+        </div>
+
         <form action="{{ route('materiales.store') }}" method="POST">
             @csrf
+
             <div class="form-group">
                 <label for="clave">Clave *</label>
                 <input type="text" id="clave" name="clave" class="form-control" value="{{ old('clave') }}" required maxlength="50">
                 @error('clave') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
+
             <div class="form-group">
-                <label for="nombre">Nombre *</label>
-                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ old('nombre') }}" required maxlength="150">
-                @error('nombre') <span class="text-danger">{{ $message }}</span> @enderror
+                <label for="descripcion">Descripción *</label>
+                <input type="text" id="descripcion" name="descripcion" class="form-control" value="{{ old('descripcion') }}" required maxlength="150">
+                @error('descripcion') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
+
             <div class="form-group">
-                <label for="marca">Marca</label>
-                <input type="text" id="marca" name="marca" class="form-control" value="{{ old('marca') }}" maxlength="120">
+                <label for="marca">Marca *</label>
+                <input type="text" id="marca" name="marca" class="form-control" value="{{ old('marca') }}" required maxlength="120">
                 @error('marca') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
+
             <div class="form-group">
                 <label for="unidad_medida_id">Unidad de Medida *</label>
                 <select id="unidad_medida_id" name="unidad_medida_id" class="form-select" required>
                     <option value="">Seleccione</option>
                     @foreach($unidades as $u)
-                        <option value="{{ $u->id }}" {{ old('unidad_medida_id') == $u->id ? 'selected' : '' }}>{{ $u->nombre }} ({{ $u->abreviatura }})</option>
+                        <option value="{{ $u->id }}" {{ old('unidad_medida_id') == $u->id ? 'selected' : '' }}>
+                            {{ $u->nombre }} ({{ $u->abreviatura }})
+                        </option>
                     @endforeach
                 </select>
                 @error('unidad_medida_id') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
+
             <div class="form-group">
                 <label for="precio_unitario">Precio Unitario *</label>
                 <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" class="form-control" value="{{ old('precio_unitario', 0) }}" required>
                 @error('precio_unitario') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
+
             <button type="submit" class="btn-submit">Guardar</button>
         </form>
     </div>

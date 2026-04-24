@@ -12,6 +12,7 @@ class Indirecto extends Model
     protected $table = 'indirectos';
 
     protected $fillable = [
+        'clave',
         'concepto',
         'porcentaje',
         'descripcion',

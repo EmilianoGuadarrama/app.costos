@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Material;
 use App\Models\UnidadMedida;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MaterialController extends Controller
 {
@@ -22,12 +23,24 @@ class MaterialController extends Controller
 
     public function store(Request $request)
     {
+        $tablaUnidadMedida = (new UnidadMedida())->getTable();
+
         $data = $request->validate([
             'clave' => 'required|string|max:50|unique:materiales,clave',
-            'nombre' => 'required|string|max:150',
-            'marca' => 'nullable|string|max:120',
-            'unidad_medida_id' => 'required|exists:unidades_medida,id',
+            'descripcion' => 'required|string|max:150',
+            'marca' => 'required|string|max:120',
+            'unidad_medida_id' => ['required', Rule::exists($tablaUnidadMedida, 'id')],
             'precio_unitario' => 'required|numeric|min:0',
+        ], [
+            'clave.required' => 'La clave es obligatoria.',
+            'clave.unique' => 'La clave ya está registrada.',
+            'descripcion.required' => 'La descripción es obligatoria.',
+            'marca.required' => 'La marca es obligatoria.',
+            'unidad_medida_id.required' => 'La unidad de medida es obligatoria.',
+            'unidad_medida_id.exists' => 'La unidad de medida seleccionada no es válida.',
+            'precio_unitario.required' => 'El precio unitario es obligatorio.',
+            'precio_unitario.numeric' => 'El precio unitario debe ser numérico.',
+            'precio_unitario.min' => 'El precio unitario no puede ser negativo.',
         ]);
 
         Material::create($data);
@@ -45,20 +58,30 @@ class MaterialController extends Controller
     {
         $material = Material::findOrFail($id);
         $unidades = UnidadMedida::orderBy('nombre')->get();
-
         return view('materiales.edit', compact('material', 'unidades'));
     }
 
     public function update(Request $request, $id)
     {
         $material = Material::findOrFail($id);
+        $tablaUnidadMedida = (new UnidadMedida())->getTable();
 
         $data = $request->validate([
             'clave' => 'required|string|max:50|unique:materiales,clave,' . $material->id,
-            'nombre' => 'required|string|max:150',
-            'marca' => 'nullable|string|max:120',
-            'unidad_medida_id' => 'required|exists:unidades_medida,id',
+            'descripcion' => 'required|string|max:150',
+            'marca' => 'required|string|max:120',
+            'unidad_medida_id' => ['required', Rule::exists($tablaUnidadMedida, 'id')],
             'precio_unitario' => 'required|numeric|min:0',
+        ], [
+            'clave.required' => 'La clave es obligatoria.',
+            'clave.unique' => 'La clave ya está registrada.',
+            'descripcion.required' => 'La descripción es obligatoria.',
+            'marca.required' => 'La marca es obligatoria.',
+            'unidad_medida_id.required' => 'La unidad de medida es obligatoria.',
+            'unidad_medida_id.exists' => 'La unidad de medida seleccionada no es válida.',
+            'precio_unitario.required' => 'El precio unitario es obligatorio.',
+            'precio_unitario.numeric' => 'El precio unitario debe ser numérico.',
+            'precio_unitario.min' => 'El precio unitario no puede ser negativo.',
         ]);
 
         $material->update($data);

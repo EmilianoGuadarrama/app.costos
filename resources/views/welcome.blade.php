@@ -111,40 +111,75 @@
     </div>
 
     <div class="form-card">
-        <form action="#" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('proyectos.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+
+            @if ($errors->any())
+                <div class="alert alert-danger rounded-4 mb-4">
+                    <strong>Corrige los siguientes errores:</strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @error('general')
+                <div class="alert alert-danger rounded-4 mb-4">
+                    {{ $message }}
+                </div>
+            @enderror
 
             <h5 class="section-title">Datos del Cliente</h5>
 
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
-                    <label class="form-label">Nombre</label>
-                    <input type="text" name="cliente_nombre" class="form-control" placeholder="Ingresa el nombre del cliente">
+                    <label for="cliente_nombre" class="form-label">Nombre</label>
+                    <input type="text" name="cliente_nombre" id="cliente_nombre" class="form-control @error('cliente_nombre') is-invalid @enderror" placeholder="Ingresa el nombre del cliente" value="{{ old('cliente_nombre') }}">
+                    @error('cliente_nombre')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Razón Social</label>
-                    <input type="text" name="cliente_razon_social" class="form-control" placeholder="Ingresa la razón social">
+                    <label for="cliente_razon_social" class="form-label">Razón Social</label>
+                    <input type="text" name="cliente_razon_social" id="cliente_razon_social" class="form-control @error('cliente_razon_social') is-invalid @enderror" placeholder="Ingresa la razón social" value="{{ old('cliente_razon_social') }}">
+                    @error('cliente_razon_social')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Dirección</label>
-                    <input type="text" name="cliente_direccion" class="form-control" placeholder="Ingresa la dirección">
+                    <label for="cliente_direccion" class="form-label">Dirección</label>
+                    <input type="text" name="cliente_direccion" id="cliente_direccion" class="form-control @error('cliente_direccion') is-invalid @enderror" placeholder="Ingresa la dirección" value="{{ old('cliente_direccion') }}">
+                    @error('cliente_direccion')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Teléfono</label>
-                    <input type="text" name="cliente_telefono" class="form-control" placeholder="Ingresa el teléfono">
+                    <label for="cliente_telefono" class="form-label">Teléfono</label>
+                    <input type="text" name="cliente_telefono" id="cliente_telefono" class="form-control @error('cliente_telefono') is-invalid @enderror" placeholder="Ingresa el teléfono" value="{{ old('cliente_telefono') }}">
+                    @error('cliente_telefono')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Correo</label>
-                    <input type="email" name="cliente_correo" class="form-control" placeholder="Ingresa el correo">
+                    <label for="cliente_correo" class="form-label">Correo</label>
+                    <input type="email" name="cliente_correo" id="cliente_correo" class="form-control @error('cliente_correo') is-invalid @enderror" placeholder="Ingresa el correo" value="{{ old('cliente_correo') }}">
+                    @error('cliente_correo')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">RFC</label>
-                    <input type="text" name="cliente_rfc" class="form-control" placeholder="Ingresa el RFC">
+                    <label for="cliente_rfc" class="form-label">RFC</label>
+                    <input type="text" name="cliente_rfc" id="cliente_rfc" class="form-control @error('cliente_rfc') is-invalid @enderror" placeholder="Ingresa el RFC" value="{{ old('cliente_rfc') }}">
+                    @error('cliente_rfc')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
@@ -152,12 +187,12 @@
                 <span class="fw-bold text-dark">Persona</span>
 
                 <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="tipo_persona" id="fisica" value="Física" checked>
+                    <input class="form-check-input" type="radio" name="tipo_persona" id="fisica" value="Física" {{ old('tipo_persona', 'Física') == 'Física' ? 'checked' : '' }}>
                     <label class="form-check-label" for="fisica">Física</label>
                 </div>
 
                 <div class="form-check mb-0">
-                    <input class="form-check-input" type="radio" name="tipo_persona" id="moral" value="Moral">
+                    <input class="form-check-input" type="radio" name="tipo_persona" id="moral" value="Moral" {{ old('tipo_persona') == 'Moral' ? 'checked' : '' }}>
                     <label class="form-check-label" for="moral">Moral</label>
                 </div>
             </div>
@@ -166,38 +201,74 @@
 
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                    <label class="form-label">Nombre del proyecto</label>
-                    <input type="text" name="obra_nombre" class="form-control" placeholder="Ingresa el nombre del proyecto">
+                    <label for="obra_nombre" class="form-label">Nombre del proyecto</label>
+                    <input type="text" name="obra_nombre" id="obra_nombre" class="form-control @error('obra_nombre') is-invalid @enderror" placeholder="Ingresa el nombre del proyecto" value="{{ old('obra_nombre') }}">
+                    @error('obra_nombre')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Ubicación del proyecto</label>
-                    <input type="text" name="obra_ubicacion" class="form-control" placeholder="Ingresa la ubicación">
+                    <label for="obra_ubicacion" class="form-label">Ubicación del proyecto</label>
+                    <input type="text" name="obra_ubicacion" id="obra_ubicacion" class="form-control @error('obra_ubicacion') is-invalid @enderror" placeholder="Ingresa la ubicación" value="{{ old('obra_ubicacion') }}">
+                    @error('obra_ubicacion')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Tipo de obra</label>
-                    <input type="text" name="obra_tipo" class="form-control" placeholder="Ingresa el tipo de obra">
+                    <label for="obra_tipo" class="form-label">Tipo de obra</label>
+                    <input type="text" name="obra_tipo" id="obra_tipo" class="form-control @error('obra_tipo') is-invalid @enderror" placeholder="Ingresa el tipo de obra" value="{{ old('obra_tipo') }}">
+                    @error('obra_tipo')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Superficie de terreno</label>
-                    <input type="text" name="obra_superficie" class="form-control" placeholder="Ingresa la superficie">
+                    <label for="obra_superficie" class="form-label">Superficie de terreno</label>
+                    <input type="text" name="obra_superficie" id="obra_superficie" class="form-control @error('obra_superficie') is-invalid @enderror" placeholder="Ingresa la superficie" value="{{ old('obra_superficie') }}">
+                    @error('obra_superficie')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Tipo de uso</label>
-                    <input type="text" name="obra_uso" class="form-control" placeholder="Ingresa el tipo de uso">
+                    <label for="obra_uso" class="form-label">Tipo de uso</label>
+                    <input type="text" name="obra_uso" id="obra_uso" class="form-control @error('obra_uso') is-invalid @enderror" placeholder="Ingresa el tipo de uso" value="{{ old('obra_uso') }}">
+                    @error('obra_uso')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Fecha de inicio estimada</label>
-                    <input type="date" name="obra_fecha_inicio" class="form-control">
+                    <label for="obra_fecha_inicio" class="form-label">Fecha de inicio estimada</label>
+                    <input type="date" name="obra_fecha_inicio" id="obra_fecha_inicio" class="form-control @error('obra_fecha_inicio') is-invalid @enderror" value="{{ old('obra_fecha_inicio') }}">
+                    @error('obra_fecha_inicio')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Duración estimada</label>
-                    <input type="text" name="obra_duracion" class="form-control" placeholder="Ingresa la duración estimada">
+                    <label for="obra_duracion" class="form-label">Duración estimada</label>
+                    <input type="text" name="obra_duracion" id="obra_duracion" class="form-control @error('obra_duracion') is-invalid @enderror" placeholder="Ingresa la duración estimada" value="{{ old('obra_duracion') }}">
+                    @error('obra_duracion')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label for="estado_proyecto_id" class="form-label">Estado del proyecto</label>
+                    <select name="estado_proyecto_id" id="estado_proyecto_id" class="form-select @error('estado_proyecto_id') is-invalid @enderror" required>
+                        <option value="">Selecciona un estado</option>
+                        @foreach($estados as $estado)
+                            <option value="{{ $estado->id }}" {{ old('estado_proyecto_id') == $estado->id ? 'selected' : '' }}>
+                                {{ $estado->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('estado_proyecto_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 
@@ -205,33 +276,51 @@
 
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Nombre</label>
-                    <input type="text" name="empresa_nombre" class="form-control" placeholder="Ingresa el nombre de la empresa">
+                    <label for="empresa_nombre" class="form-label">Nombre</label>
+                    <input type="text" name="empresa_nombre" id="empresa_nombre" class="form-control @error('empresa_nombre') is-invalid @enderror" placeholder="Ingresa el nombre de la empresa" value="{{ old('empresa_nombre') }}">
+                    @error('empresa_nombre')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Logo</label>
-                    <input type="file" name="empresa_logo" class="form-control">
+                    <label for="empresa_logo" class="form-label">Logo</label>
+                    <input type="file" name="empresa_logo" id="empresa_logo" class="form-control @error('empresa_logo') is-invalid @enderror" accept="image/*">
+                    @error('empresa_logo')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Dirección</label>
-                    <input type="text" name="empresa_direccion" class="form-control" placeholder="Ingresa la dirección de la empresa">
+                    <label for="empresa_direccion" class="form-label">Dirección</label>
+                    <input type="text" name="empresa_direccion" id="empresa_direccion" class="form-control @error('empresa_direccion') is-invalid @enderror" placeholder="Ingresa la dirección de la empresa" value="{{ old('empresa_direccion') }}">
+                    @error('empresa_direccion')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Responsable técnico</label>
-                    <input type="text" name="empresa_responsable" class="form-control" placeholder="Ingresa el responsable técnico">
+                    <label for="empresa_responsable" class="form-label">Responsable técnico</label>
+                    <input type="text" name="empresa_responsable" id="empresa_responsable" class="form-control @error('empresa_responsable') is-invalid @enderror" placeholder="Ingresa el responsable técnico" value="{{ old('empresa_responsable') }}">
+                    @error('empresa_responsable')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Cargo</label>
-                    <input type="text" name="empresa_cargo" class="form-control" placeholder="Ingresa el cargo">
+                    <label for="empresa_cargo" class="form-label">Cargo</label>
+                    <input type="text" name="empresa_cargo" id="empresa_cargo" class="form-control @error('empresa_cargo') is-invalid @enderror" placeholder="Ingresa el cargo" value="{{ old('empresa_cargo') }}">
+                    @error('empresa_cargo')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Firma digital</label>
-                    <input type="file" name="firma_digital" class="form-control">
+                    <label for="firma_digital" class="form-label">Firma digital</label>
+                    <input type="file" name="firma_digital" id="firma_digital" class="form-control @error('firma_digital') is-invalid @enderror" accept=".jpg,.jpeg,.png,.pdf">
+                    @error('firma_digital')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 

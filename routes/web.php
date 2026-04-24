@@ -14,6 +14,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\ManoObraController;
 use App\Http\Controllers\MaquinariaEquipoController;
 use App\Http\Controllers\IndirectoController;
+
 // Controladores de Entidades Principales
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EmpresaController;
@@ -44,9 +45,8 @@ use App\Http\Controllers\CompraController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('inicio');
+// Ruta principal corregida
+Route::get('/', [ProyectoController::class, 'create'])->name('inicio');
 
 // ==========================================
 // 1. CONFIGURACIONES BASE
@@ -89,4 +89,3 @@ Route::resource('cajas_chicas', CajaChicaController::class);
 Route::resource('ingresos', IngresoController::class);
 Route::resource('egresos', EgresoController::class);
 Route::resource('compras', CompraController::class);
-

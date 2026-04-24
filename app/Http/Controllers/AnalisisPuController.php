@@ -3,85 +3,88 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnalisisPu;
-use App\Models\Concepto;
 use App\Models\Proyecto;
+use App\Models\Concepto;
 use Illuminate\Http\Request;
 
 class AnalisisPuController extends Controller
 {
     public function index()
     {
-        $puItems = AnalisisPu::with([
-            'concepto.unidadMedida',
-            'materiales',
-            'manoObras',
-            'maquinarias',
-            'indirectos'
-        ])->latest()->get();
-
-        return view('pu.index', compact('puItems'));
+        $analisis = AnalisisPu::with(['proyecto', 'concepto'])->latest()->get();
+        return view('pu.index', compact('analisis'));
     }
 
     public function create()
     {
-        $conceptos = Concepto::with('unidadMedida')->orderBy('descripcion')->get();
         $proyectos = Proyecto::orderBy('nombre')->get();
-        return view('pu.create', compact('conceptos', 'proyectos'));
+        $conceptos = Concepto::orderBy('clave')->get();
+
+        return view('pu.create', compact('proyectos', 'conceptos'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'concepto_id' => 'required|exists:conceptos,id',
+        $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
+            'concepto_id' => 'required|exists:conceptos,id',
+        ], [
+            'proyecto_id.required' => 'El proyecto es obligatorio.',
+            'proyecto_id.exists' => 'El proyecto seleccionado no es válido.',
+            'concepto_id.required' => 'El concepto es obligatorio.',
+            'concepto_id.exists' => 'El concepto seleccionado no es válido.',
         ]);
 
-        AnalisisPu::create($data);
+        AnalisisPu::create([
+            'proyecto_id' => $request->proyecto_id,
+            'concepto_id' => $request->concepto_id,
+        ]);
 
-        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U creado correctamente.');
+        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U. creado correctamente.');
     }
 
     public function show($id)
     {
-        $puItem = AnalisisPu::with([
-            'concepto.unidadMedida',
-            'materiales.material',
-            'manoObras.manoObra',
-            'maquinarias.maquinariaEquipo',
-            'indirectos.indirecto'
-        ])->findOrFail($id);
-
-        return view('pu.show', compact('puItem'));
+        $analisis = AnalisisPu::with(['proyecto', 'concepto'])->findOrFail($id);
+        return view('pu.show', compact('analisis'));
     }
 
     public function edit($id)
     {
-        $puItem = AnalisisPu::findOrFail($id);
-        $conceptos = Concepto::with('unidadMedida')->orderBy('descripcion')->get();
+        $analisis = AnalisisPu::findOrFail($id);
         $proyectos = Proyecto::orderBy('nombre')->get();
+        $conceptos = Concepto::orderBy('clave')->get();
 
-        return view('pu.edit', compact('puItem', 'conceptos', 'proyectos'));
+        return view('pu.edit', compact('analisis', 'proyectos', 'conceptos'));
     }
 
     public function update(Request $request, $id)
     {
-        $puItem = AnalisisPu::findOrFail($id);
+        $analisis = AnalisisPu::findOrFail($id);
 
-        $data = $request->validate([
-            'concepto_id' => 'required|exists:conceptos,id',
+        $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
+            'concepto_id' => 'required|exists:conceptos,id',
+        ], [
+            'proyecto_id.required' => 'El proyecto es obligatorio.',
+            'proyecto_id.exists' => 'El proyecto seleccionado no es válido.',
+            'concepto_id.required' => 'El concepto es obligatorio.',
+            'concepto_id.exists' => 'El concepto seleccionado no es válido.',
         ]);
 
-        $puItem->update($data);
+        $analisis->update([
+            'proyecto_id' => $request->proyecto_id,
+            'concepto_id' => $request->concepto_id,
+        ]);
 
-        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U actualizado correctamente.');
+        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U. actualizado correctamente.');
     }
 
     public function destroy($id)
     {
-        $puItem = AnalisisPu::findOrFail($id);
-        $puItem->delete();
+        $analisis = AnalisisPu::findOrFail($id);
+        $analisis->delete();
 
-        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U eliminado correctamente.');
+        return redirect()->route('analisis_pu.index')->with('success', 'Análisis P.U. eliminado correctamente.');
     }
 }

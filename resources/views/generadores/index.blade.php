@@ -20,7 +20,7 @@
         .project-row{ background:#fff; outline:1px solid #eee; transition:all .3s ease; }
         .project-row:hover{ transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.05); }
         .project-row td{ padding:15px 20px; vertical-align:middle; }
-        .title-main{ font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px; }
+        .title-main{ font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
         .badge-dark-mini{ font-family:Arial,sans-serif; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:6px; background:#111; color:#fff; }
         .badge-soft{ display:inline-flex; align-items:center; justify-content:center; padding:4px 10px; border-radius:12px; background:#eee; color:#333; font-family:Arial,sans-serif; font-size:.75rem; font-weight:700; }
         .desc-text{ color:#666; font-size:.85rem; line-height:1.4; margin-top:5px; font-family:Arial,sans-serif; }
@@ -34,6 +34,22 @@
 
     <div class="dash-index-view">
         <div class="index-panel">
+            @if(session('success'))
+                <div class="alert alert-success" style="font-family:Arial,sans-serif;">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger" style="font-family:Arial,sans-serif;">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="header-section">
                 <div>
                     <h1>Generadores</h1>
@@ -55,7 +71,7 @@
                 <table class="project-table">
                     <thead>
                     <tr>
-                        <th style="width:35%;">Detalle del Generador</th>
+                        <th style="width:40%;">Detalle del Generador</th>
                         <th>Medidas y Cálculo</th>
                         <th>Referencia</th>
                         <th style="text-align:right;">Acciones</th>
@@ -63,41 +79,81 @@
                     </thead>
                     <tbody>
                     @forelse(($generadores ?? []) as $generador)
-                        @php $generadorId = $generador->id ?? $generador->id_generador ?? 1; @endphp
+                        @php
+                            $generadorId = $generador->id ?? 0;
+
+                            $conceptoDescripcion =
+                                data_get($generador, 'presupuestoDetalle.concepto.descripcion')
+                                ?? data_get($generador, 'detalle.concepto.descripcion')
+                                ?? data_get($generador, 'concepto.descripcion')
+                                ?? (is_string($generador->concepto ?? null) ? $generador->concepto : null)
+                                ?? 'Generador sin concepto';
+
+                            $conceptoClave =
+                                data_get($generador, 'presupuestoDetalle.concepto.clave')
+                                ?? data_get($generador, 'detalle.concepto.clave')
+                                ?? data_get($generador, 'concepto.clave')
+                                ?? null;
+
+                            $unidadAbreviatura =
+                                data_get($generador, 'presupuestoDetalle.concepto.unidadMedida.abreviatura')
+                                ?? data_get($generador, 'detalle.concepto.unidadMedida.abreviatura')
+                                ?? data_get($generador, 'concepto.unidadMedida.abreviatura')
+                                ?? $generador->unidad
+                                ?? null;
+
+                            $localizacion = $generador->localizacion ?? 'No especificada';
+                            $ejes = $generador->ejes ?? 'N/D';
+                            $numeroPiezas = $generador->numero_piezas ?? $generador->no_piezas ?? 0;
+                            $ancho = $generador->ancho ?? 0;
+                            $largo = $generador->largo ?? 0;
+                            $alto = $generador->alto ?? 0;
+                            $resultado = $generador->resultado ?? 0;
+                        @endphp
+
                         <tr class="project-row">
                             <td>
                                 <div class="title-main">
-                                    {{ $generador->concepto ?? data_get($generador, 'detalle.concepto.descripcion') ?? 'Generador sin concepto' }}
-                                    @if(!empty($generador->unidad))
-                                        <span class="badge-dark-mini">{{ $generador->unidad }}</span>
-                                    @elseif(!empty(data_get($generador, 'detalle.concepto.unidadMedida.abreviatura')))
-                                        <span class="badge-dark-mini">{{ data_get($generador, 'detalle.concepto.unidadMedida.abreviatura') }}</span>
+                                    {{ $conceptoDescripcion }}
+
+                                    @if($conceptoClave)
+                                        <span class="badge-dark-mini">{{ $conceptoClave }}</span>
+                                    @endif
+
+                                    @if($unidadAbreviatura)
+                                        <span class="badge-dark-mini">{{ $unidadAbreviatura }}</span>
                                     @endif
                                 </div>
+
                                 <div class="desc-text">
-                                    Localización: {{ $generador->localizacion ?? 'No especificada' }} ·
-                                    Ejes: {{ $generador->ejes ?? 'N/D' }}
+                                    Localización: {{ $localizacion }} ·
+                                    Ejes: {{ $ejes }}
                                 </div>
                             </td>
+
                             <td>
                                 <div class="info-stack">
-                                    <div><strong>No. piezas:</strong> {{ $generador->no_piezas ?? $generador->numero_piezas ?? '0' }}</div>
-                                    <div><strong>Ancho:</strong> {{ $generador->ancho ?? '0' }}</div>
-                                    <div><strong>Largo:</strong> {{ $generador->largo ?? '0' }}</div>
-                                    <div><strong>Alto:</strong> {{ $generador->alto ?? '0' }}</div>
-                                    <div><strong>Resultado:</strong> {{ $generador->resultado ?? '0' }}</div>
+                                    <div><strong>No. piezas:</strong> {{ number_format((float)$numeroPiezas, 4) }}</div>
+                                    <div><strong>Ancho:</strong> {{ number_format((float)$ancho, 4) }}</div>
+                                    <div><strong>Largo:</strong> {{ number_format((float)$largo, 4) }}</div>
+                                    <div><strong>Alto:</strong> {{ number_format((float)$alto, 4) }}</div>
+                                    <div><strong>Resultado:</strong> {{ number_format((float)$resultado, 4) }}</div>
                                 </div>
                             </td>
+
                             <td>
-                                <span class="badge-soft">{{ $generador->localizacion ?? 'General' }}</span>
+                                <span class="badge-soft">{{ $localizacion }}</span>
                             </td>
+
                             <td class="action-cell">
                                 <a href="{{ Route::has('generadores.show') ? route('generadores.show', $generadorId) : '#' }}" class="btn-icon-action" title="Ver">
                                     <i class="bi bi-eye"></i>
                                 </a>
+
                                 <a href="{{ Route::has('generadores.edit') ? route('generadores.edit', $generadorId) : '#' }}" class="btn-icon-action" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
+
                                 @if(Route::has('generadores.destroy'))
                                     <form action="{{ route('generadores.destroy', $generadorId) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este generador?');">
                                         @csrf
@@ -106,10 +162,6 @@
                                             <i class="bi bi-trash3"></i>
                                         </button>
                                     </form>
-                                @else
-                                    <button type="button" class="btn-icon-action" title="Eliminar">
-                                        <i class="bi bi-trash3"></i>
-                                    </button>
                                 @endif
                             </td>
                         </tr>

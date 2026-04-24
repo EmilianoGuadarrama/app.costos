@@ -22,20 +22,32 @@ class PresupuestoController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
             'nombre' => 'required|string|max:150',
-            'estado' => 'nullable|string|max:50',
+            'total' => 'nullable|numeric|min:0',
+            'estado' => 'required|string|max:50',
+        ], [
+            'proyecto_id.required' => 'El proyecto es obligatorio.',
+            'proyecto_id.exists' => 'El proyecto seleccionado no es válido.',
+            'nombre.required' => 'El nombre del presupuesto es obligatorio.',
+            'total.numeric' => 'El total debe ser numérico.',
+            'estado.required' => 'El estado es obligatorio.',
         ]);
 
-        Presupuesto::create($data);
+        Presupuesto::create([
+            'proyecto_id' => $request->proyecto_id,
+            'nombre' => $request->nombre,
+            'total' => $request->total ?? 0,
+            'estado' => $request->estado,
+        ]);
 
         return redirect()->route('presupuestos.index')->with('success', 'Presupuesto creado correctamente.');
     }
 
     public function show($id)
     {
-        $presupuesto = Presupuesto::with(['proyecto', 'detalles.concepto'])->findOrFail($id);
+        $presupuesto = Presupuesto::with('proyecto')->findOrFail($id);
         return view('presupuestos.show', compact('presupuesto'));
     }
 
@@ -51,13 +63,25 @@ class PresupuestoController extends Controller
     {
         $presupuesto = Presupuesto::findOrFail($id);
 
-        $data = $request->validate([
+        $request->validate([
             'proyecto_id' => 'required|exists:proyectos,id',
             'nombre' => 'required|string|max:150',
-            'estado' => 'nullable|string|max:50',
+            'total' => 'nullable|numeric|min:0',
+            'estado' => 'required|string|max:50',
+        ], [
+            'proyecto_id.required' => 'El proyecto es obligatorio.',
+            'proyecto_id.exists' => 'El proyecto seleccionado no es válido.',
+            'nombre.required' => 'El nombre del presupuesto es obligatorio.',
+            'total.numeric' => 'El total debe ser numérico.',
+            'estado.required' => 'El estado es obligatorio.',
         ]);
 
-        $presupuesto->update($data);
+        $presupuesto->update([
+            'proyecto_id' => $request->proyecto_id,
+            'nombre' => $request->nombre,
+            'total' => $request->total ?? 0,
+            'estado' => $request->estado,
+        ]);
 
         return redirect()->route('presupuestos.index')->with('success', 'Presupuesto actualizado correctamente.');
     }

@@ -30,6 +30,7 @@ use App\Http\Controllers\ReporteGeneradoController;
 
 // Controladores de Movimientos Financieros
 use App\Http\Controllers\CajaChicaController;
+use App\Http\Controllers\MovimientoCajaChicaController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\EgresoController;
 use App\Http\Controllers\CompraController;
@@ -86,6 +87,7 @@ Route::resource('reportes', ReporteGeneradoController::class);
 // 5. MOVIMIENTOS FINANCIEROS Y CAJA
 // ==========================================
 Route::resource('cajas_chicas', CajaChicaController::class);
+Route::resource('movimientos_caja_chica', MovimientoCajaChicaController::class)->parameters(['movimientos_caja_chica' => 'movimientos_caja_chica']);
 Route::resource('ingresos', IngresoController::class);
 Route::resource('egresos', EgresoController::class);
 Route::resource('compras', CompraController::class);

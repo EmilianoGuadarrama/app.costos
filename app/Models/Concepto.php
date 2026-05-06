@@ -30,6 +30,11 @@ class Concepto extends Model
         return $this->belongsTo(UnidadMedida::class);
     }
 
+    public function analisisPu()
+    {
+        return $this->hasOne(AnalisisPu::class);
+    }
+
     public function generadores()
     {
         return $this->hasMany(Generador::class);

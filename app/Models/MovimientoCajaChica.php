@@ -2,22 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class MovimientoCajaChica extends Model
 {
-    use HasFactory;
-
     protected $table = 'movimientos_caja_chica';
+
+    // Tipos reales en BD: ENTRADA / SALIDA (mayúsculas)
+    const TIPO_ENTRADA = 'ENTRADA';
+    const TIPO_SALIDA  = 'SALIDA';
 
     protected $fillable = [
         'caja_chica_id',
-        'tipo',
-        'monto',
-        'concepto',
         'fecha',
-        'comprobante',
+        'responsable',
+        'concepto',
+        'categoria',
+        'monto',
+        'tipo',
+    ];
+
+    protected $casts = [
+        'fecha'  => 'date',
+        'monto'  => 'float',
     ];
 
     public function cajaChica()

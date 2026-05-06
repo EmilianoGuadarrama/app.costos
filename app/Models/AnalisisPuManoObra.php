@@ -2,20 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AnalisisPuManoObra extends Model
 {
-    use HasFactory;
-
     protected $table = 'analisis_pu_mano_obra';
 
     protected $fillable = [
         'analisis_pu_id',
         'mano_obra_id',
         'cantidad',
-        'costo',
+        'costo_unitario',   // columna real en BD: costo_unitario
     ];
 
     public function analisisPu()
@@ -26,5 +23,10 @@ class AnalisisPuManoObra extends Model
     public function manoObra()
     {
         return $this->belongsTo(ManoObra::class);
+    }
+
+    public function getImporteAttribute(): float
+    {
+        return round($this->cantidad * $this->costo_unitario, 2);
     }
 }

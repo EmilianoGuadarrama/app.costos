@@ -71,9 +71,9 @@
                             <div class="title-main">{{ $item->concepto->clave ?? 'Sin clave' }}<span class="badge-dark-mini">A.P.U.</span></div>
                             <div class="desc-text">{{ $item->concepto->descripcion ?? 'Sin descripción' }}</div>
                         </td>
-                        <td><div class="info-stack"><div><strong>Proyecto:</strong> {{ $item->proyecto->nombre ?? 'Sin proyecto' }}</div><div><strong>Concepto:</strong> {{ $item->concepto->clave ?? 'N/D' }}</div><div><strong>Observaciones:</strong> {{ $item->observaciones ?? 'Sin observaciones' }}</div><div><strong>Fecha:</strong> {{ optional($item->created_at)->format('Y-m-d H:i') ?? 'N/D' }}</div></div></td>
+                        <td><div class="info-stack"><div><strong>Área:</strong> {{ $item->concepto->area->nombre ?? 'Sin área' }}</div><div><strong>Concepto:</strong> {{ $item->concepto->clave ?? 'N/D' }}</div><div><strong>Observaciones:</strong> {{ $item->observaciones ?? 'Sin observaciones' }}</div><div><strong>Fecha:</strong> {{ optional($item->created_at)->format('Y-m-d H:i') ?? 'N/D' }}</div></div></td>
                         <td class="action-cell">
-                            <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verPuModal{{ $puId }}"><i class="bi bi-eye"></i></button>
+                            <a href="{{ route('analisis_pu.show', $puId) }}" class="btn-icon-action" title="Ver detalle"><i class="bi bi-eye"></i></a>
                             <button type="button" class="btn-icon-action" title="Eliminar" data-bs-toggle="modal" data-bs-target="#eliminarPuModal{{ $puId }}"><i class="bi bi-trash3"></i></button>
                         </td>
                     </tr>

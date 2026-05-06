@@ -10,13 +10,16 @@ class MovimientoCajaChicaController extends Controller
 {
     public function index()
     {
-        $movimientos = MovimientoCajaChica::with('cajaChica')->latest()->get();
+        $movimientos = MovimientoCajaChica::with('cajaChica.proyecto')
+            ->latest()
+            ->get();
+
         return view('movimientos_caja_chica.index', compact('movimientos'));
     }
 
     public function create()
     {
-        $cajas = CajaChica::orderBy('nombre')->get();
+        $cajas = CajaChica::with('proyecto')->orderBy('nombre')->get();
         return view('movimientos_caja_chica.create', compact('cajas'));
     }
 
@@ -24,36 +27,51 @@ class MovimientoCajaChicaController extends Controller
     {
         $data = $request->validate([
             'caja_chica_id' => 'required|exists:cajas_chicas,id',
-            'tipo' => 'required|in:ingreso,egreso',
-            'monto' => 'required|numeric|min:0.01',
-            'concepto' => 'required|string|max:255',
-            'fecha' => 'required|date',
-            'comprobante' => 'nullable|string|max:255',
+            'tipo'          => 'required|in:ENTRADA,SALIDA',
+            'monto'         => 'required|numeric|min:0.01',
+            'concepto'      => 'required|string|max:200',
+            'responsable'   => 'nullable|string|max:150',
+            'categoria'     => 'nullable|string|max:100',
+            'fecha'         => 'required|date',
+        ], [
+            'tipo.in'    => 'El tipo debe ser ENTRADA o SALIDA.',
+            'monto.min'  => 'El monto debe ser mayor a cero.',
         ]);
 
-        $movimiento = MovimientoCajaChica::create($data);
-        
-        // Actualizar saldo de caja chica
-        $caja = CajaChica::find($data['caja_chica_id']);
-        if ($data['tipo'] === 'ingreso') {
-            $caja->saldo_actual += $data['monto'];
-        } else {
-            $caja->saldo_actual -= $data['monto'];
-        }
-        $caja->save();
+        // ✅ Validar saldo suficiente para salidas
+        if ($data['tipo'] === MovimientoCajaChica::TIPO_SALIDA) {
+            $caja         = CajaChica::with('movimientos')->findOrFail($data['caja_chica_id']);
+            $saldoActual  = $caja->saldo_actual; // calculado dinámicamente
 
-        return redirect()->route('movimientos_caja_chica.index')->with('success', 'Movimiento registrado correctamente.');
+            if ($data['monto'] > $saldoActual) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'monto' => sprintf(
+                            'Saldo insuficiente. Saldo disponible: $%s — Monto solicitado: $%s',
+                            number_format($saldoActual, 2),
+                            number_format($data['monto'], 2)
+                        ),
+                    ]);
+            }
+        }
+
+        MovimientoCajaChica::create($data);
+
+        return redirect()
+            ->route('movimientos_caja_chica.index')
+            ->with('success', 'Movimiento registrado correctamente.');
     }
 
     public function show(MovimientoCajaChica $movimientos_caja_chica)
     {
-        $movimientos_caja_chica->load('cajaChica');
+        $movimientos_caja_chica->load('cajaChica.proyecto');
         return view('movimientos_caja_chica.show', compact('movimientos_caja_chica'));
     }
 
     public function edit(MovimientoCajaChica $movimientos_caja_chica)
     {
-        $cajas = CajaChica::orderBy('nombre')->get();
+        $cajas = CajaChica::with('proyecto')->orderBy('nombre')->get();
         return view('movimientos_caja_chica.edit', compact('movimientos_caja_chica', 'cajas'));
     }
 
@@ -61,45 +79,50 @@ class MovimientoCajaChicaController extends Controller
     {
         $data = $request->validate([
             'caja_chica_id' => 'required|exists:cajas_chicas,id',
-            'tipo' => 'required|in:ingreso,egreso',
-            'monto' => 'required|numeric|min:0.01',
-            'concepto' => 'required|string|max:255',
-            'fecha' => 'required|date',
-            'comprobante' => 'nullable|string|max:255',
+            'tipo'          => 'required|in:ENTRADA,SALIDA',
+            'monto'         => 'required|numeric|min:0.01',
+            'concepto'      => 'required|string|max:200',
+            'responsable'   => 'nullable|string|max:150',
+            'categoria'     => 'nullable|string|max:100',
+            'fecha'         => 'required|date',
         ]);
 
-        // Revertir efecto anterior y aplicar nuevo
-        $caja = CajaChica::find($movimientos_caja_chica->caja_chica_id);
-        if ($movimientos_caja_chica->tipo === 'ingreso') {
-            $caja->saldo_actual -= $movimientos_caja_chica->monto;
-        } else {
-            $caja->saldo_actual += $movimientos_caja_chica->monto;
+        // Validar saldo: revertir el movimiento actual y verificar con el nuevo
+        if ($data['tipo'] === MovimientoCajaChica::TIPO_SALIDA) {
+            $caja        = CajaChica::with('movimientos')->findOrFail($data['caja_chica_id']);
+            // Saldo excluyendo el movimiento que estamos editando
+            $saldoBase   = $caja->saldo_actual;
+            if ($movimientos_caja_chica->tipo === MovimientoCajaChica::TIPO_SALIDA) {
+                $saldoBase += $movimientos_caja_chica->monto; // devolver la salida anterior
+            } else {
+                $saldoBase -= $movimientos_caja_chica->monto; // quitar la entrada anterior
+            }
+
+            if ($data['monto'] > $saldoBase) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'monto' => sprintf(
+                            'Saldo insuficiente. Saldo disponible: $%s',
+                            number_format($saldoBase, 2)
+                        ),
+                    ]);
+            }
         }
-        
-        if ($data['tipo'] === 'ingreso') {
-            $caja->saldo_actual += $data['monto'];
-        } else {
-            $caja->saldo_actual -= $data['monto'];
-        }
-        $caja->save();
 
         $movimientos_caja_chica->update($data);
 
-        return redirect()->route('movimientos_caja_chica.index')->with('success', 'Movimiento actualizado correctamente.');
+        return redirect()
+            ->route('movimientos_caja_chica.index')
+            ->with('success', 'Movimiento actualizado correctamente.');
     }
 
     public function destroy(MovimientoCajaChica $movimientos_caja_chica)
     {
-        $caja = CajaChica::find($movimientos_caja_chica->caja_chica_id);
-        if ($movimientos_caja_chica->tipo === 'ingreso') {
-            $caja->saldo_actual -= $movimientos_caja_chica->monto;
-        } else {
-            $caja->saldo_actual += $movimientos_caja_chica->monto;
-        }
-        $caja->save();
-        
         $movimientos_caja_chica->delete();
-        
-        return redirect()->route('movimientos_caja_chica.index')->with('success', 'Movimiento eliminado correctamente.');
+
+        return redirect()
+            ->route('movimientos_caja_chica.index')
+            ->with('success', 'Movimiento eliminado correctamente.');
     }
 }

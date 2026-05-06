@@ -2,27 +2,24 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CajaChica extends Model
 {
-    use HasFactory;
-
     protected $table = 'cajas_chicas';
 
     protected $fillable = [
-        'nombre',
-        'monto_inicial',
-        'saldo_actual',
-        'responsable_id',
         'proyecto_id',
+        'nombre',
+        'responsable',
+        'monto_inicial',
+        'fecha_apertura',
     ];
 
-    public function responsable()
-    {
-        return $this->belongsTo(ResponsableTecnico::class, 'responsable_id');
-    }
+    protected $casts = [
+        'monto_inicial' => 'float',
+        'fecha_apertura' => 'date',
+    ];
 
     public function proyecto()
     {
@@ -32,5 +29,16 @@ class CajaChica extends Model
     public function movimientos()
     {
         return $this->hasMany(MovimientoCajaChica::class);
+    }
+
+    /**
+     * Saldo calculado dinámicamente desde los movimientos.
+     * No existe columna saldo_actual en la BD real.
+     */
+    public function getSaldoActualAttribute(): float
+    {
+        $entradas = $this->movimientos->where('tipo', 'ENTRADA')->sum('monto');
+        $salidas  = $this->movimientos->where('tipo', 'SALIDA')->sum('monto');
+        return round($this->monto_inicial + $entradas - $salidas, 2);
     }
 }

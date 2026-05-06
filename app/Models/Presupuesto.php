@@ -11,12 +11,32 @@ class Presupuesto extends Model
     protected $fillable = [
         'proyecto_id',
         'nombre',
-        'total',
-        'estado',
+        'fecha',
+        'observaciones',
+    ];
+
+    protected $casts = [
+        'fecha' => 'date',
     ];
 
     public function proyecto()
     {
         return $this->belongsTo(Proyecto::class);
+    }
+
+    public function detalles()
+    {
+        return $this->hasMany(PresupuestoDetalle::class);
+    }
+
+    /**
+     * Total calculado dinámicamente desde los detalles
+     */
+    public function getTotalAttribute(): float
+    {
+        return round(
+            $this->detalles->sum(fn($d) => $d->cantidad * ($d->pu_unitario_snapshot ?? 0)),
+            2
+        );
     }
 }

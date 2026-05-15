@@ -34,39 +34,28 @@
             @csrf
 
             <div class="row mb-3 align-items-center">
-                <label class="col-md-4 form-label">Clave *</label>
+                <label class="col-md-4 form-label">Área *</label>
                 <div class="col-md-8">
-                    <input type="text" name="clave" class="form-control" value="{{ old('clave') }}" placeholder="Ej. ALB-001" required maxlength="50">
-                    @error('clave') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <div class="row mb-3 align-items-center">
-                <label class="col-md-4 form-label">Área</label>
-                <div class="col-md-8">
-                    <select name="area_id" class="form-control">
+                    <select name="id_area" class="form-control" required>
                         <option value="">-- Seleccionar Área --</option>
                         @foreach($areas as $area)
-                            <option value="{{ $area->id }}" {{ old('area_id') == $area->id ? 'selected' : '' }}>{{ $area->clave }} - {{ $area->nombre }}</option>
+                            <option value="{{ $area->id }}" {{ old('id_area') == $area->id ? 'selected' : '' }}>{{ $area->abreviatura }} - {{ $area->descripcion }}</option>
                         @endforeach
                     </select>
-                    @error('area_id') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
+                    @error('id_area') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
                 </div>
             </div>
 
             <div class="row mb-3 align-items-center">
-                <label class="col-md-4 form-label">Partida</label>
+                <label class="col-md-4 form-label">Unidad de Medida *</label>
                 <div class="col-md-8">
-                    <input type="text" name="partida" class="form-control" value="{{ old('partida') }}" placeholder="Ej. Preliminares" maxlength="100">
-                    @error('partida') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
-                </div>
-            </div>
-
-            <div class="row mb-3 align-items-center">
-                <label class="col-md-4 form-label">Subpartida</label>
-                <div class="col-md-8">
-                    <input type="text" name="subpartida" class="form-control" value="{{ old('subpartida') }}" placeholder="Ej. Trazo y Nivelación" maxlength="100">
-                    @error('subpartida') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
+                    <select name="id_unidad_medida" class="form-control" required>
+                        <option value="">-- Seleccionar Unidad --</option>
+                        @foreach($unidades as $unidad)
+                            <option value="{{ $unidad->id }}" {{ old('id_unidad_medida') == $unidad->id ? 'selected' : '' }}>{{ $unidad->nombre }} ({{ $unidad->abreviatura }})</option>
+                        @endforeach
+                    </select>
+                    @error('id_unidad_medida') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -79,15 +68,18 @@
             </div>
 
             <div class="row mb-3 align-items-center">
-                <label class="col-md-4 form-label">Unidad de Medida *</label>
+                <label class="col-md-4 form-label">Precio Unitario (P.U.) *</label>
                 <div class="col-md-8">
-                    <select name="unidad_medida_id" class="form-control" required>
-                        <option value="">-- Seleccionar Unidad --</option>
-                        @foreach($unidades as $unidad)
-                            <option value="{{ $unidad->id }}" {{ old('unidad_medida_id') == $unidad->id ? 'selected' : '' }}>{{ $unidad->nombre }} ({{ $unidad->abreviatura }})</option>
-                        @endforeach
-                    </select>
-                    @error('unidad_medida_id') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
+                    <input type="number" step="0.01" min="0" name="p_u" class="form-control" value="{{ old('p_u', 0) }}" required>
+                    @error('p_u') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="row mb-3 align-items-center">
+                <label class="col-md-4 form-label">Duración en días</label>
+                <div class="col-md-8">
+                    <input type="number" step="1" min="0" name="duracion_en_dias" class="form-control" value="{{ old('duracion_en_dias') }}">
+                    @error('duracion_en_dias') <span class="text-danger mt-1 d-block" style="font-size:0.85rem;">{{ $message }}</span> @enderror
                 </div>
             </div>
 

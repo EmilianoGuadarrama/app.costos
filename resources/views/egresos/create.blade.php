@@ -22,44 +22,49 @@
         <form action="{{ route('egresos.store') }}" method="POST">
             @csrf
             <div class="form-group">
-                <label for="proyecto_id">Proyecto *</label>
-                <select id="proyecto_id" name="proyecto_id" class="form-select" required>
-                    <option value="">Seleccione un proyecto</option>
-                    @foreach($proyectos as $p)
-                        <option value="{{ $p->id }}" {{ old('proyecto_id') == $p->id ? 'selected' : '' }}>{{ $p->nombre }}</option>
+                <label for="id_obra">Obra *</label>
+                <select id="id_obra" name="id_obra" class="form-select" required>
+                    <option value="">Seleccione una obra</option>
+                    @foreach($obras as $o)
+                        <option value="{{ $o->id }}" {{ old('id_obra') == $o->id ? 'selected' : '' }}>{{ $o->datosDeObra?->nombre ?? 'Obra #'.$o->id }}</option>
                     @endforeach
                 </select>
-                @error('proyecto_id') <span class="text-danger">{{ $message }}</span> @enderror
+                @error('id_obra') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
-                <label for="categoria_id">Categoría *</label>
-                <select id="categoria_id" name="categoria_id" class="form-select" required>
-                    <option value="">Seleccione una categoría</option>
-                    @foreach($categorias as $c)
-                        <option value="{{ $c->id }}" {{ old('categoria_id') == $c->id ? 'selected' : '' }}>{{ $c->nombre }}</option>
+                <label for="id_area">Área *</label>
+                <select id="id_area" name="id_area" class="form-select" required>
+                    <option value="">Seleccione un área</option>
+                    @foreach($areas as $a)
+                        <option value="{{ $a->id }}" {{ old('id_area') == $a->id ? 'selected' : '' }}>{{ $a->abreviatura }} - {{ $a->descripcion }}</option>
                     @endforeach
                 </select>
-                @error('categoria_id') <span class="text-danger">{{ $message }}</span> @enderror
+                @error('id_area') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
-                <label for="concepto">Concepto *</label>
-                <input type="text" id="concepto" name="concepto" class="form-control" value="{{ old('concepto') }}" required maxlength="255">
+                <label for="id_persona">Persona / Proveedor</label>
+                <select id="id_persona" name="id_persona" class="form-select">
+                    <option value="">-- Opcional --</option>
+                    @foreach($personas as $p)
+                        <option value="{{ $p->id }}" {{ old('id_persona') == $p->id ? 'selected' : '' }}>{{ $p->nombre }} {{ $p->apellido_paterno }}</option>
+                    @endforeach
+                </select>
+                @error('id_persona') <span class="text-danger">{{ $message }}</span> @enderror
+            </div>
+            <div class="form-group">
+                <label for="concepto">Concepto (Descripción)</label>
+                <input type="text" id="concepto" name="concepto" class="form-control" value="{{ old('concepto') }}" maxlength="255">
                 @error('concepto') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
-                <label for="monto">Monto *</label>
-                <input type="number" step="0.01" id="monto" name="monto" class="form-control" value="{{ old('monto', 0) }}" required>
-                @error('monto') <span class="text-danger">{{ $message }}</span> @enderror
+                <label for="pago">Monto del pago *</label>
+                <input type="number" step="0.01" id="pago" name="pago" class="form-control" value="{{ old('pago', 0) }}" required>
+                @error('pago') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
                 <label for="fecha">Fecha *</label>
                 <input type="date" id="fecha" name="fecha" class="form-control" value="{{ old('fecha', date('Y-m-d')) }}" required>
                 @error('fecha') <span class="text-danger">{{ $message }}</span> @enderror
-            </div>
-            <div class="form-group">
-                <label for="comprobante">Comprobante (Ruta/URL)</label>
-                <input type="text" id="comprobante" name="comprobante" class="form-control" value="{{ old('comprobante') }}" maxlength="255">
-                @error('comprobante') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <button type="submit" class="btn-submit">Guardar Egreso</button>
         </form>

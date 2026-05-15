@@ -69,10 +69,10 @@
                     @php $matId = $material->id; @endphp
                     <tr class="project-row">
                         <td>
-                            <div class="title-main">{{ $material->descripcion ?? 'Sin descripción' }}<span class="badge-dark-mini">{{ $material->clave ?? 'MAT' }}</span></div>
-                            <div class="desc-text">Material registrado para uso en análisis de precio unitario.</div>
+                            <div class="title-main">{{ $material->nombre ?? 'Sin nombre' }}<span class="badge-dark-mini">MAT-{{ $matId }}</span></div>
+                            <div class="desc-text">{{ $material->descripcion ?? 'Sin descripción' }}</div>
                         </td>
-                        <td><span class="badge-soft">${{ number_format((float) ($material->precio_unitario ?? 0), 2) }}</span></td>
+                        <td><span class="badge-soft">${{ number_format((float) ($material->precio_x_unidad ?? 0), 2) }}</span></td>
                         <td><div class="info-stack">{{ optional($material->unidadMedida)->nombre ?? 'N/D' }}</div></td>
                         <td class="action-cell">
                             <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verMatModal{{ $matId }}"><i class="bi bi-eye"></i></button>
@@ -81,10 +81,10 @@
                     </tr>
                     <div class="modal fade" id="verMatModal{{ $matId }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
-                            <div class="modal-header"><h5 class="modal-title">{{ $material->descripcion ?? 'Material' }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                            <div class="modal-header"><h5 class="modal-title">{{ $material->nombre ?? 'Material' }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
                             <div class="modal-body"><div class="detail-grid">
-                                <div class="detail-box"><h6>Información</h6><p><strong>Clave:</strong> {{ $material->clave ?? '—' }}</p><p><strong>Descripción:</strong> {{ $material->descripcion ?? '—' }}</p></div>
-                                <div class="detail-box"><h6>Precio y Unidad</h6><p><strong>Precio unitario:</strong> ${{ number_format((float) ($material->precio_unitario ?? 0), 2) }}</p><p><strong>Unidad:</strong> {{ optional($material->unidadMedida)->nombre ?? 'N/D' }}</p></div>
+                                <div class="detail-box"><h6>Información</h6><p><strong>Nombre:</strong> {{ $material->nombre ?? '—' }}</p><p><strong>Descripción:</strong> {{ $material->descripcion ?? '—' }}</p></div>
+                                <div class="detail-box"><h6>Precio y Unidad</h6><p><strong>Precio unitario:</strong> ${{ number_format((float) ($material->precio_x_unidad ?? 0), 2) }}</p><p><strong>Unidad:</strong> {{ optional($material->unidadMedida)->nombre ?? 'N/D' }}</p></div>
                             </div></div>
                             <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button><a href="{{ route('materiales.edit', $matId) }}" class="btn-modal-dark">Editar</a></div>
                         </div></div>
@@ -92,7 +92,7 @@
                     <div class="modal fade" id="eliminarMatModal{{ $matId }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
                             <div class="modal-header"><h5 class="modal-title">Eliminar material</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
-                            <div class="modal-body">¿Deseas eliminar el material <strong>{{ $material->descripcion ?? '' }}</strong>?<br><br>Esta acción no se puede deshacer.</div>
+                            <div class="modal-body">¿Deseas eliminar el material <strong>{{ $material->nombre ?? '' }}</strong>?<br><br>Esta acción no se puede deshacer.</div>
                             <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cancelar</button><form action="{{ route('materiales.destroy', $matId) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="btn-modal-danger">Eliminar</button></form></div>
                         </div></div>
                     </div>

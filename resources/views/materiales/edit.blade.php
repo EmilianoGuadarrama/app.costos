@@ -33,48 +33,48 @@
             @method('PUT')
 
             <div class="form-group">
-                <label for="clave">Clave *</label>
-                <input type="text" id="clave" name="clave" class="form-control" value="{{ old('clave', $material->clave) }}" required maxlength="50">
-                @error('clave')
+                <label for="nombre">Nombre *</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ old('nombre', $material->nombre) }}" required maxlength="255">
+                @error('nombre')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="descripcion">Descripción *</label>
-                <input type="text" id="descripcion" name="descripcion" class="form-control" value="{{ old('descripcion', $material->descripcion) }}" required maxlength="150">
+                <label for="descripcion">Descripción</label>
+                <input type="text" id="descripcion" name="descripcion" class="form-control" value="{{ old('descripcion', $material->descripcion) }}" maxlength="255">
                 @error('descripcion')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="marca">Marca *</label>
-                <input type="text" id="marca" name="marca" class="form-control" value="{{ old('marca', $material->marca) }}" required maxlength="120">
+                <label for="marca">Marca</label>
+                <input type="text" id="marca" name="marca" class="form-control" value="{{ old('marca', $material->marca) }}" maxlength="120">
                 @error('marca')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="unidad_medida_id">Unidad de Medida *</label>
-                <select id="unidad_medida_id" name="unidad_medida_id" class="form-select" required>
+                <label for="id_unidad_medida">Unidad de Medida *</label>
+                <select id="id_unidad_medida" name="id_unidad_medida" class="form-select" required>
                     <option value="">Seleccione</option>
                     @foreach($unidades as $u)
-                        <option value="{{ $u->id }}" {{ old('unidad_medida_id', $material->unidad_medida_id) == $u->id ? 'selected' : '' }}>
+                        <option value="{{ $u->id }}" {{ old('id_unidad_medida', $material->id_unidad_medida) == $u->id ? 'selected' : '' }}>
                             {{ $u->nombre }} ({{ $u->abreviatura }})
                         </option>
                     @endforeach
                 </select>
-                @error('unidad_medida_id')
+                @error('id_unidad_medida')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="precio_unitario">Precio Unitario *</label>
-                <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" class="form-control" value="{{ old('precio_unitario', $material->precio_unitario) }}" required>
-                @error('precio_unitario')
+                <label for="precio_x_unidad">Precio por Unidad *</label>
+                <input type="number" step="0.01" id="precio_x_unidad" name="precio_x_unidad" class="form-control" value="{{ old('precio_x_unidad', $material->precio_x_unidad) }}" required>
+                @error('precio_x_unidad')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>

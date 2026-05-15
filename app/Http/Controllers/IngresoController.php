@@ -1,75 +1,46 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Ingreso;
-use App\Models\Proyecto;
-use App\Models\Cliente;
+use App\Models\IngresoTotal;
+use App\Models\ObraIniciada;
+use App\Models\Empleado;
 use Illuminate\Http\Request;
 
 class IngresoController extends Controller
 {
     public function index()
     {
-        $ingresos = Ingreso::with(['proyecto', 'cliente'])->latest()->get();
+        $ingresos = IngresoTotal::with(['obra.datosDeObra','empleado.persona'])
+            ->latest('fecha')->paginate(30);
         return view('ingresos.index', compact('ingresos'));
     }
 
     public function create()
     {
-        $proyectos = Proyecto::orderBy('nombre')->get();
-        $clientes = Cliente::orderBy('nombre')->get();
-        return view('ingresos.create', compact('proyectos', 'clientes'));
+        $obras     = ObraIniciada::with('datosDeObra')->get();
+        $empleados = Empleado::with('persona')->get();
+        return view('ingresos.create', compact('obras','empleados'));
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'proyecto_id' => 'required|exists:proyectos,id',
-            'cliente_id' => 'required|exists:clientes,id',
-            'concepto' => 'required|string|max:255',
-            'monto' => 'required|numeric|min:0',
-            'fecha' => 'required|date',
-            'comprobante' => 'nullable|string|max:255',
+        $request->validate([
+            'id_obra'     => 'required|exists:obras_iniciadas,id',
+            'id_empleado' => 'nullable|exists:empleados,id',
+            'fecha'       => 'required|date',
+            'monto_dado'  => 'required|numeric|min:0',
+            'concepto'    => 'nullable|string',
         ]);
-
-        Ingreso::create($data);
-
-        return redirect()->route('ingresos.index')->with('success', 'Ingreso creado correctamente.');
+        IngresoTotal::create($request->only(
+            'concepto','id_empleado','id_obra','fecha',
+            'id_total_obra_o_presupuesto','monto_dado','saldo_cubierto','porcentaje_cubierto'
+        ));
+        return redirect()->route('ingresos.index')->with('success', 'Ingreso registrado.');
     }
 
-    public function show(Ingreso $ingreso)
+    public function destroy($id)
     {
-        $ingreso->load(['proyecto', 'cliente']);
-        return view('ingresos.show', compact('ingreso'));
-    }
-
-    public function edit(Ingreso $ingreso)
-    {
-        $proyectos = Proyecto::orderBy('nombre')->get();
-        $clientes = Cliente::orderBy('nombre')->get();
-        return view('ingresos.edit', compact('ingreso', 'proyectos', 'clientes'));
-    }
-
-    public function update(Request $request, Ingreso $ingreso)
-    {
-        $data = $request->validate([
-            'proyecto_id' => 'required|exists:proyectos,id',
-            'cliente_id' => 'required|exists:clientes,id',
-            'concepto' => 'required|string|max:255',
-            'monto' => 'required|numeric|min:0',
-            'fecha' => 'required|date',
-            'comprobante' => 'nullable|string|max:255',
-        ]);
-
-        $ingreso->update($data);
-
-        return redirect()->route('ingresos.index')->with('success', 'Ingreso actualizado correctamente.');
-    }
-
-    public function destroy(Ingreso $ingreso)
-    {
-        $ingreso->delete();
-        return redirect()->route('ingresos.index')->with('success', 'Ingreso eliminado correctamente.');
+        IngresoTotal::findOrFail($id)->delete();
+        return redirect()->route('ingresos.index')->with('success', 'Ingreso eliminado.');
     }
 }

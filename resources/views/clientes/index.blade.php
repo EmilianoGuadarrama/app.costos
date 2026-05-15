@@ -57,10 +57,10 @@
                 @forelse($clientes as $cliente)
                     @php $clienteId = $cliente->id; @endphp
                     <tr class="project-row">
-                        <td><strong>{{ $cliente->nombre }}</strong><br><small class="text-muted">{{ $cliente->razon_social }}</small></td>
-                        <td><span class="badge-soft">{{ $cliente->tipo_persona }}</span></td>
-                        <td>{{ $cliente->rfc ?? 'N/A' }}</td>
-                        <td>{{ $cliente->correo }}<br><small>{{ $cliente->telefono }}</small></td>
+                        <td><strong>{{ $cliente->nombre_o_razon_social ?? $cliente->persona?->nombre_completo ?? '—' }}</strong><br><small class="text-muted">Cta: {{ $cliente->cuenta_catastral ?? 'N/D' }}</small></td>
+                        <td><span class="badge-soft">{{ $cliente->uso_suelo ?? 'N/D' }}</span></td>
+                        <td>{{ $cliente->persona?->rfc ?? 'N/A' }}</td>
+                        <td>{{ $cliente->email ?? 'N/A' }}<br><small>{{ $cliente->telefono ?? 'N/A' }}</small></td>
                         <td class="action-cell">
                             <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verClienteModal{{ $clienteId }}"><i class="bi bi-eye"></i></button>
                             <button type="button" class="btn-icon-action" title="Eliminar" data-bs-toggle="modal" data-bs-target="#eliminarClienteModal{{ $clienteId }}"><i class="bi bi-trash3"></i></button>
@@ -70,8 +70,8 @@
                         <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
                             <div class="modal-header"><h5 class="modal-title">{{ $cliente->nombre }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
                             <div class="modal-body"><div class="detail-grid">
-                                <div class="detail-box"><h6>Datos del cliente</h6><p><strong>Nombre:</strong> {{ $cliente->nombre }}</p><p><strong>Razón social:</strong> {{ $cliente->razon_social ?? '—' }}</p><p><strong>Tipo persona:</strong> {{ $cliente->tipo_persona }}</p><p><strong>RFC:</strong> {{ $cliente->rfc ?? '—' }}</p></div>
-                                <div class="detail-box"><h6>Contacto</h6><p><strong>Dirección:</strong> {{ $cliente->direccion ?? '—' }}</p><p><strong>Teléfono:</strong> {{ $cliente->telefono ?? '—' }}</p><p><strong>Correo:</strong> {{ $cliente->correo ?? '—' }}</p></div>
+                                <div class="detail-box"><h6>Datos del cliente</h6><p><strong>Nombre / Razón social:</strong> {{ $cliente->nombre_o_razon_social ?? $cliente->persona?->nombre_completo ?? '—' }}</p><p><strong>Uso de suelo:</strong> {{ $cliente->uso_suelo ?? '—' }}</p><p><strong>Cuenta catastral:</strong> {{ $cliente->cuenta_catastral ?? '—' }}</p><p><strong>RFC:</strong> {{ $cliente->persona?->rfc ?? '—' }}</p></div>
+                                <div class="detail-box"><h6>Contacto</h6><p><strong>Dirección:</strong> {{ $cliente->direccionFiscal?->calle ?? $cliente->persona?->direccion?->calle ?? '—' }}</p><p><strong>Teléfono:</strong> {{ $cliente->telefono ?? '—' }}</p><p><strong>Correo:</strong> {{ $cliente->email ?? '—' }}</p></div>
                             </div></div>
                             <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button><a href="{{ route('clientes.edit', $clienteId) }}" class="btn-modal-dark">Editar</a></div>
                         </div></div>

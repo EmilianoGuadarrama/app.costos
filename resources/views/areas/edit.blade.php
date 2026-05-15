@@ -33,20 +33,14 @@
                 @csrf
                 @method('PUT')
                 <div class="form-group">
-                    <label for="clave">Clave del Área *</label>
-                    <input type="text" id="clave" name="clave" class="form-control" value="{{ old('clave', $area->clave) }}" required maxlength="20">
-                    @error('clave') <span class="text-danger">{{ $message }}</span> @enderror
+                    <label for="abreviatura">Abreviatura *</label>
+                    <input type="text" id="abreviatura" name="abreviatura" class="form-control" value="{{ old('abreviatura', $area->abreviatura) }}" required maxlength="50">
+                    @error('abreviatura') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="nombre">Nombre *</label>
-                    <input type="text" id="nombre" name="nombre" class="form-control" value="{{ old('nombre', $area->nombre) }}" required maxlength="150">
-                    @error('nombre') <span class="text-danger">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="descripcion">Descripción</label>
-                    <textarea id="descripcion" name="descripcion" class="form-control" rows="3" maxlength="255">{{ old('descripcion', $area->descripcion) }}</textarea>
+                    <label for="descripcion">Descripción *</label>
+                    <input type="text" id="descripcion" name="descripcion" class="form-control" value="{{ old('descripcion', $area->descripcion) }}" required maxlength="255">
                     @error('descripcion') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
 

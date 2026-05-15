@@ -84,7 +84,7 @@
                 <table class="project-table">
                     <thead>
                     <tr>
-                        <th style="width:30%;">Nombre y Clave</th>
+                        <th style="width:20%;">Abreviatura</th>
                         <th>Descripción</th>
                         <th style="text-align:right;">Acciones</th>
                     </tr>
@@ -94,13 +94,10 @@
                         @php $areaId = $area->id; @endphp
                         <tr class="project-row">
                             <td>
-                                <div class="title-main">
-                                    {{ $area->nombre }}
-                                    <span class="badge-dark-mini">{{ $area->clave }}</span>
-                                </div>
+                                <span class="badge-dark-mini">{{ $area->abreviatura }}</span>
                             </td>
                             <td>
-                                {{ $area->descripcion ?? 'Sin descripción' }}
+                                {{ $area->descripcion }}
                             </td>
                             <td class="action-cell">
                                 <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verAreaModal{{ $areaId }}">
@@ -128,13 +125,8 @@
                                         <div class="detail-grid">
                                             <div class="detail-box">
                                                 <h6>Información General</h6>
-                                                <p><strong>Clave:</strong> {{ $area->clave }}</p>
-                                                <p><strong>Nombre:</strong> {{ $area->nombre }}</p>
-                                            </div>
-
-                                            <div class="detail-box">
-                                                <h6>Descripción</h6>
-                                                <p>{{ $area->descripcion ?? 'Sin descripción registrada.' }}</p>
+                                                <p><strong>Abreviatura:</strong> {{ $area->abreviatura }}</p>
+                                                <p><strong>Descripción:</strong> {{ $area->descripcion }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -158,7 +150,7 @@
 
                                     <div class="modal-body">
                                         ¿Deseas eliminar el área
-                                        <strong>{{ $area->nombre }}</strong>?
+                                        <strong>{{ $area->descripcion }}</strong>?
                                         <br><br>
                                         Esta acción no se puede deshacer.
                                     </div>

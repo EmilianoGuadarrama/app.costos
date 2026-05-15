@@ -32,20 +32,14 @@
             <form action="{{ route('areas.store') }}" method="POST">
                 @csrf
                 <div class="form-group">
-                    <label for="clave">Clave del Área *</label>
-                    <input type="text" id="clave" name="clave" class="form-control" value="{{ old('clave') }}" required maxlength="20">
-                    @error('clave') <span class="text-danger">{{ $message }}</span> @enderror
+                    <label for="abreviatura">Abreviatura *</label>
+                    <input type="text" id="abreviatura" name="abreviatura" class="form-control" value="{{ old('abreviatura') }}" required maxlength="50">
+                    @error('abreviatura') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="nombre">Nombre *</label>
-                    <input type="text" id="nombre" name="nombre" class="form-control" value="{{ old('nombre') }}" required maxlength="150">
-                    @error('nombre') <span class="text-danger">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="form-group">
-                    <label for="descripcion">Descripción</label>
-                    <textarea id="descripcion" name="descripcion" class="form-control" rows="3" maxlength="255">{{ old('descripcion') }}</textarea>
+                    <label for="descripcion">Descripción *</label>
+                    <input type="text" id="descripcion" name="descripcion" class="form-control" value="{{ old('descripcion') }}" required maxlength="255">
                     @error('descripcion') <span class="text-danger">{{ $message }}</span> @enderror
                 </div>
 

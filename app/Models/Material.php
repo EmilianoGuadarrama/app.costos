@@ -1,26 +1,13 @@
 <?php
-
 namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/** materiales: id, nombre, descripcion, marca, id_unidad_medida, cantidad_contenida, precio_x_unidad */
 class Material extends Model
 {
-    use HasFactory;
-
     protected $table = 'materiales';
+    protected $fillable = ['nombre','descripcion','marca','id_unidad_medida','cantidad_contenida','precio_x_unidad'];
 
-    protected $fillable = [
-        'clave',
-        'descripcion',
-        'marca',
-        'unidad_medida_id',
-        'precio_unitario',
-    ];
-
-    public function unidadMedida()
-    {
-        return $this->belongsTo(UnidadMedida::class, 'unidad_medida_id');
-    }
+    public function unidadMedida()     { return $this->belongsTo(UnidadMedida::class, 'id_unidad_medida'); }
+    public function asignaciones()     { return $this->hasMany(AsignaMaterial::class, 'id_material'); }
 }

@@ -1,0 +1,57 @@
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * obras_iniciadas: id, id_datos_de_obra, encargado_id_empleado, fecha_inicio,
+ *                  duracion, precio_por_m2_estimado, total_de_obra_estimado,
+ *                  total_presupuestado, total_por_m2
+ *
+ * Esta es la entidad central de "proyecto/obra".
+ */
+class ObraIniciada extends Model
+{
+    protected $table = 'obras_iniciadas';
+    protected $fillable = [
+        'id_datos_de_obra','encargado_id_empleado','fecha_inicio','duracion',
+        'precio_por_m2_estimado','total_de_obra_estimado','total_presupuestado','total_por_m2',
+    ];
+
+    protected $casts = ['fecha_inicio' => 'date'];
+
+    public function datosDeObra()    { return $this->belongsTo(DatosDeObra::class, 'id_datos_de_obra'); }
+    public function encargado()      { return $this->belongsTo(Empleado::class, 'encargado_id_empleado'); }
+    public function niveles()        { return $this->hasMany(Nivel::class, 'id_obra'); }
+    public function obrasProceso()   { return $this->hasMany(ObraProceso::class, 'id_obras_iniciadas'); }
+    public function asignaConceptos(){ return $this->hasMany(AsignaConcepto::class, 'id_obra'); }
+    public function asignaMateriales(){ return $this->hasMany(AsignaMaterial::class, 'id_obra'); }
+    public function asignaMaquinaria(){ return $this->hasMany(AsignaMaquinaria::class, 'id_obra'); }
+    public function preProveedores() { return $this->hasMany(PreProveedor::class, 'id_obra'); }
+    public function preMateriales()  { return $this->hasMany(PreMaterial::class, 'id_obra'); }
+    public function totalBloque()    { return $this->hasMany(TotalBloque::class, 'id_obra'); }
+    public function totalObra()      { return $this->hasOne(TotalObra::class, 'id_obra'); }
+    public function cajaGeneral()    { return $this->hasOne(CajaGeneral::class, 'id_obra'); }
+    public function egresos()        { return $this->hasMany(EgresoTotal::class, 'id_obra'); }
+    public function ingresos()       { return $this->hasMany(IngresoTotal::class, 'id_obra'); }
+
+    /** Nombre de la obra (viene de datos_de_obra) */
+    public function getNombreAttribute(): string
+    {
+        return $this->datosDeObra?->nombre ?? "Obra #{$this->id}";
+    }
+
+    /** Días transcurridos desde inicio */
+    public function getDiasTranscurridosAttribute(): int
+    {
+        if (!$this->fecha_inicio) return 0;
+        return (int) $this->fecha_inicio->diffInDays(now(), false);
+    }
+
+    /** Días que faltan */
+    public function getDiasFaltanAttribute(): ?int
+    {
+        $dur = (int) $this->duracion;
+        if (!$dur || !$this->fecha_inicio) return null;
+        return $dur - $this->dias_transcurridos;
+    }
+}

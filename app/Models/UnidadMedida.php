@@ -1,19 +1,12 @@
 <?php
-
 namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class UnidadMedida extends Model
 {
-    use HasFactory;
+    protected $table = 'unidad_medida';
+    protected $fillable = ['abreviatura', 'nombre'];
 
-    protected $table = 'unidades_medida';
-
-    protected $fillable = [
-        'nombre',
-        'abreviatura',
-        'descripcion',
-    ];
+    public function materiales()  { return $this->hasMany(Material::class, 'id_unidad_medida'); }
+    public function maquinaria()  { return $this->hasMany(Maquinaria::class, 'id_unidad_medida'); }
 }

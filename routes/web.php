@@ -2,92 +2,76 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Controladores Base
-use App\Http\Controllers\UnidadMedidaController;
-use App\Http\Controllers\AreaController;
-use App\Http\Controllers\CategoriaEgresoController;
-
-// Controladores de Elementos
-use App\Http\Controllers\ConceptoController;
-use App\Http\Controllers\GeneradorController;
-use App\Http\Controllers\MaterialController;
-use App\Http\Controllers\ManoObraController;
-use App\Http\Controllers\MaquinariaEquipoController;
-use App\Http\Controllers\IndirectoController;
-
-// Controladores de Entidades Principales
-use App\Http\Controllers\ClienteController;
-use App\Http\Controllers\EmpresaController;
-use App\Http\Controllers\ProveedorController;
-use App\Http\Controllers\ResponsableTecnicoController;
-use App\Http\Controllers\EstadoProyectoController;
-
-// Controladores de Proyectos y Presupuestos
-use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\ObraController;
 use App\Http\Controllers\PresupuestoController;
-use App\Http\Controllers\AnalisisPuController;
-use App\Http\Controllers\ReporteGeneradoController;
-
-// Controladores de Movimientos Financieros
-use App\Http\Controllers\CajaChicaController;
-use App\Http\Controllers\MovimientoCajaChicaController;
+use App\Http\Controllers\ConceptoController;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\MaquinariaController;
+use App\Http\Controllers\AreaController;
+use App\Http\Controllers\UnidadMedidaController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\EgresoController;
-use App\Http\Controllers\CompraController;
+use App\Http\Controllers\CajaGeneralController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Aquí se definen todas las rutas para la aplicación "App Costos".
-| Hemos centralizado todo utilizando Resource Controllers para
-| mantener una estructura MVC limpia y predecible.
-|
-*/
-
-// Ruta principal corregida
-Route::get('/', [ProyectoController::class, 'create'])->name('inicio');
+// ── Inicio ───────────────────────────────────────────────────────────────────
+Route::get('/', [ObraController::class, 'index'])->name('inicio');
 
 // ==========================================
-// 1. CONFIGURACIONES BASE
+// 1. OBRAS
 // ==========================================
-Route::resource('unidad_medida', UnidadMedidaController::class)->parameters(['unidad_medida' => 'unidad_medida']);
-Route::resource('areas', AreaController::class);
-Route::resource('categorias_egreso', CategoriaEgresoController::class);
+Route::resource('obras', ObraController::class);
 
 // ==========================================
-// 2. CATÁLOGOS Y ELEMENTOS
+// 2. PRESUPUESTO (asigna_conceptos + asigna_materiales + asigna_maquinaria)
+// ==========================================
+Route::prefix('obras/{obraId}/presupuesto')->group(function () {
+
+    // Ver presupuesto completo por bloques
+    Route::get('/', [PresupuestoController::class, 'show'])->name('obras.presupuesto');
+
+    // Formulario agregar conceptos
+    Route::get('/agregar', [PresupuestoController::class, 'create'])->name('obras.presupuesto.create');
+    Route::post('/conceptos', [PresupuestoController::class, 'storeConceptos'])->name('obras.presupuesto.conceptos.store');
+    Route::delete('/conceptos/{id}', [PresupuestoController::class, 'destroyConcepto'])->name('obras.presupuesto.conceptos.destroy');
+
+    // Formulario agregar materiales (GET + POST separados)
+    Route::get('/agregar-materiales', [PresupuestoController::class, 'createMateriales'])->name('obras.presupuesto.materiales.create');
+    Route::post('/materiales', [PresupuestoController::class, 'storeMateriales'])->name('obras.presupuesto.materiales.store');
+    Route::delete('/materiales/{id}', [PresupuestoController::class, 'destroyMaterial'])->name('obras.presupuesto.materiales.destroy');
+
+    // *** FORMULARIO UNIFICADO (Conceptos + Materiales + Maquinaria) ***
+    Route::get('/agregar-todo', [PresupuestoController::class, 'createUnificado'])->name('obras.presupuesto.unificado.create');
+    Route::post('/agregar-todo', [PresupuestoController::class, 'storeUnificado'])->name('obras.presupuesto.unificado.store');
+
+    // Edición en línea
+    Route::post('/actualizar-todo', [PresupuestoController::class, 'updateAll'])->name('obras.presupuesto.updateAll');
+});
+
+// ==========================================
+// 3. CATÁLOGOS
 // ==========================================
 Route::resource('conceptos', ConceptoController::class);
 Route::resource('materiales', MaterialController::class);
-Route::resource('mano_obra', ManoObraController::class)->parameters(['mano_obra' => 'mano_obra']);
-Route::resource('maquinaria_equipo', MaquinariaEquipoController::class)->parameters(['maquinaria_equipo' => 'maquinaria_equipo']);
-Route::resource('indirectos', IndirectoController::class);
-Route::resource('generadores', GeneradorController::class);
+Route::resource('maquinaria', MaquinariaController::class);
+Route::resource('areas', AreaController::class);
+Route::resource('unidad_medida', UnidadMedidaController::class)
+    ->parameters(['unidad_medida' => 'unidad_medida']);
 
 // ==========================================
-// 3. ENTIDADES PRINCIPALES
+// 4. ENTIDADES
 // ==========================================
 Route::resource('clientes', ClienteController::class);
-Route::resource('empresas', EmpresaController::class);
 Route::resource('proveedores', ProveedorController::class);
-Route::resource('responsables_tecnicos', ResponsableTecnicoController::class);
-Route::resource('estados_proyecto', EstadoProyectoController::class);
+Route::resource('empleados', EmpleadoController::class);
 
 // ==========================================
-// 4. PROYECTOS Y PRESUPUESTOS
+// 5. FINANZAS
 // ==========================================
-Route::resource('proyectos', ProyectoController::class);
-Route::resource('presupuestos', PresupuestoController::class);
-Route::resource('analisis_pu', AnalisisPuController::class)->parameters(['analisis_pu' => 'analisis_pu']);
-Route::resource('reportes', ReporteGeneradoController::class);
-
-// ==========================================
-// 5. MOVIMIENTOS FINANCIEROS Y CAJA
-// ==========================================
-Route::resource('cajas_chicas', CajaChicaController::class);
-Route::resource('movimientos_caja_chica', MovimientoCajaChicaController::class)->parameters(['movimientos_caja_chica' => 'movimientos_caja_chica']);
 Route::resource('ingresos', IngresoController::class);
 Route::resource('egresos', EgresoController::class);
-Route::resource('compras', CompraController::class);
+// Caja general — solo index y show (no hay CRUD completo)
+Route::get('caja_general', [CajaGeneralController::class, 'index'])->name('caja_general.index');
+Route::get('caja_general/{id}', [CajaGeneralController::class, 'show'])->name('caja_general.show');

@@ -74,11 +74,14 @@
                         @php $conceptoId = $concepto->id; @endphp
                         <tr class="project-row">
                             <td>
-                                <div class="title-main">{{ $concepto->descripcion }}<span class="badge-dark-mini">{{ $concepto->clave }}</span></div>
-                                <div class="desc-text">Partida: {{ $concepto->partida ?? 'N/D' }} · Subpartida: {{ $concepto->subpartida ?? 'N/D' }}</div>
+                                <div class="title-main">{{ $concepto->descripcion }}<span class="badge-dark-mini">CON-{{ $conceptoId }}</span></div>
+                                <div class="desc-text">Duración: {{ $concepto->duracion_en_dias ?? 'N/D' }} días</div>
                             </td>
-                            <td><div class="info-stack"><div><strong>Unidad:</strong> {{ optional($concepto->unidadMedida)->abreviatura ?? 'N/D' }}</div></div></td>
-                            <td><span class="badge-soft">{{ optional($concepto->area)->nombre ?? 'Sin Área' }}</span></td>
+                            <td><div class="info-stack">
+                                <div><strong>P.U.:</strong> ${{ number_format($concepto->p_u ?? 0, 2) }}</div>
+                                <div><strong>Unidad:</strong> {{ optional($concepto->unidadMedida)->abreviatura ?? 'N/D' }}</div>
+                            </div></td>
+                            <td><span class="badge-soft">{{ optional($concepto->area)->descripcion ?? 'Sin Área' }}</span></td>
                             <td class="action-cell">
                                 <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verConceptoModal{{ $conceptoId }}"><i class="bi bi-eye"></i></button>
                                 <button type="button" class="btn-icon-action" title="Eliminar" data-bs-toggle="modal" data-bs-target="#eliminarConceptoModal{{ $conceptoId }}"><i class="bi bi-trash3"></i></button>
@@ -88,8 +91,8 @@
                             <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
                                 <div class="modal-header"><h5 class="modal-title">{{ $concepto->descripcion }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
                                 <div class="modal-body"><div class="detail-grid">
-                                    <div class="detail-box"><h6>Información general</h6><p><strong>Clave:</strong> {{ $concepto->clave }}</p><p><strong>Descripción:</strong> {{ $concepto->descripcion }}</p><p><strong>Unidad:</strong> {{ optional($concepto->unidadMedida)->abreviatura ?? 'N/D' }}</p></div>
-                                    <div class="detail-box"><h6>Clasificación</h6><p><strong>Área:</strong> {{ optional($concepto->area)->nombre ?? 'Sin Área' }}</p><p><strong>Partida:</strong> {{ $concepto->partida ?? 'N/D' }}</p><p><strong>Subpartida:</strong> {{ $concepto->subpartida ?? 'N/D' }}</p></div>
+                                    <div class="detail-box"><h6>Información general</h6><p><strong>ID:</strong> CON-{{ $conceptoId }}</p><p><strong>Descripción:</strong> {{ $concepto->descripcion }}</p><p><strong>P.U.:</strong> ${{ number_format($concepto->p_u ?? 0, 2) }}</p><p><strong>Unidad:</strong> {{ optional($concepto->unidadMedida)->abreviatura ?? 'N/D' }}</p></div>
+                                    <div class="detail-box"><h6>Clasificación</h6><p><strong>Área:</strong> {{ optional($concepto->area)->descripcion ?? 'Sin Área' }}</p><p><strong>Duración:</strong> {{ $concepto->duracion_en_dias ?? 'N/D' }} días</p></div>
                                 </div></div>
                                 <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button><a href="{{ route('conceptos.edit', $conceptoId) }}" class="btn-modal-dark">Editar</a></div>
                             </div></div>

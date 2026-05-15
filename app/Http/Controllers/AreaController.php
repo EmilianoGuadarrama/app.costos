@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Area;
@@ -9,7 +8,7 @@ class AreaController extends Controller
 {
     public function index()
     {
-        $areas = Area::latest()->get();
+        $areas = Area::orderBy('abreviatura')->paginate(50);
         return view('areas.index', compact('areas'));
     }
 
@@ -20,43 +19,40 @@ class AreaController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'clave' => 'required|string|max:20|unique:areas,clave',
-            'nombre' => 'required|string|max:150',
-            'descripcion' => 'nullable|string|max:255',
+        $request->validate([
+            'abreviatura' => 'required|string|max:50',
+            'descripcion' => 'required|string|max:255',
         ]);
-
-        Area::create($data);
-
-        return redirect()->route('areas.index')->with('success', 'Área creada correctamente.');
+        Area::create($request->only('abreviatura','descripcion'));
+        return redirect()->route('areas.index')->with('success', 'Área creada.');
     }
 
-    public function show(Area $area)
+    public function show($id)
     {
+        $area = Area::with('conceptos')->findOrFail($id);
         return view('areas.show', compact('area'));
     }
 
-    public function edit(Area $area)
+    public function edit($id)
     {
+        $area = Area::findOrFail($id);
         return view('areas.edit', compact('area'));
     }
 
-    public function update(Request $request, Area $area)
+    public function update(Request $request, $id)
     {
-        $data = $request->validate([
-            'clave' => 'required|string|max:20|unique:areas,clave,' . $area->id,
-            'nombre' => 'required|string|max:150',
-            'descripcion' => 'nullable|string|max:255',
+        $area = Area::findOrFail($id);
+        $request->validate([
+            'abreviatura' => 'required|string|max:50',
+            'descripcion' => 'required|string|max:255',
         ]);
-
-        $area->update($data);
-
-        return redirect()->route('areas.index')->with('success', 'Área actualizada correctamente.');
+        $area->update($request->only('abreviatura','descripcion'));
+        return redirect()->route('areas.index')->with('success', 'Área actualizada.');
     }
 
-    public function destroy(Area $area)
+    public function destroy($id)
     {
-        $area->delete();
-        return redirect()->route('areas.index')->with('success', 'Área eliminada correctamente.');
+        Area::findOrFail($id)->delete();
+        return redirect()->route('areas.index')->with('success', 'Área eliminada.');
     }
 }

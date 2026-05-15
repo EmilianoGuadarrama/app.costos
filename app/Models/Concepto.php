@@ -1,42 +1,17 @@
 <?php
-
 namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * conceptos: id, id_area, descripcion, p_u, duracion_en_dias
+ * NOTA: p_u es el precio unitario directo, sin APU separado.
+ */
 class Concepto extends Model
 {
-    use HasFactory;
-
     protected $table = 'conceptos';
+    protected $fillable = ['id_area','descripcion','p_u','duracion_en_dias','id_unidad_medida'];
 
-    protected $fillable = [
-        'clave',
-        'area_id',
-        'partida',
-        'subpartida',
-        'descripcion',
-        'unidad_medida_id',
-    ];
-
-    public function area()
-    {
-        return $this->belongsTo(Area::class);
-    }
-
-    public function unidadMedida()
-    {
-        return $this->belongsTo(UnidadMedida::class);
-    }
-
-    public function analisisPu()
-    {
-        return $this->hasOne(AnalisisPu::class);
-    }
-
-    public function generadores()
-    {
-        return $this->hasMany(Generador::class);
-    }
+    public function area()             { return $this->belongsTo(Area::class, 'id_area'); }
+    public function unidadMedida()     { return $this->belongsTo(UnidadMedida::class, 'id_unidad_medida'); }
+    public function asignaConceptos()  { return $this->hasMany(AsignaConcepto::class, 'id_concepto'); }
 }

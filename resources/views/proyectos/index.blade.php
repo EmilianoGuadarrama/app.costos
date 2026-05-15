@@ -1,346 +1,299 @@
 @extends('layout')
-
-@section('title','Proyectos')
-
+@section('title', 'Proyectos — App Costos')
 @section('content')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+/* ── Dashboard Multi-Proyecto ── */
+.dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+.dash-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+}
+.dash-subtitle {
+    color: #6b7280;
+    font-size: .95rem;
+    margin: 4px 0 0;
+}
+.btn-nuevo-proyecto {
+    background: #111827;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: .75rem 1.4rem;
+    font-weight: 700;
+    font-size: .9rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background .2s;
+}
+.btn-nuevo-proyecto:hover { background: #374151; color: #fff; }
 
-    <style>
-        .dash-index-view{ min-height:100%; background:#f8f8f8; font-family:"Garamond","Baskerville",serif; color:#111; padding:20px; }
-        .index-panel{ background:#fff; padding:40px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.05); }
-        .header-section{ border-bottom:1px solid #eaeaea; padding-bottom:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
-        .header-section h1{ font-size:2.2rem; font-weight:700; margin:0; }
-        .header-section p{ margin:6px 0 0; color:#666; font-family:Arial,sans-serif; font-size:.92rem; }
-        .header-actions{ display:flex; gap:10px; flex-wrap:wrap; }
-        .btn-filter{ background:#fff; color:#111; border:1px solid #d9d9d9; padding:10px 16px; border-radius:6px; font-size:.8rem; letter-spacing:1px; text-transform:uppercase; font-family:Arial,sans-serif; }
-        .btn-add-new{ background:#111; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-size:.8rem; letter-spacing:1px; text-transform:uppercase; text-decoration:none; font-family:Arial,sans-serif; cursor:pointer; transition:background .3s ease; }
-        .btn-add-new:hover{ background:#333; color:#fff; }
-        .project-table{ width:100%; border-collapse:separate; border-spacing:0 12px; }
-        .project-table thead th{ text-align:left; color:#888; font-size:.75rem; letter-spacing:2px; text-transform:uppercase; padding:0 20px 10px; font-family:Arial,sans-serif; }
-        .project-row{ background:#fff; outline:1px solid #eee; transition:all .3s ease; }
-        .project-row:hover{ transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.05); }
-        .project-row td{ padding:15px 20px; vertical-align:middle; }
-        .title-main{ font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-        .badge-dark-mini{ font-family:Arial,sans-serif; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:6px; background:#111; color:#fff; }
-        .badge-soft{ display:inline-flex; align-items:center; justify-content:center; padding:6px 12px; border-radius:999px; background:#eee; color:#333; font-family:Arial,sans-serif; font-size:.78rem; font-weight:700; }
-        .badge-pendiente{ background:#ececec; color:#444; }
-        .badge-activo{ background:#d1fae5; color:#065f46; }
-        .badge-proceso{ background:#fef3c7; color:#92400e; }
-        .badge-finalizado{ background:#dbeafe; color:#1d4ed8; }
-        .desc-text{ color:#666; font-size:.85rem; line-height:1.4; margin-top:5px; font-family:Arial,sans-serif; }
-        .info-stack{ font-family:Arial,sans-serif; font-size:.9rem; color:#555; line-height:1.55; }
-        .action-cell{ text-align:right; white-space:nowrap; }
-        .btn-icon-action{ background:none; border:none; font-size:1.15rem; cursor:pointer; transition:transform .2s ease, color .3s ease; padding:5px; margin-left:10px; display:inline-flex; align-items:center; justify-content:center; color:#888; text-decoration:none; }
-        .btn-icon-action:hover{ transform:scale(1.15); color:#111; }
-        .empty-state{ text-align:center; padding:28px 18px !important; color:#777; font-style:italic; font-family:Arial,sans-serif; background:#fff; }
+/* Tarjetas de proyecto */
+.proyectos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+}
+.proyecto-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.05);
+    transition: box-shadow .25s, transform .25s;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.proyecto-card:hover {
+    box-shadow: 0 12px 32px rgba(0,0,0,.1);
+    transform: translateY(-2px);
+}
+.proj-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.badge-estado {
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+}
+.badge-activo   { background: #d1fae5; color: #065f46; }
+.badge-pausado  { background: #fef3c7; color: #92400e; }
+.badge-terminado{ background: #e0e7ff; color: #3730a3; }
+.badge-default  { background: #f3f4f6; color: #374151; }
 
-        .modal-content{
-            border:none;
-            border-radius:16px;
-            box-shadow:0 20px 50px rgba(0,0,0,.15);
-        }
+.proj-nombre {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    line-height: 1.3;
+}
+.proj-cliente {
+    font-size: .88rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.proj-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+}
+.stat-box {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 10px 12px;
+    text-align: center;
+}
+.stat-value {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #111827;
+    display: block;
+}
+.stat-label {
+    font-size: .68rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+.stat-box.accent .stat-value { color: #2563eb; }
+.stat-box.danger  .stat-value { color: #dc2626; }
 
-        .modal-header{
-            border-bottom:1px solid #ececec;
-            padding:18px 22px;
-        }
+.proj-progress {
+    background: #f3f4f6;
+    border-radius: 100px;
+    height: 6px;
+    overflow: hidden;
+}
+.proj-progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    transition: width .6s ease;
+}
 
-        .modal-title{
-            font-family:"Garamond","Baskerville",serif;
-            font-size:1.45rem;
-            font-weight:700;
-            color:#111;
-        }
+.proj-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.btn-proj {
+    flex: 1;
+    min-width: 90px;
+    text-align: center;
+    border-radius: 10px;
+    padding: .5rem .8rem;
+    font-size: .78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .2s;
+    border: 1.5px solid;
+}
+.btn-proj-view    { border-color: #111827; color: #111827; background: transparent; }
+.btn-proj-view:hover { background: #111827; color: #fff; }
+.btn-proj-budget  { border-color: #2563eb; color: #2563eb; background: transparent; }
+.btn-proj-budget:hover { background: #2563eb; color: #fff; }
+.btn-proj-finance { border-color: #059669; color: #059669; background: transparent; }
+.btn-proj-finance:hover { background: #059669; color: #fff; }
 
-        .modal-body{
-            padding:22px;
-            font-family:Arial,sans-serif;
-            color:#444;
-        }
+/* Estado vacío */
+.empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: #9ca3af;
+}
+.empty-state i { font-size: 4rem; margin-bottom: 20px; color: #d1d5db; }
+.empty-state h3 { font-size: 1.4rem; font-weight: 700; color: #374151; margin-bottom: 10px; }
+</style>
 
-        .modal-footer{
-            border-top:1px solid #ececec;
-            padding:16px 22px;
-        }
+<div class="dash-header">
+    <div>
+        <h1 class="dash-title">Mis Proyectos</h1>
+        <p class="dash-subtitle">Gestiona todos tus proyectos y presupuestos desde aquí</p>
+    </div>
+    <a href="{{ route('proyectos.create') }}" class="btn-nuevo-proyecto" id="btn-nuevo-proyecto">
+        <i class="bi bi-plus-lg"></i> Nuevo Proyecto
+    </a>
+</div>
 
-        .detail-grid{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:18px;
-        }
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
 
-        .detail-box{
-            background:#fafafa;
-            border:1px solid #ececec;
-            border-radius:12px;
-            padding:16px;
-        }
+@if($proyectos->isEmpty())
+    <div class="empty-state">
+        <i class="bi bi-folder2-open"></i>
+        <h3>Sin proyectos todavía</h3>
+        <p>Crea tu primer proyecto para comenzar a gestionar presupuestos y costos.</p>
+        <a href="{{ route('proyectos.create') }}" class="btn-nuevo-proyecto" style="display:inline-flex;margin-top:16px;">
+            <i class="bi bi-plus-lg"></i> Crear primer proyecto
+        </a>
+    </div>
+@else
+<div class="proyectos-grid">
+    @foreach($proyectos as $proyecto)
+    @php
+        $estado = $proyecto->estado->nombre ?? 'Sin estado';
+        $estadoClass = match(mb_strtolower($estado)) {
+            'activo', 'en curso', 'en proceso' => 'badge-activo',
+            'pausado', 'suspendido'             => 'badge-pausado',
+            'terminado', 'finalizado'           => 'badge-terminado',
+            default                              => 'badge-default',
+        };
 
-        .detail-box h6{
-            font-size:.82rem;
-            text-transform:uppercase;
-            letter-spacing:1.5px;
-            color:#777;
-            margin-bottom:10px;
-            font-weight:700;
-        }
+        $fechaInicio = $proyecto->fecha_inicio ? \Carbon\Carbon::parse($proyecto->fecha_inicio) : null;
+        $hoy         = now();
+        $duracion    = (int) ($proyecto->duracion_estimada ?? 0);
 
-        .detail-box p{
-            margin:0 0 8px;
-            line-height:1.5;
-            font-size:.95rem;
-        }
+        $diasTranscurridos = $fechaInicio ? (int) $fechaInicio->diffInDays($hoy, false) : 0;
+        $diasRestantes     = ($duracion > 0 && $fechaInicio)
+                             ? $duracion - $diasTranscurridos
+                             : null;
+        $progreso = ($duracion > 0 && $diasTranscurridos > 0)
+                    ? min(100, round(($diasTranscurridos / $duracion) * 100))
+                    : 0;
 
-        .detail-box strong{
-            color:#111;
-        }
+        $totalPresupuestado = $proyecto->presupuestos->sum('total');
+        $numPresupuestos    = $proyecto->presupuestos->count();
+    @endphp
 
-        .btn-modal-dark{
-            background:#111;
-            color:#fff;
-            border:none;
-            border-radius:8px;
-            padding:9px 18px;
-            font-family:Arial,sans-serif;
-            font-size:.82rem;
-            letter-spacing:1px;
-            text-transform:uppercase;
-        }
+    <div class="proyecto-card" id="proyecto-card-{{ $proyecto->id }}">
+        <!-- Estado + fecha -->
+        <div class="proj-status-bar">
+            <span class="badge-estado {{ $estadoClass }}">{{ $estado }}</span>
+            @if($fechaInicio)
+                <small style="color:#9ca3af;font-size:.75rem;">
+                    <i class="bi bi-calendar3 me-1"></i>{{ $fechaInicio->format('d/m/Y') }}
+                </small>
+            @endif
+        </div>
 
-        .btn-modal-dark:hover{
-            background:#333;
-            color:#fff;
-        }
+        <!-- Nombre y cliente -->
+        <div>
+            <h3 class="proj-nombre">{{ $proyecto->nombre }}</h3>
+            <p class="proj-cliente">
+                <i class="bi bi-person-fill"></i>
+                {{ $proyecto->cliente->nombre ?? '— Sin cliente —' }}
+            </p>
+            @if($proyecto->ubicacion)
+                <p class="proj-cliente" style="margin-top:2px;">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    {{ $proyecto->ubicacion }}
+                </p>
+            @endif
+        </div>
 
-        .btn-modal-light{
-            background:#fff;
-            color:#111;
-            border:1px solid #d9d9d9;
-            border-radius:8px;
-            padding:9px 18px;
-            font-family:Arial,sans-serif;
-            font-size:.82rem;
-            letter-spacing:1px;
-            text-transform:uppercase;
-        }
-
-        .btn-modal-danger{
-            background:#b91c1c;
-            color:#fff;
-            border:none;
-            border-radius:8px;
-            padding:9px 18px;
-            font-family:Arial,sans-serif;
-            font-size:.82rem;
-            letter-spacing:1px;
-            text-transform:uppercase;
-        }
-
-        .btn-modal-danger:hover{
-            background:#991b1b;
-            color:#fff;
-        }
-
-        @media (max-width: 992px){
-            .index-panel{ padding:24px; }
-            .project-table{ min-width:980px; }
-            .detail-grid{ grid-template-columns:1fr; }
-        }
-    </style>
-
-    <div class="dash-index-view">
-        <div class="index-panel">
-            <div class="header-section">
-                <div>
-                    <h1>Proyectos</h1>
-                    <p>Gestión de proyectos, clientes, ubicación y estado general de obra.</p>
-                </div>
-
-                <div class="header-actions">
-                    <button class="btn-filter" type="button">
-                        <i class="bi bi-funnel me-1"></i> Filtrar
-                    </button>
-
-                    <a href="{{ route('proyectos.create') }}" class="btn-add-new">
-                        <i class="bi bi-plus-circle me-1"></i> Nuevo Proyecto
-                    </a>
-                </div>
+        <!-- Estadísticas rápidas -->
+        <div class="proj-stats">
+            <div class="stat-box accent">
+                <span class="stat-value">${{ number_format($totalPresupuestado, 0) }}</span>
+                <span class="stat-label">Presupuestado</span>
             </div>
-
-            @if(session('success'))
-                <div class="alert alert-dark mb-4" style="font-family: Arial; font-size: 0.85rem;">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if($errors->any())
-                <div class="alert alert-danger mb-4" style="font-family: Arial; font-size: 0.85rem;">
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <div class="table-responsive">
-                <table class="project-table">
-                    <thead>
-                    <tr>
-                        <th style="width:35%;">Detalle del Proyecto</th>
-                        <th>Cantidades y Costos</th>
-                        <th>Estado</th>
-                        <th style="text-align:right;">Acciones</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @forelse(($proyectos ?? []) as $proyecto)
-                        @php
-                            $proyectoId = $proyecto->id;
-
-                            $estadoNombre = data_get($proyecto, 'estado.nombre')
-                                ?? data_get($proyecto, 'estado.nombre_estado')
-                                ?? (is_string($proyecto->estado ?? null) ? $proyecto->estado : null)
-                                ?? 'Sin estado';
-
-                            $estadoClase = match (mb_strtolower(trim($estadoNombre))) {
-                                'pendiente' => 'badge-pendiente',
-                                'activo' => 'badge-activo',
-                                'en proceso' => 'badge-proceso',
-                                'finalizado' => 'badge-finalizado',
-                                default => '',
-                            };
-                        @endphp
-
-                        <tr class="project-row">
-                            <td>
-                                <div class="title-main">
-                                    {{ $proyecto->obra_nombre ?? $proyecto->titulo ?? $proyecto->nombre ?? 'Proyecto sin nombre' }}
-
-                                    @if(!empty($proyecto->obra_fecha_inicio))
-                                        <span class="badge-dark-mini">{{ $proyecto->obra_fecha_inicio }}</span>
-                                    @elseif(!empty($proyecto->fecha_inicio))
-                                        <span class="badge-dark-mini">{{ $proyecto->fecha_inicio }}</span>
-                                    @endif
-                                </div>
-
-                                <div class="desc-text">
-                                    Cliente: {{ $proyecto->cliente_nombre ?? data_get($proyecto, 'cliente.nombre') ?? 'Sin cliente' }} ·
-                                    Razón social: {{ $proyecto->cliente_razon_social ?? data_get($proyecto, 'cliente.razon_social') ?? 'No registrada' }}<br>
-                                    Ubicación: {{ $proyecto->obra_ubicacion ?? $proyecto->ubicacion ?? 'No registrada' }}
-                                </div>
-                            </td>
-
-                            <td>
-                                <div class="info-stack">
-                                    <div><strong>Tipo de obra:</strong> {{ $proyecto->obra_tipo ?? $proyecto->tipo_obra ?? 'No especificado' }}</div>
-                                    <div><strong>Uso:</strong> {{ $proyecto->obra_uso ?? $proyecto->tipo_uso ?? 'No especificado' }}</div>
-                                    <div><strong>Duración:</strong> {{ $proyecto->obra_duracion ?? $proyecto->duracion_estimada ?? 'No especificada' }}</div>
-                                </div>
-                            </td>
-
-                            <td>
-                                <span class="badge-soft {{ $estadoClase }}">{{ $estadoNombre }}</span>
-                            </td>
-
-                            <td class="action-cell">
-                                <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verProyectoModal{{ $proyectoId }}">
-                                    <i class="bi bi-eye"></i>
-                                </button>
-
-                                <button type="button" class="btn-icon-action" title="Eliminar" data-bs-toggle="modal" data-bs-target="#eliminarProyectoModal{{ $proyectoId }}">
-                                    <i class="bi bi-trash3"></i>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Modal Ver -->
-                        <div class="modal fade" id="verProyectoModal{{ $proyectoId }}" tabindex="-1" aria-labelledby="verProyectoModalLabel{{ $proyectoId }}" aria-hidden="true">
-                            <div class="modal-dialog modal-lg modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="verProyectoModalLabel{{ $proyectoId }}">
-                                            {{ $proyecto->obra_nombre ?? $proyecto->titulo ?? $proyecto->nombre ?? 'Detalle del proyecto' }}
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                    </div>
-
-                                    <div class="modal-body">
-                                        <div class="detail-grid">
-                                            <div class="detail-box">
-                                                <h6>Datos del cliente</h6>
-                                                <p><strong>Cliente:</strong> {{ $proyecto->cliente_nombre ?? data_get($proyecto, 'cliente.nombre') ?? 'Sin cliente' }}</p>
-                                                <p><strong>Razón social:</strong> {{ $proyecto->cliente_razon_social ?? data_get($proyecto, 'cliente.razon_social') ?? 'No registrada' }}</p>
-                                                <p><strong>Ubicación:</strong> {{ $proyecto->obra_ubicacion ?? $proyecto->ubicacion ?? 'No registrada' }}</p>
-                                            </div>
-
-                                            <div class="detail-box">
-                                                <h6>Estado y control</h6>
-                                                <p><strong>Estado:</strong> {{ $estadoNombre }}</p>
-                                                <p><strong>Fecha de inicio:</strong> {{ $proyecto->obra_fecha_inicio ?? $proyecto->fecha_inicio ?? 'No registrada' }}</p>
-                                                <p><strong>Duración:</strong> {{ $proyecto->obra_duracion ?? $proyecto->duracion_estimada ?? 'No especificada' }}</p>
-                                            </div>
-
-                                            <div class="detail-box">
-                                                <h6>Datos generales</h6>
-                                                <p><strong>Tipo de obra:</strong> {{ $proyecto->obra_tipo ?? $proyecto->tipo_obra ?? 'No especificado' }}</p>
-                                                <p><strong>Uso:</strong> {{ $proyecto->obra_uso ?? $proyecto->tipo_uso ?? 'No especificado' }}</p>
-                                                <p><strong>Superficie:</strong> {{ $proyecto->obra_superficie ?? $proyecto->superficie_terreno ?? 'No especificada' }}</p>
-                                            </div>
-
-                                            <div class="detail-box">
-                                                <h6>Responsable técnico</h6>
-                                                <p><strong>Nombre:</strong> {{ $proyecto->empresa_responsable ?? data_get($proyecto, 'responsableTecnico.nombre') ?? 'No registrado' }}</p>
-                                                <p><strong>Empresa:</strong> {{ $proyecto->empresa_nombre ?? data_get($proyecto, 'responsableTecnico.empresa.nombre') ?? 'No registrada' }}</p>
-                                                <p><strong>Cargo:</strong> {{ $proyecto->empresa_cargo ?? data_get($proyecto, 'responsableTecnico.cargo') ?? 'No registrado' }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button>
-                                        <a href="{{ route('proyectos.edit', $proyectoId) }}" class="btn-modal-dark">Editar</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal Eliminar -->
-                        <div class="modal fade" id="eliminarProyectoModal{{ $proyectoId }}" tabindex="-1" aria-labelledby="eliminarProyectoModalLabel{{ $proyectoId }}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="eliminarProyectoModalLabel{{ $proyectoId }}">Eliminar proyecto</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                    </div>
-
-                                    <div class="modal-body">
-                                        ¿Deseas eliminar el proyecto
-                                        <strong>{{ $proyecto->obra_nombre ?? $proyecto->titulo ?? $proyecto->nombre ?? 'seleccionado' }}</strong>?
-                                        <br><br>
-                                        Esta acción no se puede deshacer.
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cancelar</button>
-
-                                        <form action="{{ route('proyectos.destroy', $proyectoId) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-modal-danger">Eliminar</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <tr class="project-row">
-                            <td colspan="4" class="empty-state">No hay proyectos registrados por el momento.</td>
-                        </tr>
-                    @endforelse
-                    </tbody>
-                </table>
+            <div class="stat-box">
+                <span class="stat-value">{{ $numPresupuestos }}</span>
+                <span class="stat-label">Presupuesto{{ $numPresupuestos !== 1 ? 's' : '' }}</span>
+            </div>
+            <div class="stat-box {{ ($diasRestantes !== null && $diasRestantes < 0) ? 'danger' : '' }}">
+                <span class="stat-value">
+                    @if($diasRestantes !== null)
+                        {{ $diasRestantes > 0 ? $diasRestantes : abs($diasRestantes) }}
+                        {{ $diasRestantes < 0 ? '⚠' : '' }}
+                    @else
+                        —
+                    @endif
+                </span>
+                <span class="stat-label">{{ $diasRestantes !== null ? ($diasRestantes < 0 ? 'días vencido' : 'días rest.') : 'sin fecha' }}</span>
             </div>
         </div>
+
+        <!-- Barra de progreso -->
+        @if($duracion > 0)
+        <div>
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;color:#9ca3af;margin-bottom:5px;">
+                <span>Progreso temporal</span>
+                <span>{{ $progreso }}%</span>
+            </div>
+            <div class="proj-progress">
+                <div class="proj-progress-fill" style="width:{{ $progreso }}%"></div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Acciones -->
+        <div class="proj-actions">
+            <a href="{{ route('proyectos.show', $proyecto->id) }}" class="btn-proj btn-proj-view" id="btn-ver-{{ $proyecto->id }}">
+                <i class="bi bi-eye me-1"></i>Ver
+            </a>
+            <a href="{{ route('presupuestos.create', ['proyecto_id' => $proyecto->id]) }}" class="btn-proj btn-proj-budget" id="btn-presup-{{ $proyecto->id }}">
+                <i class="bi bi-file-earmark-text me-1"></i>Presupuesto
+            </a>
+            <a href="{{ route('cajas_chicas.index', ['proyecto_id' => $proyecto->id]) }}" class="btn-proj btn-proj-finance" id="btn-finanzas-{{ $proyecto->id }}">
+                <i class="bi bi-wallet2 me-1"></i>Finanzas
+            </a>
+        </div>
     </div>
+    @endforeach
+</div>
+@endif
 @endsection

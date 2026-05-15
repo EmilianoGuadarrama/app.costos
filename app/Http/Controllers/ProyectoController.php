@@ -14,7 +14,7 @@ class ProyectoController extends Controller
 {
     public function index()
     {
-        $proyectos = Proyecto::with(['cliente', 'responsableTecnico', 'estado'])
+        $proyectos = Proyecto::with(['cliente', 'responsableTecnico', 'estado', 'presupuestos'])
             ->latest()
             ->get();
 
@@ -98,7 +98,10 @@ class ProyectoController extends Controller
 
     public function show($id)
     {
-        $proyecto = Proyecto::with(['cliente', 'responsableTecnico', 'estado'])->findOrFail($id);
+        $proyecto = Proyecto::with([
+            'cliente', 'responsableTecnico.empresa', 'estado',
+            'presupuestos' => fn($q) => $q->orderByDesc('created_at'),
+        ])->findOrFail($id);
         return view('proyectos.show', compact('proyecto'));
     }
 

@@ -180,6 +180,39 @@ label.fl span { color: #dc2626; margin-left: 2px; }
                     <p class="fc-hint">Se crearán automáticamente en la tabla de Niveles.</p>
                 </div>
             </div>
+
+            <div style="margin-top:16px; border-top:1px dashed #e5e7eb; padding-top:16px;">
+                <label class="fl" style="color:#2563eb; margin-bottom:10px;"><i class="bi bi-geo-alt me-1"></i>Dirección de la Obra</label>
+                <div class="fg-2">
+                    <div>
+                        <label class="fl">Calle y número</label>
+                        <input type="text" name="obra_calle" class="fc" value="{{ old('obra_calle') }}">
+                    </div>
+                    <div>
+                        <label class="fl">Colonia</label>
+                        <input type="text" name="obra_colonia" class="fc" value="{{ old('obra_colonia') }}">
+                    </div>
+                </div>
+                <div class="fg-3" style="margin-top:10px;">
+                    <div>
+                        <label class="fl">Delegación/Municipio</label>
+                        <input type="text" name="obra_del" class="fc" value="{{ old('obra_del') }}">
+                    </div>
+                    <div>
+                        <label class="fl">Código Postal</label>
+                        <input type="number" name="obra_cp" class="fc" value="{{ old('obra_cp') }}">
+                    </div>
+                    <div>
+                        <label class="fl">Estado</label>
+                        <select name="obra_estado" class="fc">
+                            <option value="">— Seleccionar —</option>
+                            @foreach($estados as $est)
+                            <option value="{{ $est->id }}" {{ old('obra_estado') == $est->id ? 'selected' : '' }}>{{ $est->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {{-- ── 2. Cliente ── --}}
@@ -211,13 +244,64 @@ label.fl span { color: #dc2626; margin-left: 2px; }
                                 <input type="text" name="cliente_nuevo_tel" class="fc" placeholder="Ej. 55 1234 5678">
                             </div>
                         </div>
-                        <div class="fg-1">
+                        <div class="fg-2">
                             <div>
                                 <label class="fl">Correo electrónico</label>
-                                <input type="email" name="cliente_nuevo_email" class="fc" placeholder="correo@ejemplo.com">
+                                <input type="email" name="cliente_nuevo_email" class="fc" placeholder="correo@ejemplo.com" value="{{ old('cliente_nuevo_email') }}">
+                            </div>
+                            <div>
+                                <label class="fl" style="display:flex; justify-content:space-between;">
+                                    <span>RFC <span>*</span></span>
+                                    <label style="font-weight:normal; font-size:0.75rem; color:#2563eb; cursor:pointer; margin:0;">
+                                        <input type="checkbox" onchange="toggleClientNA(this)" style="vertical-align:middle; margin-right:2px;"> No aplica
+                                    </label>
+                                </label>
+                                <input type="text" name="cliente_nuevo_rfc" class="fc" placeholder="Ej. ABCD123456XYZ" value="{{ old('cliente_nuevo_rfc') }}">
                             </div>
                         </div>
-                        <p class="fc-hint" style="margin-top:8px;">El cliente se registrará automáticamente al guardar la obra.</p>
+                        <div class="fg-2" style="margin-top:10px;">
+                            <div>
+                                <label class="fl">Uso de suelo <span>*</span></label>
+                                <input type="text" name="cliente_nuevo_uso" class="fc" placeholder="Ej. Habitacional" value="{{ old('cliente_nuevo_uso') }}">
+                            </div>
+                            <div>
+                                <label class="fl">Cuenta catastral <span>*</span></label>
+                                <input type="text" name="cliente_nuevo_catastral" class="fc" placeholder="Ej. 123-456-789" value="{{ old('cliente_nuevo_catastral') }}">
+                            </div>
+                        </div>
+                        <div style="margin-top:16px; border-top:1px dashed #86efac; padding-top:16px;">
+                            <label class="fl" style="color:#166534; margin-bottom:10px;"><i class="bi bi-geo-alt me-1"></i>Dirección Fiscal <span>*</span></label>
+                            <div class="fg-2">
+                                <div>
+                                    <label class="fl">Calle y número</label>
+                                    <input type="text" name="cliente_calle" class="fc" value="{{ old('cliente_calle') }}">
+                                </div>
+                                <div>
+                                    <label class="fl">Colonia</label>
+                                    <input type="text" name="cliente_colonia" class="fc" value="{{ old('cliente_colonia') }}">
+                                </div>
+                            </div>
+                            <div class="fg-3" style="margin-top:10px;">
+                                <div>
+                                    <label class="fl">Delegación/Municipio</label>
+                                    <input type="text" name="cliente_del" class="fc" value="{{ old('cliente_del') }}">
+                                </div>
+                                <div>
+                                    <label class="fl">Código Postal</label>
+                                    <input type="number" name="cliente_cp" class="fc" value="{{ old('cliente_cp') }}">
+                                </div>
+                                <div>
+                                    <label class="fl">Estado</label>
+                                    <select name="cliente_estado" class="fc">
+                                        <option value="">— Seleccionar —</option>
+                                        @foreach($estados as $est)
+                                        <option value="{{ $est->id }}" {{ old('cliente_estado') == $est->id ? 'selected' : '' }}>{{ $est->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="fc-hint" style="margin-top:14px;"><i class="bi bi-info-circle me-1"></i>El cliente se registrará automáticamente al guardar la obra. Los campos marcados con (*) son requeridos.</p>
                     </div>
                 </div>
             </div>

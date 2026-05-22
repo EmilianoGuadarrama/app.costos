@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Prunable;
 
 /**
  * obras_iniciadas: id, id_datos_de_obra, encargado_id_empleado, fecha_inicio,
@@ -11,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ObraIniciada extends Model
 {
+    use SoftDeletes, Prunable;
+
     protected $table = 'obras_iniciadas';
     protected $fillable = [
         'id_datos_de_obra','encargado_id_empleado','id_cliente','fecha_inicio','duracion',
@@ -24,9 +28,7 @@ class ObraIniciada extends Model
     public function cliente()        { return $this->belongsTo(Cliente::class, 'id_cliente'); }
     public function niveles()        { return $this->hasMany(Nivel::class, 'id_obra'); }
     public function obrasProceso()   { return $this->hasMany(ObraProceso::class, 'id_obras_iniciadas'); }
-    public function asignaConceptos(){ return $this->hasMany(AsignaConcepto::class, 'id_obra'); }
-    public function asignaMateriales(){ return $this->hasMany(AsignaMaterial::class, 'id_obra'); }
-    public function asignaMaquinaria(){ return $this->hasMany(AsignaMaquinaria::class, 'id_obra'); }
+    public function obraConceptos(){ return $this->hasMany(ObraConcepto::class, 'id_obra'); }
     public function preProveedores() { return $this->hasMany(PreProveedor::class, 'id_obra'); }
     public function preMateriales()  { return $this->hasMany(PreMaterial::class, 'id_obra'); }
     public function totalBloque()    { return $this->hasMany(TotalBloque::class, 'id_obra'); }
@@ -54,5 +56,13 @@ class ObraIniciada extends Model
         $dur = (int) $this->duracion;
         if (!$dur || !$this->fecha_inicio) return null;
         return $dur - $this->dias_transcurridos;
+    }
+
+    /**
+     * Get the prunable query.
+     */
+    public function prunable()
+    {
+        return static::where('deleted_at', '<=', now()->subDays(30));
     }
 }

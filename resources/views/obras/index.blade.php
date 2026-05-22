@@ -61,9 +61,17 @@
         <h1 class="dash-title">Mis Obras</h1>
         <p class="dash-subtitle">Gestión de obras activas y sus presupuestos</p>
     </div>
-    <a href="{{ route('obras.create') }}" class="btn-nueva-obra" id="btn-nueva-obra">
-        <i class="bi bi-plus-lg"></i> Nueva Obra
-    </a>
+    <div style="display:flex; gap:10px;">
+        <a href="{{ route('obras.papelera') }}" class="btn-nueva-obra" style="background:#fef2f2; color:#dc2626; border:1px solid #fecaca; box-shadow:none;">
+            <i class="bi bi-trash3"></i> Papelera 
+            @if($trashedCount > 0)
+                <span style="background:#dc2626; color:#fff; padding:2px 6px; border-radius:10px; font-size:.7rem; margin-left:4px;">{{ $trashedCount }}</span>
+            @endif
+        </a>
+        <a href="{{ route('obras.create') }}" class="btn-nueva-obra" id="btn-nueva-obra">
+            <i class="bi bi-plus-lg"></i> Nueva Obra
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
@@ -155,10 +163,8 @@
                 <i class="bi bi-eye me-1"></i>Ver
             </a>
             @php
-                $tieneRenglones = $obra->asignaConceptos()->exists()
-                               || $obra->asignaMateriales()->exists()
-                               || $obra->asignaMaquinaria()->exists();
-            @endphp
+            $tieneRenglones = $obra->obraConceptos()->exists();
+        @endphp
             @if($tieneRenglones)
             <a href="{{ route('obras.presupuesto', $obra->id) }}" class="btn-obra btn-presup" id="btn-presup-{{ $obra->id }}">
                 <i class="bi bi-file-earmark-text me-1"></i>Presupuesto
@@ -175,6 +181,13 @@
                 <i class="bi bi-wallet2 me-1"></i>Caja
             </a>
             @endif
+            <button type="button" class="btn-obra btn-eliminar" style="border-color:#dc2626; color:#dc2626; background:transparent; cursor:pointer;" onclick="if(confirm('¿Estás seguro de enviar la obra \'{{ addslashes($datos?->nombre) }}\' a la papelera?')) { document.getElementById('form-delete-{{ $obra->id }}').submit(); }">
+                <i class="bi bi-trash3 me-1"></i>Eliminar
+            </button>
+            <form id="form-delete-{{ $obra->id }}" action="{{ route('obras.destroy', $obra->id) }}" method="POST" style="display:none;">
+                @csrf
+                @method('DELETE')
+            </form>
         </div>
     </div>
     @endforeach

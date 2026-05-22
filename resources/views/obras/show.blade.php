@@ -63,9 +63,7 @@
             <i class="bi bi-pencil me-1"></i> Editar
         </a>
         @php
-            $tieneRenglones = $obra->asignaConceptos()->exists()
-                           || $obra->asignaMateriales()->exists()
-                           || $obra->asignaMaquinaria()->exists();
+            $tieneRenglones = $obra->obraConceptos()->exists();
         @endphp
         @if($tieneRenglones)
         <a href="{{ route('obras.presupuesto', $obra->id) }}" class="btn-presupuesto" id="btn-ver-presupuesto">
@@ -110,6 +108,18 @@
         <tr><td>Concepto</td><td>Variable o Renglón</td></tr>
         <tr><td>Nombre de la obra</td><td>{{ $datos?->nombre ?? '—' }}</td></tr>
         <tr><td>Descripción</td><td>{{ $datos?->descripcion ?? '—' }}</td></tr>
+        <tr><td>Dirección</td>
+            <td>
+                @if($datos?->direccion)
+                    {{ $datos->direccion->calle_y_numero }} {{ $datos->direccion->colonia ? ', Col. '.$datos->direccion->colonia : '' }}
+                    {{ $datos->direccion->delegacion ? ', Del/Mun. '.$datos->direccion->delegacion : '' }}
+                    {{ $datos->direccion->estado ? ', '.$datos->direccion->estado->nombre : '' }}
+                    {{ $datos->direccion->codigo_postal ? 'C.P. '.$datos->direccion->codigo_postal : '' }}
+                @else
+                    —
+                @endif
+            </td>
+        </tr>
         <tr><td>Responsable / Encargado</td>
             <td>{{ $encargado ? $encargado->nombre.' '.$encargado->apellido_paterno : '—' }}
                 @if($obra->encargado?->rol)<span style="color:#9ca3af;font-size:.85em;"> · {{ $obra->encargado->rol }}</span>@endif

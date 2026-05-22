@@ -9,7 +9,5 @@ class Nivel extends Model
     protected $fillable = ['id_obra','descripcion','m2'];
 
     public function obra()             { return $this->belongsTo(ObraIniciada::class, 'id_obra'); }
-    public function asignaConceptos()  { return $this->hasMany(AsignaConcepto::class, 'id_nivel'); }
-    public function asignaMateriales() { return $this->hasMany(AsignaMaterial::class, 'id_nivel'); }
-    public function asignaMaquinaria() { return $this->hasMany(AsignaMaquinaria::class, 'id_nivel'); }
+    public function obraConceptos()  { return $this->hasMany(ObraConcepto::class, 'id_nivel'); }
 }

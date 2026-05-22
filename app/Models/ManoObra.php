@@ -12,14 +12,13 @@ class ManoObra extends Model
     protected $table = 'mano_obra';
 
     protected $fillable = [
-        'clave',
-        'categoria',
-        'unidad_medida_id',
-        'salario_unitario',
+        'nombre',
+        'id_unidad_medida',
+        'precio_x_unidad',
     ];
 
     public function unidadMedida()
     {
-        return $this->belongsTo(UnidadMedida::class);
+        return $this->belongsTo(UnidadMedida::class, 'id_unidad_medida');
     }
 }

@@ -10,7 +10,7 @@ class ManoObraController extends Controller
 {
     public function index()
     {
-        $manoObras = ManoObra::with('unidadMedida')->latest()->get();
+        $manoObras = ManoObra::with('unidadMedida')->orderBy('nombre')->get();
         return view('mano_obra.index', compact('manoObras'));
     }
 
@@ -23,10 +23,9 @@ class ManoObraController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'clave' => 'required|string|max:50|unique:mano_obra,clave',
-            'categoria' => 'required|string|max:150',
-            'unidad_medida_id' => 'required|exists:unidades_medida,id',
-            'salario_unitario' => 'required|numeric|min:0',
+            'nombre' => 'required|string|max:255',
+            'id_unidad_medida' => 'nullable|exists:unidades_medida,id',
+            'precio_x_unidad' => 'required|numeric|min:0',
         ]);
 
         ManoObra::create($data);
@@ -53,10 +52,9 @@ class ManoObraController extends Controller
         $mano = ManoObra::findOrFail($id);
 
         $data = $request->validate([
-            'clave' => 'required|string|max:50|unique:mano_obra,clave,' . $mano->id,
-            'categoria' => 'required|string|max:150',
-            'unidad_medida_id' => 'required|exists:unidades_medida,id',
-            'salario_unitario' => 'required|numeric|min:0',
+            'nombre' => 'required|string|max:255',
+            'id_unidad_medida' => 'nullable|exists:unidades_medida,id',
+            'precio_x_unidad' => 'required|numeric|min:0',
         ]);
 
         $mano->update($data);

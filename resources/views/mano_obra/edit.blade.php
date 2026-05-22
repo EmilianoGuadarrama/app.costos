@@ -22,29 +22,24 @@
         <form action="{{ route('mano_obra.update', $mano) }}" method="POST">
             @csrf @method('PUT')
             <div class="form-group">
-                <label for="clave">Clave *</label>
-                <input type="text" id="clave" name="clave" class="form-control" value="{{ old('clave', $mano->clave) }}" required maxlength="50">
-                @error('clave') <span class="text-danger">{{ $message }}</span> @enderror
+                <label for="nombre">Nombre *</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" value="{{ old('nombre', $mano->nombre) }}" required maxlength="255">
+                @error('nombre') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
-                <label for="categoria">Categoría *</label>
-                <input type="text" id="categoria" name="categoria" class="form-control" value="{{ old('categoria', $mano->categoria) }}" required maxlength="150">
-                @error('categoria') <span class="text-danger">{{ $message }}</span> @enderror
-            </div>
-            <div class="form-group">
-                <label for="unidad_medida_id">Unidad de Medida *</label>
-                <select id="unidad_medida_id" name="unidad_medida_id" class="form-select" required>
+                <label for="id_unidad_medida">Unidad de Medida *</label>
+                <select id="id_unidad_medida" name="id_unidad_medida" class="form-select" required>
                     <option value="">Seleccione</option>
                     @foreach($unidades as $u)
-                        <option value="{{ $u->id }}" {{ old('unidad_medida_id', $mano->unidad_medida_id) == $u->id ? 'selected' : '' }}>{{ $u->nombre }} ({{ $u->abreviatura }})</option>
+                        <option value="{{ $u->id }}" {{ old('id_unidad_medida', $mano->id_unidad_medida) == $u->id ? 'selected' : '' }}>{{ $u->nombre }} ({{ $u->abreviatura }})</option>
                     @endforeach
                 </select>
-                @error('unidad_medida_id') <span class="text-danger">{{ $message }}</span> @enderror
+                @error('id_unidad_medida') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
-                <label for="salario_unitario">Salario Unitario *</label>
-                <input type="number" step="0.01" id="salario_unitario" name="salario_unitario" class="form-control" value="{{ old('salario_unitario', $mano->salario_unitario) }}" required>
-                @error('salario_unitario') <span class="text-danger">{{ $message }}</span> @enderror
+                <label for="precio_x_unidad">Salario Unitario *</label>
+                <input type="number" step="0.01" id="precio_x_unidad" name="precio_x_unidad" class="form-control" value="{{ old('precio_x_unidad', $mano->precio_x_unidad) }}" required>
+                @error('precio_x_unidad') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <button type="submit" class="btn-submit">Actualizar</button>
         </form>

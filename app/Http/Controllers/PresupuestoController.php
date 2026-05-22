@@ -2,303 +2,262 @@
 namespace App\Http\Controllers;
 
 use App\Models\ObraIniciada;
-use App\Models\AsignaConcepto;
+use App\Models\ObraConcepto;
 use App\Models\AsignaMaterial;
 use App\Models\AsignaMaquinaria;
+use App\Models\AsignaManoObra;
 use App\Models\Concepto;
 use App\Models\Material;
 use App\Models\Maquinaria;
+use App\Models\ManoObra;
 use App\Models\Bloque;
 use App\Models\Nivel;
 use App\Models\Area;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PresupuestoExport;
 
 class PresupuestoController extends Controller
 {
     // ──────────────────────────────────────────────────────────────
-    // SHOW — Vista del presupuesto completo por bloques
+    // SHOW — Vista del presupuesto completo (Padre-Hijo)
     // ──────────────────────────────────────────────────────────────
     public function show($obraId)
     {
         $obra = ObraIniciada::with([
             'datosDeObra', 'encargado.persona', 'niveles', 'totalObra',
+            'obraConceptos.bloque', 'obraConceptos.area', 'obraConceptos.nivel', 'obraConceptos.concepto.unidadMedida',
+            'obraConceptos.materiales.material.unidadMedida',
+            'obraConceptos.maquinaria.maquinaria.unidadMedida',
+            'obraConceptos.manoObra.manoObra.unidadMedida'
         ])->findOrFail($obraId);
-
-        $conceptos  = AsignaConcepto::with(['bloque','area','concepto.unidadMedida','concepto.composicion','nivel'])
-            ->where('id_obra', $obraId)->get();
-        $materiales = AsignaMaterial::with(['bloque','area','material.unidadMedida','nivel'])
-            ->where('id_obra', $obraId)->get();
-        $maquinaria = AsignaMaquinaria::with(['bloque','area','maquinaria.unidadMedida','nivel'])
-            ->where('id_obra', $obraId)->get();
 
         $totalesPorBloque = \App\Models\TotalBloque::with('bloque')
             ->where('id_obra', $obraId)->get()->keyBy('id_bloque');
 
-        $bloques = Bloque::orderBy('id')->get();  // Para el orden correcto en vista
+        $bloques = Bloque::orderBy('id')->get();
 
-        return view('obras.presupuesto', compact(
-            'obra','conceptos','materiales','maquinaria','totalesPorBloque','bloques'
-        ));
+        return view('obras.presupuesto', compact('obra', 'totalesPorBloque', 'bloques'));
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // CONCEPTOS — Formulario + Store + Destroy
-    // ──────────────────────────────────────────────────────────────
     public function create($obraId)
     {
-        $obra      = ObraIniciada::with(['datosDeObra','niveles'])->findOrFail($obraId);
-        $bloques   = Bloque::orderBy('id')->get();
-        $areas     = Area::orderBy('abreviatura')->get();
-        $conceptos = Concepto::with('area', 'unidadMedida')->orderBy('descripcion')->get();
-
-        return view('obras.presupuesto_form', compact('obra','bloques','areas','conceptos'));
-    }
-
-    public function storeConceptos(Request $request, $obraId)
-    {
-        ObraIniciada::findOrFail($obraId);
-
-        $request->validate([
-            'filas'                   => 'required|array|min:1',
-            'filas.*.id_bloque'       => 'required|exists:bloques,id',
-            'filas.*.id_area'         => 'required|exists:areas,id',
-            'filas.*.id_nivel'        => 'nullable|exists:niveles,id',
-            'filas.*.cantidad'        => 'required|numeric|min:0',
-            'filas.*.precio_unitario' => 'required|numeric|min:0',
-            'filas.*.porcentaje_iva'  => 'required|numeric|min:0|max:100',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            foreach ($request->filas as $fila) {
-                // Si viene un concepto nuevo escrito a mano, crearlo primero
-                $idConcepto = $fila['id_concepto'] ?? null;
-
-                if (empty($idConcepto) && !empty($fila['descripcion_nueva'])) {
-                    $concepto = \App\Models\Concepto::firstOrCreate(
-                        ['descripcion' => trim($fila['descripcion_nueva'])],
-                        [
-                            'id_area'     => $fila['id_area'],
-                            'p_u'         => $fila['precio_unitario'],
-                        ]
-                    );
-                    $idConcepto = $concepto->id;
-                }
-
-                if (empty($idConcepto)) continue; // fila vacía, saltar
-
-                $sub = round($fila['cantidad'] * $fila['precio_unitario'], 4);
-                $iva = round($sub * ($fila['porcentaje_iva'] / 100), 4);
-                AsignaConcepto::create([
-                    'id_obra'         => $obraId,
-                    'id_nivel'        => $fila['id_nivel'] ?: null,
-                    'id_bloque'       => $fila['id_bloque'],
-                    'id_area'         => $fila['id_area'],
-                    'id_concepto'     => $idConcepto,
-                    'cantidad'        => $fila['cantidad'],
-                    'precio_unitario' => $fila['precio_unitario'],
-                    'subtotal'        => $sub,
-                    'porcentaje_iva'  => $fila['porcentaje_iva'],
-                    'iva'             => $iva,
-                    'total_final'     => $sub + $iva,
-                ]);
-            }
-            $this->recalcularTotalesBloque($obraId);
-            ObraController::recalcularTotales($obraId);
-            DB::commit();
-            return redirect()->route('obras.presupuesto', $obraId)
-                ->with('success', 'Conceptos agregados al presupuesto.');
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return back()->withInput()->withErrors(['general' => $e->getMessage()]);
-        }
-    }
-
-    public function destroyConcepto($obraId, $id)
-    {
-        AsignaConcepto::where('id_obra', $obraId)->findOrFail($id)->delete();
-        $this->recalcularTotalesBloque($obraId);
-        ObraController::recalcularTotales($obraId);
-        return back()->with('success', 'Renglón eliminado.');
+        return redirect()->route('obras.presupuesto.unificado.create', $obraId);
     }
 
     // ──────────────────────────────────────────────────────────────
-    // MATERIALES — Formulario + Store + Destroy
-    // ──────────────────────────────────────────────────────────────
-    public function createMateriales($obraId)
-    {
-        $obra       = ObraIniciada::with(['datosDeObra','niveles'])->findOrFail($obraId);
-        $bloques    = Bloque::orderBy('id')->get();
-        $areas      = Area::orderBy('abreviatura')->get();
-        $materiales = Material::with('unidadMedida')->orderBy('nombre')->get();
-
-        return view('obras.presupuesto_materiales_form', compact('obra','bloques','areas','materiales'));
-    }
-
-    // ──────────────────────────────────────────────────────────────
-    // UNIFICADO — Conceptos + Materiales + Maquinaria en una sola vista
+    // UNIFICADO — Carga la vista para agregar renglones
     // ──────────────────────────────────────────────────────────────
     public function createUnificado($obraId)
     {
-        $obra       = ObraIniciada::with(['datosDeObra','niveles'])->findOrFail($obraId);
+        $obra = ObraIniciada::with([
+            'datosDeObra', 'niveles',
+            'obraConceptos.concepto.unidadMedida',
+            'obraConceptos.materiales.material',
+            'obraConceptos.maquinaria.maquinaria',
+            'obraConceptos.manoObra.manoObra'
+        ])->findOrFail($obraId);
+
         $bloques    = Bloque::orderBy('id')->get();
         $areas      = Area::orderBy('abreviatura')->get();
         $conceptos  = Concepto::with('area', 'unidadMedida', 'composicion')->orderBy('descripcion')->get();
         $materiales = Material::with('unidadMedida')->orderBy('nombre')->get();
         $maquinaria = Maquinaria::with('unidadMedida')->orderBy('nombre')->get();
+        $mano_obra  = ManoObra::with('unidadMedida')->orderBy('nombre')->get();
+        $unidades   = \App\Models\UnidadMedida::orderBy('abreviatura')->get();
+        $niveles    = $obra->niveles;
 
         return view('obras.presupuesto_unificado', compact(
-            'obra','bloques','areas','conceptos','materiales','maquinaria'
+            'obra', 'bloques', 'areas', 'conceptos', 'materiales', 'maquinaria', 'mano_obra', 'unidades', 'niveles'
         ));
     }
 
+    // ──────────────────────────────────────────────────────────────
+    // GUARDAR CONCEPTOS Y SUS INSUMOS DE FORMA JERÁRQUICA
+    // ──────────────────────────────────────────────────────────────
     public function storeUnificado(Request $request, $obraId)
     {
         ObraIniciada::findOrFail($obraId);
 
-        $request->validate([
-            'filas'                   => 'array',
-            'filas.*.tipo'            => 'required|in:concepto,material,maquinaria',
-            'filas.*.id_bloque'       => 'required|exists:bloques,id',
-            'filas.*.id_area'         => 'required|exists:areas,id',
-            'filas.*.id_nivel'        => 'nullable|exists:niveles,id',
-            'filas.*.cantidad'        => 'required|numeric|min:0',
-            'filas.*.precio_unitario' => 'required|numeric|min:0',
-            'filas.*.porcentaje_iva'  => 'required|numeric|min:0|max:100',
-        ]);
+        // Se espera un payload JSON o form array con esta estructura:
+        // 'conceptos' => [
+        //    [ 'id_concepto', 'nombre_nuevo', 'id_bloque', 'id_area', 'cantidad', ... 
+        //      'materiales' => [ [ 'id_material', 'cantidad', ... ] ],
+        //      'maquinaria' => [ [ 'id_maquinaria', 'cantidad', ... ] ],
+        //      'mano_obra'  => [ [ 'id_mano_obra', 'cantidad', ... ] ],
+        //    ]
+        // ]
 
         DB::beginTransaction();
         try {
-            foreach (($request->filas ?? []) as $fila) {
-                $tipo = $fila['tipo'];
-                $sub  = round($fila['cantidad'] * $fila['precio_unitario'], 4);
-                $iva  = round($sub * ($fila['porcentaje_iva'] / 100), 4);
-                $base = [
+            foreach (($request->conceptos ?? []) as $cData) {
+                // 1. Resolver/Crear el Concepto Base
+                $idConcepto = $cData['id_concepto'] ?? null;
+                if (empty($idConcepto) && !empty($cData['nombre_nuevo'])) {
+                    $c = Concepto::firstOrCreate(
+                        ['descripcion' => trim($cData['nombre_nuevo'])],
+                        [
+                            'id_area'          => $cData['id_area'] ?? null,
+                            'p_u'              => $cData['precio_unitario'] ?? 0,
+                            'id_unidad_medida' => $cData['id_unidad_medida'] ?? null,
+                        ]
+                    );
+                    $idConcepto = $c->id;
+                }
+                
+                if (empty($idConcepto)) continue;
+
+                $cantConcepto = floatval($cData['cantidad'] ?? 1);
+                
+                // 2. Crear el ObraConcepto (Padre)
+                // El precio unitario lo calcularemos a partir de sus hijos, pero si el usuario puso uno manual, lo respetamos inicialmente.
+                // En un presupuesto de matrices (PU), el P.U. del concepto es la suma de los (P.U. de insumos * su rendimiento).
+                // Pero por ahora lo mantendremos simple: suma plana de hijos o P.U. manual.
+                $obraConcepto = ObraConcepto::create([
                     'id_obra'         => $obraId,
-                    'id_nivel'        => $fila['id_nivel'] ?: null,
-                    'id_bloque'       => $fila['id_bloque'],
-                    'id_area'         => $fila['id_area'],
-                    'cantidad'        => $fila['cantidad'],
-                    'precio_unitario' => $fila['precio_unitario'],
-                    'subtotal'        => $sub,
-                    'porcentaje_iva'  => $fila['porcentaje_iva'],
-                    'iva'             => $iva,
-                    'total_final'     => $sub + $iva,
-                ];
+                    'id_nivel'        => $cData['id_nivel'] ?? null,
+                    'id_bloque'       => $cData['id_bloque'] ?? null,
+                    'id_area'         => $cData['id_area'] ?? null,
+                    'id_concepto'     => $idConcepto,
+                    'cantidad'        => $cantConcepto,
+                    'precio_unitario' => $cData['precio_unitario'] ?? 0,
+                    'subtotal'        => 0,
+                    'porcentaje_iva'  => $cData['porcentaje_iva'] ?? 16,
+                    'iva'             => 0,
+                    'total_final'     => 0,
+                ]);
 
-                if ($tipo === 'concepto') {
-                    $idConcepto = $fila['id_concepto'] ?? null;
-                    if (empty($idConcepto) && !empty($fila['nombre_nuevo'])) {
-                        $c = Concepto::firstOrCreate(
-                            ['descripcion' => trim($fila['nombre_nuevo'])],
-                            [
-                                'id_area'          => !empty($fila['nuevo_id_area']) ? $fila['nuevo_id_area'] : $fila['id_area'],
-                                'p_u'              => !empty($fila['nuevo_pu']) ? $fila['nuevo_pu'] : $fila['precio_unitario'],
-                                'id_unidad_medida' => $fila['nuevo_id_um'] ?? null,
-                            ]
-                        );
-                        $idConcepto = $c->id;
-                    }
-                    if (empty($idConcepto)) continue;
-                    AsignaConcepto::create($base + ['id_concepto' => $idConcepto]);
+                $totalSubtotalConcepto = 0;
 
-                } elseif ($tipo === 'material') {
-                    $idMaterial = $fila['id_material'] ?? null;
-                    if (empty($idMaterial) && !empty($fila['nombre_nuevo'])) {
+                // 3. Agregar Materiales
+                foreach (($cData['materiales'] ?? []) as $mData) {
+                    $idMat = $mData['id_material'] ?? null;
+                    if (empty($idMat) && !empty($mData['nombre_nuevo'])) {
                         $m = Material::firstOrCreate(
-                            ['nombre' => trim($fila['nombre_nuevo'])],
+                            ['nombre' => trim($mData['nombre_nuevo'])],
                             [
-                                'descripcion'      => $fila['nuevo_desc'] ?? null,
-                                'id_unidad_medida' => $fila['nuevo_id_um'] ?? null,
-                                'precio_x_unidad'  => !empty($fila['nuevo_precio']) ? $fila['nuevo_precio'] : $fila['precio_unitario'],
+                                'id_unidad_medida' => $mData['id_unidad_medida'] ?? null,
+                                'precio_x_unidad'  => $mData['precio_unitario'] ?? 0,
                             ]
                         );
-                        $idMaterial = $m->id;
+                        $idMat = $m->id;
                     }
-                    if (empty($idMaterial)) continue;
-                    AsignaMaterial::create($base + ['id_material' => $idMaterial]);
+                    if (empty($idMat)) continue;
 
-                } elseif ($tipo === 'maquinaria') {
-                    $idMaq = $fila['id_maquinaria'] ?? null;
-                    if (empty($idMaq) && !empty($fila['nombre_nuevo'])) {
+                    $sub = round(($mData['cantidad'] ?? 0) * ($mData['precio_unitario'] ?? 0), 4);
+                    $iva = round($sub * (($mData['porcentaje_iva'] ?? 16) / 100), 4);
+                    
+                    AsignaMaterial::create([
+                        'id_obra_concepto' => $obraConcepto->id,
+                        'id_material'      => $idMat,
+                        'cantidad'         => $mData['cantidad'] ?? 0,
+                        'precio_unitario'  => $mData['precio_unitario'] ?? 0,
+                        'subtotal'         => $sub,
+                        'porcentaje_iva'   => $mData['porcentaje_iva'] ?? 16,
+                        'iva'              => $iva,
+                        'total_final'      => $sub + $iva,
+                    ]);
+                    $totalSubtotalConcepto += $sub;
+                }
+
+                // 4. Agregar Maquinaria
+                foreach (($cData['maquinaria'] ?? []) as $mData) {
+                    $idMaq = $mData['id_maquinaria'] ?? null;
+                    if (empty($idMaq) && !empty($mData['nombre_nuevo'])) {
                         $maq = Maquinaria::firstOrCreate(
-                            ['nombre' => trim($fila['nombre_nuevo'])],
+                            ['nombre' => trim($mData['nombre_nuevo'])],
                             [
-                                'descripcion'      => $fila['nuevo_desc'] ?? null,
-                                'id_unidad_medida' => $fila['nuevo_id_um'] ?? null,
-                                'precio_x_unidad'  => !empty($fila['nuevo_precio']) ? $fila['nuevo_precio'] : $fila['precio_unitario'],
+                                'id_unidad_medida' => $mData['id_unidad_medida'] ?? null,
+                                'precio_x_unidad'  => $mData['precio_unitario'] ?? 0,
                             ]
                         );
                         $idMaq = $maq->id;
                     }
                     if (empty($idMaq)) continue;
-                    AsignaMaquinaria::create($base + ['id_maquinaria' => $idMaq]);
+
+                    $sub = round(($mData['cantidad'] ?? 0) * ($mData['precio_unitario'] ?? 0), 4);
+                    $iva = round($sub * (($mData['porcentaje_iva'] ?? 16) / 100), 4);
+                    
+                    AsignaMaquinaria::create([
+                        'id_obra_concepto' => $obraConcepto->id,
+                        'id_maquinaria'    => $idMaq,
+                        'cantidad'         => $mData['cantidad'] ?? 0,
+                        'precio_unitario'  => $mData['precio_unitario'] ?? 0,
+                        'subtotal'         => $sub,
+                        'porcentaje_iva'   => $mData['porcentaje_iva'] ?? 16,
+                        'iva'              => $iva,
+                        'total_final'      => $sub + $iva,
+                    ]);
+                    $totalSubtotalConcepto += $sub;
+                }
+
+                // 5. Agregar Mano de Obra
+                foreach (($cData['mano_obra'] ?? []) as $mData) {
+                    $idMo = $mData['id_mano_obra'] ?? null;
+                    if (empty($idMo) && !empty($mData['nombre_nuevo'])) {
+                        $mo = ManoObra::firstOrCreate(
+                            ['nombre' => trim($mData['nombre_nuevo'])],
+                            [
+                                'id_unidad_medida' => $mData['id_unidad_medida'] ?? null,
+                                'precio_x_unidad'  => $mData['precio_unitario'] ?? 0,
+                            ]
+                        );
+                        $idMo = $mo->id;
+                    }
+                    if (empty($idMo)) continue;
+
+                    $sub = round(($mData['cantidad'] ?? 0) * ($mData['precio_unitario'] ?? 0), 4);
+                    $iva = round($sub * (($mData['porcentaje_iva'] ?? 16) / 100), 4);
+                    
+                    AsignaManoObra::create([
+                        'id_obra_concepto' => $obraConcepto->id,
+                        'id_mano_obra'     => $idMo,
+                        'cantidad'         => $mData['cantidad'] ?? 0,
+                        'precio_unitario'  => $mData['precio_unitario'] ?? 0,
+                        'subtotal'         => $sub,
+                        'porcentaje_iva'   => $mData['porcentaje_iva'] ?? 16,
+                        'iva'              => $iva,
+                        'total_final'      => $sub + $iva,
+                    ]);
+                    $totalSubtotalConcepto += $sub;
+                }
+
+                // 6. Actualizar Totales del ObraConcepto si se le asignaron hijos
+                // Si no hay hijos, mantenemos el P.U. manual que escribió el usuario.
+                // Si hay hijos, el subtotal del Concepto es el Costo Unitario de la matriz * la cantidad del concepto.
+                if ($totalSubtotalConcepto > 0) {
+                    $nuevoPU = $totalSubtotalConcepto;
+                    $subtotalFinalConcepto = round($nuevoPU * $cantConcepto, 4);
+                    $ivaConcepto = round($subtotalFinalConcepto * ($obraConcepto->porcentaje_iva / 100), 4);
+
+                    $obraConcepto->update([
+                        'precio_unitario' => $nuevoPU,
+                        'subtotal'        => $subtotalFinalConcepto,
+                        'iva'             => $ivaConcepto,
+                        'total_final'     => $subtotalFinalConcepto + $ivaConcepto,
+                    ]);
+                } else {
+                    $sub = round($cantConcepto * $obraConcepto->precio_unitario, 4);
+                    $iva = round($sub * ($obraConcepto->porcentaje_iva / 100), 4);
+                    $obraConcepto->update([
+                        'subtotal'    => $sub,
+                        'iva'         => $iva,
+                        'total_final' => $sub + $iva,
+                    ]);
                 }
             }
 
             $this->recalcularTotalesBloque($obraId);
             ObraController::recalcularTotales($obraId);
             DB::commit();
-            return redirect()->route('obras.presupuesto', $obraId)
-                ->with('success', 'Renglones guardados correctamente.');
+            return response()->json(['success' => true, 'redirect' => route('obras.presupuesto', $obraId)]);
         } catch (\Throwable $e) {
             DB::rollBack();
-            return back()->withInput()->withErrors(['general' => $e->getMessage()]);
+            \Log::error('Error storeUnificado: ' . $e->getMessage() . ' - L: ' . $e->getLine());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-    }
-
-    public function storeMateriales(Request $request, $obraId)
-    {
-        ObraIniciada::findOrFail($obraId);
-
-        $request->validate([
-            'filas'                   => 'required|array|min:1',
-            'filas.*.id_material'     => 'required|exists:materiales,id',
-            'filas.*.id_bloque'       => 'required|exists:bloques,id',
-            'filas.*.id_area'         => 'required|exists:areas,id',
-            'filas.*.id_nivel'        => 'nullable|exists:niveles,id',
-            'filas.*.cantidad'        => 'required|numeric|min:0',
-            'filas.*.precio_unitario' => 'required|numeric|min:0',
-            'filas.*.porcentaje_iva'  => 'required|numeric|min:0|max:100',
-        ]);
-
-        DB::beginTransaction();
-        try {
-            foreach ($request->filas as $fila) {
-                $sub = round($fila['cantidad'] * $fila['precio_unitario'], 4);
-                $iva = round($sub * ($fila['porcentaje_iva'] / 100), 4);
-                AsignaMaterial::create([
-                    'id_obra'         => $obraId,
-                    'id_nivel'        => $fila['id_nivel'] ?: null,
-                    'id_bloque'       => $fila['id_bloque'],
-                    'id_area'         => $fila['id_area'],
-                    'id_material'     => $fila['id_material'],
-                    'cantidad'        => $fila['cantidad'],
-                    'precio_unitario' => $fila['precio_unitario'],
-                    'subtotal'        => $sub,
-                    'porcentaje_iva'  => $fila['porcentaje_iva'],
-                    'iva'             => $iva,
-                    'total_final'     => $sub + $iva,
-                ]);
-            }
-            $this->recalcularTotalesBloque($obraId);
-            ObraController::recalcularTotales($obraId);
-            DB::commit();
-            return redirect()->route('obras.presupuesto', $obraId)
-                ->with('success', count($request->filas) . ' materiales agregados al presupuesto.');
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return back()->withInput()->withErrors(['general' => $e->getMessage()]);
-        }
-    }
-
-    public function destroyMaterial($obraId, $id)
-    {
-        AsignaMaterial::where('id_obra', $obraId)->findOrFail($id)->delete();
-        $this->recalcularTotalesBloque($obraId);
-        ObraController::recalcularTotales($obraId);
-        return back()->with('success', 'Material eliminado.');
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -306,73 +265,68 @@ class PresupuestoController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function updateAll(Request $request, $obraId)
     {
-        ObraIniciada::findOrFail($obraId);
-
-        $items = $request->input('items', []);
-
-        DB::beginTransaction();
-        try {
-            foreach ($items as $tipo => $filas) {
-                foreach ($filas as $id => $datos) {
-                    $pu = floatval($datos['pu'] ?? 0);
-                    $cant = floatval($datos['cantidad'] ?? 0);
-                    
-                    if ($tipo === 'concepto') {
-                        $model = AsignaConcepto::where('id_obra', $obraId)->find($id);
-                    } elseif ($tipo === 'material') {
-                        $model = AsignaMaterial::where('id_obra', $obraId)->find($id);
-                    } elseif ($tipo === 'maquinaria') {
-                        $model = AsignaMaquinaria::where('id_obra', $obraId)->find($id);
-                    } else {
-                        continue;
-                    }
-
-                    if ($model) {
-                        $porcIva = $model->porcentaje_iva;
-                        $sub = round($cant * $pu, 4);
-                        $iva = round($sub * ($porcIva / 100), 4);
-                        $model->update([
-                            'cantidad' => $cant,
-                            'precio_unitario' => $pu,
-                            'subtotal' => $sub,
-                            'iva' => $iva,
-                            'total_final' => $sub + $iva,
-                        ]);
-                    }
-                }
-            }
-
-            $this->recalcularTotalesBloque($obraId);
-            ObraController::recalcularTotales($obraId);
-            DB::commit();
-
-            return redirect()->route('obras.presupuesto', $obraId)
-                ->with('success', 'Presupuesto actualizado correctamente.');
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return back()->withErrors(['general' => $e->getMessage()]);
-        }
+        // Se puede implementar edición rápida más adelante
+        return back()->with('success', 'Edición rápida en desarrollo para el nuevo modelo jerárquico.');
     }
+
+    public function destroyConcepto($obraId, $id)
+    {
+        ObraConcepto::where('id_obra', $obraId)->findOrFail($id)->delete();
+        $this->recalcularTotalesBloque($obraId);
+        ObraController::recalcularTotales($obraId);
+        return back()->with('success', 'Concepto y sus insumos eliminados.');
+    }
+
+    public function destroyMaterial($obraId, $id) { /* Implementar si se borra un insumo específico */ }
+    public function destroyMaquinaria($obraId, $id) { /* Implementar si se borra un insumo específico */ }
+    public function destroyManoObra($obraId, $id) { /* Implementar si se borra un insumo específico */ }
 
     // ──────────────────────────────────────────────────────────────
     // HELPERS
     // ──────────────────────────────────────────────────────────────
     private function recalcularTotalesBloque(int $obraId): void
     {
+        // El total del bloque ahora se calcula sumando solo los subtotales de ObraConcepto, 
+        // ya que los insumos están dentro de los Conceptos y sus costos se suman hacia arriba.
         $bloques = Bloque::all();
         foreach ($bloques as $bloque) {
-            $sub = AsignaConcepto::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->sum('subtotal')
-                 + AsignaMaterial::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->sum('subtotal')
-                 + AsignaMaquinaria::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->sum('subtotal');
-            $iva = AsignaConcepto::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->sum('iva')
-                 + AsignaMaterial::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->sum('iva')
-                 + AsignaMaquinaria::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->sum('iva');
+            $sub = ObraConcepto::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->sum('subtotal');
+            $iva = ObraConcepto::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->sum('iva');
+            
             if ($sub > 0 || $iva > 0) {
                 \App\Models\TotalBloque::updateOrCreate(
                     ['id_obra' => $obraId, 'id_bloque' => $bloque->id],
                     ['total' => $sub, 'iva' => $iva, 'total_final' => $sub + $iva]
                 );
+            } else {
+                \App\Models\TotalBloque::where('id_obra', $obraId)->where('id_bloque', $bloque->id)->delete();
             }
         }
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // EXPORTACIÓN
+    // ──────────────────────────────────────────────────────────────
+    public function exportExcel($obraId)
+    {
+        $obra = ObraIniciada::with(['datosDeObra', 'niveles'])->findOrFail($obraId);
+        $fileName = 'Presupuesto_' . str_replace(' ', '_', $obra->datosDeObra?->nombre ?? 'Obra') . '.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\PresupuestoExport($obraId), 
+            $fileName
+        );
+    }
+
+    public function exportPdf($obraId)
+    {
+        $obra = ObraIniciada::with(['datosDeObra', 'niveles', 'obraConceptos.concepto.unidadMedida', 'totalBloque'])->findOrFail($obraId);
+        $bloques = \App\Models\Bloque::orderBy('id')->get();
+        $totalesPorBloque = $obra->totalBloque->keyBy('id_bloque');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('obras.presupuesto_export', compact('obra', 'bloques', 'totalesPorBloque'));
+        $pdf->setPaper('A4', 'landscape');
+        
+        return $pdf->download('Presupuesto_' . str_replace(' ', '_', $obra->datosDeObra?->nombre ?? 'Obra') . '.pdf');
     }
 }

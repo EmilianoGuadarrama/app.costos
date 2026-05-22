@@ -228,7 +228,7 @@
 
                 {{-- CATÁLOGOS --}}
                 <li class="nav-item">
-                    @php $isCat = request()->routeIs(['conceptos*','materiales*','maquinaria*','areas*','unidad_medida*']); @endphp
+                    @php $isCat = request()->routeIs(['conceptos*','materiales*','maquinaria*','mano_obra*','areas*','unidad_medida*']); @endphp
                     <a class="nav-link dropdown-toggle {{ $isCat ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#menuCatalogos" aria-expanded="{{ $isCat ? 'true' : 'false' }}">
                         <i class="fas fa-list"></i>
                         <span>Catálogos</span>
@@ -238,6 +238,7 @@
                             <li><a href="{{ route('conceptos.index') }}" class="nav-link {{ request()->routeIs('conceptos*') ? 'active' : '' }}">Conceptos</a></li>
                             <li><a href="{{ route('materiales.index') }}" class="nav-link {{ request()->routeIs('materiales*') ? 'active' : '' }}">Materiales</a></li>
                             <li><a href="{{ route('maquinaria.index') }}" class="nav-link {{ request()->routeIs('maquinaria*') ? 'active' : '' }}"><i class="bi bi-truck me-1"></i>Maquinaria</a></li>
+                            <li><a href="{{ route('mano_obra.index') }}" class="nav-link {{ request()->routeIs('mano_obra*') ? 'active' : '' }}"><i class="bi bi-person-lines-fill me-1"></i>Mano de Obra</a></li>
                             <li><a href="{{ route('areas.index') }}" class="nav-link {{ request()->routeIs('areas*') ? 'active' : '' }}">Areas</a></li>
                             <li><a href="{{ route('unidad_medida.index') }}" class="nav-link {{ request()->routeIs('unidad_medida*') ? 'active' : '' }}">Unidades</a></li>
                         </ul>

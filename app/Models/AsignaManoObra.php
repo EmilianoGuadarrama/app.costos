@@ -2,12 +2,12 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class AsignaMaquinaria extends Model
+class AsignaManoObra extends Model
 {
-    protected $table = 'asigna_maquinaria';
+    protected $table = 'asigna_mano_obra';
     protected $fillable = [
         'id_obra_concepto',
-        'id_maquinaria',
+        'id_mano_obra',
         'cantidad',
         'precio_unitario',
         'subtotal',
@@ -17,5 +17,5 @@ class AsignaMaquinaria extends Model
     ];
 
     public function obraConcepto() { return $this->belongsTo(ObraConcepto::class, 'id_obra_concepto'); }
-    public function maquinaria()   { return $this->belongsTo(Maquinaria::class, 'id_maquinaria'); }
+    public function manoObra()     { return $this->belongsTo(ManoObra::class, 'id_mano_obra'); }
 }

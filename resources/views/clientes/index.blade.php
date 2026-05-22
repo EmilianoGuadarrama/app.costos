@@ -60,7 +60,7 @@
                         <td><strong>{{ $cliente->nombre_o_razon_social ?? $cliente->persona?->nombre_completo ?? '—' }}</strong><br><small class="text-muted">Cta: {{ $cliente->cuenta_catastral ?? 'N/D' }}</small></td>
                         <td><span class="badge-soft">{{ $cliente->uso_suelo ?? 'N/D' }}</span></td>
                         <td>{{ $cliente->persona?->rfc ?? 'N/A' }}</td>
-                        <td>{{ $cliente->email ?? 'N/A' }}<br><small>{{ $cliente->telefono ?? 'N/A' }}</small></td>
+                        <td>{{ $cliente->persona?->email ?? 'N/A' }}<br><small>{{ $cliente->persona?->telefono_1 ?? 'N/A' }}</small></td>
                         <td class="action-cell">
                             <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verClienteModal{{ $clienteId }}"><i class="bi bi-eye"></i></button>
                             <button type="button" class="btn-icon-action" title="Eliminar" data-bs-toggle="modal" data-bs-target="#eliminarClienteModal{{ $clienteId }}"><i class="bi bi-trash3"></i></button>
@@ -68,11 +68,47 @@
                     </tr>
                     <div class="modal fade" id="verClienteModal{{ $clienteId }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
-                            <div class="modal-header"><h5 class="modal-title">{{ $cliente->nombre }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
-                            <div class="modal-body"><div class="detail-grid">
-                                <div class="detail-box"><h6>Datos del cliente</h6><p><strong>Nombre / Razón social:</strong> {{ $cliente->nombre_o_razon_social ?? $cliente->persona?->nombre_completo ?? '—' }}</p><p><strong>Uso de suelo:</strong> {{ $cliente->uso_suelo ?? '—' }}</p><p><strong>Cuenta catastral:</strong> {{ $cliente->cuenta_catastral ?? '—' }}</p><p><strong>RFC:</strong> {{ $cliente->persona?->rfc ?? '—' }}</p></div>
-                                <div class="detail-box"><h6>Contacto</h6><p><strong>Dirección:</strong> {{ $cliente->direccionFiscal?->calle ?? $cliente->persona?->direccion?->calle ?? '—' }}</p><p><strong>Teléfono:</strong> {{ $cliente->telefono ?? '—' }}</p><p><strong>Correo:</strong> {{ $cliente->email ?? '—' }}</p></div>
-                            </div></div>
+                            <div class="modal-header" style="display:none;"></div>
+                            <div class="modal-body" style="padding: 0;">
+                                <div style="background: linear-gradient(135deg, #111, #333); color: #fff; padding: 30px 20px; text-align: center; border-radius: 16px 16px 0 0; position:relative;">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar" style="position:absolute; top:20px; right:20px; opacity:0.8;"></button>
+                                    <div style="width: 70px; height: 70px; background: #fff; color: #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 15px; font-weight: bold;">
+                                        {{ strtoupper(substr($cliente->nombre_o_razon_social ?? $cliente->persona?->nombre_completo ?? 'C', 0, 1)) }}
+                                    </div>
+                                    <h4 style="margin: 0; font-family: 'Garamond', 'Baskerville', serif; font-size: 1.6rem;">{{ $cliente->nombre_o_razon_social ?? $cliente->persona?->nombre_completo ?? '—' }}</h4>
+                                    <p style="margin: 5px 0 0; color: #ccc; font-size: 0.9rem;"><i class="bi bi-person-badge"></i> RFC: {{ $cliente->persona?->rfc ?? '—' }}</p>
+                                </div>
+                                <div style="padding: 25px;">
+                                    <div class="detail-grid">
+                                        <div class="detail-box">
+                                            <h6>Datos Técnicos</h6>
+                                            <p><strong>Uso de suelo:</strong> <span class="badge-soft">{{ $cliente->uso_suelo ?? '—' }}</span></p>
+                                            <p><strong>Cuenta catastral:</strong> {{ $cliente->cuenta_catastral ?? '—' }}</p>
+                                        </div>
+                                        <div class="detail-box">
+                                            <h6>Contacto Personal</h6>
+                                            <p><i class="bi bi-telephone-fill text-muted me-2"></i> <strong>Teléfono:</strong> {{ $cliente->persona?->telefono_1 ?? '—' }}</p>
+                                            <p><i class="bi bi-envelope-fill text-muted me-2"></i> <strong>Correo:</strong> {{ $cliente->persona?->email ?? '—' }}</p>
+                                        </div>
+                                        <div class="detail-box" style="grid-column: 1 / -1;">
+                                            <h6><i class="bi bi-geo-alt-fill text-muted me-1"></i> Dirección Fiscal</h6>
+                                            @php
+                                                $dirF = $cliente->direccionFiscal ?? $cliente->persona?->direccion;
+                                            @endphp
+                                            <p style="margin:0; font-size:0.95rem; line-height:1.6; color:#444;">
+                                                @if($dirF)
+                                                    {{ $dirF->calle_y_numero }} {{ $dirF->colonia ? ', Col. '.$dirF->colonia : '' }}<br>
+                                                    {{ $dirF->delegacion ? 'Del/Mun. '.$dirF->delegacion : '' }}
+                                                    {{ $dirF->estado ? ', '.$dirF->estado->nombre : '' }}
+                                                    {{ $dirF->codigo_postal ? ' C.P. '.$dirF->codigo_postal : '' }}
+                                                @else
+                                                    <em style="color:#888;">No se ha registrado dirección fiscal.</em>
+                                                @endif
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button><a href="{{ route('clientes.edit', $clienteId) }}" class="btn-modal-dark">Editar</a></div>
                         </div></div>
                     </div>

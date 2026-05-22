@@ -12,6 +12,7 @@ use App\Http\Controllers\UnidadMedidaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\EmpleadoController;
+use App\Http\Controllers\ManoObraController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\EgresoController;
 use App\Http\Controllers\CajaGeneralController;
@@ -22,6 +23,9 @@ Route::get('/', [ObraController::class, 'index'])->name('inicio');
 // ==========================================
 // 1. OBRAS
 // ==========================================
+Route::get('obras/papelera', [ObraController::class, 'papelera'])->name('obras.papelera');
+Route::post('obras/{id}/restaurar', [ObraController::class, 'restaurar'])->name('obras.restaurar');
+Route::delete('obras/{id}/force', [ObraController::class, 'forceDelete'])->name('obras.forceDelete');
 Route::resource('obras', ObraController::class);
 
 // ==========================================
@@ -46,6 +50,10 @@ Route::prefix('obras/{obraId}/presupuesto')->group(function () {
     Route::get('/agregar-todo', [PresupuestoController::class, 'createUnificado'])->name('obras.presupuesto.unificado.create');
     Route::post('/agregar-todo', [PresupuestoController::class, 'storeUnificado'])->name('obras.presupuesto.unificado.store');
 
+    // Exportaciones
+    Route::get('/export-excel', [PresupuestoController::class, 'exportExcel'])->name('obras.presupuesto.export_excel');
+    Route::get('/export-pdf', [PresupuestoController::class, 'exportPdf'])->name('obras.presupuesto.export_pdf');
+
     // Edición en línea
     Route::post('/actualizar-todo', [PresupuestoController::class, 'updateAll'])->name('obras.presupuesto.updateAll');
 });
@@ -56,6 +64,7 @@ Route::prefix('obras/{obraId}/presupuesto')->group(function () {
 Route::resource('conceptos', ConceptoController::class);
 Route::resource('materiales', MaterialController::class);
 Route::resource('maquinaria', MaquinariaController::class);
+Route::resource('mano_obra', ManoObraController::class);
 Route::resource('areas', AreaController::class);
 Route::resource('unidad_medida', UnidadMedidaController::class)
     ->parameters(['unidad_medida' => 'unidad_medida']);

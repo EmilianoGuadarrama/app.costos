@@ -210,35 +210,18 @@
             @csrf
 
             <div class="form-group">
-                <label for="clave">Clave <span class="required-mark">*</span></label>
+                <label for="nombre">Nombre <span class="required-mark">*</span></label>
                 <input
                     type="text"
-                    id="clave"
-                    name="clave"
-                    class="form-control @error('clave') is-invalid @enderror"
-                    value="{{ old('clave') }}"
+                    id="nombre"
+                    name="nombre"
+                    class="form-control @error('nombre') is-invalid @enderror"
+                    value="{{ old('nombre') }}"
                     required
-                    maxlength="50"
-                    placeholder="Ejemplo: MO-001"
-                >
-                @error('clave')
-                    <span class="text-danger">{{ $message }}</span>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="categoria">Categoría <span class="required-mark">*</span></label>
-                <input
-                    type="text"
-                    id="categoria"
-                    name="categoria"
-                    class="form-control @error('categoria') is-invalid @enderror"
-                    value="{{ old('categoria') }}"
-                    required
-                    maxlength="150"
+                    maxlength="255"
                     placeholder="Ejemplo: Oficial Albañil"
                 >
-                @error('categoria')
+                @error('nombre')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
@@ -246,37 +229,37 @@
             <div class="form-group">
                 <label for="unidad_medida_id">Unidad de Medida <span class="required-mark">*</span></label>
                 <select
-                    id="unidad_medida_id"
-                    name="unidad_medida_id"
-                    class="form-select @error('unidad_medida_id') is-invalid @enderror"
+                    id="id_unidad_medida"
+                    name="id_unidad_medida"
+                    class="form-select @error('id_unidad_medida') is-invalid @enderror"
                     required
                 >
                     <option value="">Seleccione una unidad de medida</option>
                     @foreach($unidades as $u)
-                        <option value="{{ $u->id }}" {{ old('unidad_medida_id') == $u->id ? 'selected' : '' }}>
+                        <option value="{{ $u->id }}" {{ old('id_unidad_medida') == $u->id ? 'selected' : '' }}>
                             {{ $u->nombre }} ({{ $u->abreviatura }})
                         </option>
                     @endforeach
                 </select>
-                @error('unidad_medida_id')
+                @error('id_unidad_medida')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="salario_unitario">Salario Unitario <span class="required-mark">*</span></label>
+                <label for="precio_x_unidad">Salario Unitario <span class="required-mark">*</span></label>
                 <input
                     type="number"
                     step="0.01"
                     min="0"
-                    id="salario_unitario"
-                    name="salario_unitario"
-                    class="form-control @error('salario_unitario') is-invalid @enderror"
-                    value="{{ old('salario_unitario', 0) }}"
+                    id="precio_x_unidad"
+                    name="precio_x_unidad"
+                    class="form-control @error('precio_x_unidad') is-invalid @enderror"
+                    value="{{ old('precio_x_unidad', 0) }}"
                     required
                     placeholder="Ejemplo: 450.00"
                 >
-                @error('salario_unitario')
+                @error('precio_x_unidad')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>

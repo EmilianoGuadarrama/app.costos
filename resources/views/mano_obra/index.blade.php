@@ -72,10 +72,10 @@
                     @php $manoId = $mano->id; @endphp
                     <tr class="work-row">
                         <td>
-                            <div class="title-main">{{ $mano->categoria ?? 'Sin categoría' }}<span class="badge-dark-mini">{{ $mano->clave ?? 'MO' }}</span></div>
+                            <div class="title-main">{{ $mano->nombre ?? 'Sin nombre' }}<span class="badge-dark-mini">MO</span></div>
                             <div class="desc-text">Registro de mano de obra para análisis de precio unitario.</div>
                         </td>
-                        <td><span class="amount-badge">${{ number_format((float) $mano->salario_unitario, 2) }}</span></td>
+                        <td><span class="amount-badge">${{ number_format((float) $mano->precio_x_unidad, 2) }}</span></td>
                         <td><div class="info-stack"><strong>Unidad:</strong> {{ optional($mano->unidadMedida)->nombre ?? 'N/D' }}@if(optional($mano->unidadMedida)->abreviatura) ({{ optional($mano->unidadMedida)->abreviatura }})@endif</div></td>
                         <td class="action-cell">
                             <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verManoModal{{ $manoId }}"><i class="bi bi-eye"></i></button>
@@ -84,10 +84,10 @@
                     </tr>
                     <div class="modal fade" id="verManoModal{{ $manoId }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
-                            <div class="modal-header"><h5 class="modal-title">{{ $mano->categoria ?? 'Mano de Obra' }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                            <div class="modal-header"><h5 class="modal-title">{{ $mano->nombre ?? 'Mano de Obra' }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
                             <div class="modal-body"><div class="detail-grid">
-                                <div class="detail-box"><h6>Información</h6><p><strong>Categoría:</strong> {{ $mano->categoria ?? 'Sin categoría' }}</p><p><strong>Clave:</strong> {{ $mano->clave ?? 'MO' }}</p></div>
-                                <div class="detail-box"><h6>Pago y Unidad</h6><p><strong>Salario unitario:</strong> ${{ number_format((float) $mano->salario_unitario, 2) }}</p><p><strong>Unidad:</strong> {{ optional($mano->unidadMedida)->nombre ?? 'N/D' }}</p></div>
+                                <div class="detail-box"><h6>Información</h6><p><strong>Nombre:</strong> {{ $mano->nombre ?? 'Sin nombre' }}</p></div>
+                                <div class="detail-box"><h6>Pago y Unidad</h6><p><strong>Salario unitario:</strong> ${{ number_format((float) $mano->precio_x_unidad, 2) }}</p><p><strong>Unidad:</strong> {{ optional($mano->unidadMedida)->nombre ?? 'N/D' }}</p></div>
                             </div></div>
                             <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button><a href="{{ route('mano_obra.edit', $manoId) }}" class="btn-modal-dark">Editar</a></div>
                         </div></div>
@@ -95,7 +95,7 @@
                     <div class="modal fade" id="eliminarManoModal{{ $manoId }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
                             <div class="modal-header"><h5 class="modal-title">Eliminar mano de obra</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
-                            <div class="modal-body">¿Deseas eliminar este registro de mano de obra <strong>{{ $mano->categoria ?? '' }}</strong>?<br><br>Esta acción no se puede deshacer.</div>
+                            <div class="modal-body">¿Deseas eliminar este registro de mano de obra <strong>{{ $mano->nombre ?? '' }}</strong>?<br><br>Esta acción no se puede deshacer.</div>
                             <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cancelar</button><form action="{{ route('mano_obra.destroy', $manoId) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="btn-modal-danger">Eliminar</button></form></div>
                         </div></div>
                     </div>

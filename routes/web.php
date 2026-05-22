@@ -40,6 +40,7 @@ Route::prefix('obras/{obraId}/presupuesto')->group(function () {
     Route::get('/agregar', [PresupuestoController::class, 'create'])->name('obras.presupuesto.create');
     Route::post('/conceptos', [PresupuestoController::class, 'storeConceptos'])->name('obras.presupuesto.conceptos.store');
     Route::delete('/conceptos/{id}', [PresupuestoController::class, 'destroyConcepto'])->name('obras.presupuesto.conceptos.destroy');
+    Route::patch('/conceptos/{id}', [PresupuestoController::class, 'updateConcepto'])->name('obras.presupuesto.conceptos.update');
 
     // Formulario agregar materiales (GET + POST separados)
     Route::get('/agregar-materiales', [PresupuestoController::class, 'createMateriales'])->name('obras.presupuesto.materiales.create');
@@ -57,6 +58,10 @@ Route::prefix('obras/{obraId}/presupuesto')->group(function () {
     // Edición en línea
     Route::post('/actualizar-todo', [PresupuestoController::class, 'updateAll'])->name('obras.presupuesto.updateAll');
 });
+
+// Rutas directas para editar/actualizar un ObraConcepto por su ID
+Route::get('obra-conceptos/{id}/edit', [PresupuestoController::class, 'editConcepto'])->name('obra_conceptos.edit');
+Route::patch('obra-conceptos/{id}', [PresupuestoController::class, 'updateConcepto'])->name('obra_conceptos.update');
 
 // ==========================================
 // 3. CATÁLOGOS

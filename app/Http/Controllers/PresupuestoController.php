@@ -92,7 +92,10 @@ class PresupuestoController extends Controller
 
         DB::beginTransaction();
         try {
-            foreach (($request->conceptos ?? []) as $cData) {
+            // El front envía JSON puro; lo parsemos correctamente
+            $data = $request->json()->all();
+            $conceptosList = $data['conceptos'] ?? [];
+            foreach ($conceptosList as $cData) {
                 // 1. Resolver/Crear el Concepto Base
                 $idConcepto = $cData['id_concepto'] ?? null;
                 if (empty($idConcepto) && !empty($cData['nombre_nuevo'])) {
@@ -115,11 +118,28 @@ class PresupuestoController extends Controller
                 // El precio unitario lo calcularemos a partir de sus hijos, pero si el usuario puso uno manual, lo respetamos inicialmente.
                 // En un presupuesto de matrices (PU), el P.U. del concepto es la suma de los (P.U. de insumos * su rendimiento).
                 // Pero por ahora lo mantendremos simple: suma plana de hijos o P.U. manual.
+                // CREAR BLOQUE SI ES NUEVO
+                $idBloque = $cData['id_bloque'] ?? null;
+                if (empty($idBloque) && !empty($cData['bloque_nuevo'])) {
+                    $b = Bloque::firstOrCreate(['descripcion' => trim($cData['bloque_nuevo'])]);
+                    $idBloque = $b->id;
+                }
+
+                // CREAR AREA SI ES NUEVA
+                $idArea = $cData['id_area'] ?? null;
+                if (empty($idArea) && !empty($cData['area_nuevo'])) {
+                    $a = Area::firstOrCreate([
+                        'abreviatura' => trim($cData['area_nuevo']),
+                        'descripcion' => trim($cData['area_nuevo'])
+                    ]);
+                    $idArea = $a->id;
+                }
+
                 $obraConcepto = ObraConcepto::create([
                     'id_obra'         => $obraId,
                     'id_nivel'        => $cData['id_nivel'] ?? null,
-                    'id_bloque'       => $cData['id_bloque'] ?? null,
-                    'id_area'         => $cData['id_area'] ?? null,
+                    'id_bloque'       => $idBloque,
+                    'id_area'         => $idArea,
                     'id_concepto'     => $idConcepto,
                     'cantidad'        => $cantConcepto,
                     'precio_unitario' => $cData['precio_unitario'] ?? 0,
@@ -271,15 +291,192 @@ class PresupuestoController extends Controller
 
     public function destroyConcepto($obraId, $id)
     {
-        ObraConcepto::where('id_obra', $obraId)->findOrFail($id)->delete();
+        $concepto = ObraConcepto::where('id_obra', $obraId)->findOrFail($id);
+        $concepto->delete();
         $this->recalcularTotalesBloque($obraId);
         ObraController::recalcularTotales($obraId);
-        return back()->with('success', 'Concepto y sus insumos eliminados.');
+        return back()->with('success', 'Renglón eliminado correctamente.');
     }
 
-    public function destroyMaterial($obraId, $id) { /* Implementar si se borra un insumo específico */ }
-    public function destroyMaquinaria($obraId, $id) { /* Implementar si se borra un insumo específico */ }
-    public function destroyManoObra($obraId, $id) { /* Implementar si se borra un insumo específico */ }
+    // ──────────────────────────────────────────────────────────────
+    // GET datos completos de un ObraConcepto para el panel de edición
+    // ──────────────────────────────────────────────────────────────
+    public function editConcepto($id)
+    {
+        $oc = ObraConcepto::with([
+            'concepto.unidadMedida',
+            'materiales.material.unidadMedida',
+            'maquinaria.maquinaria.unidadMedida',
+            'manoObra.manoObra.unidadMedida',
+        ])->findOrFail($id);
+
+        return response()->json([
+            'id'               => $oc->id,
+            'id_concepto'      => $oc->id_concepto,
+            'descripcion'      => $oc->concepto?->descripcion ?? '',
+            'cantidad'         => $oc->cantidad,
+            'precio_unitario'  => $oc->precio_unitario,
+            'porcentaje_iva'   => $oc->porcentaje_iva ?? 16,
+            'subtotal'         => $oc->subtotal,
+            'total_final'      => $oc->total_final,
+            'materiales' => $oc->materiales->map(fn($m) => [
+                'id'          => $m->id,
+                'id_material' => $m->id_material,
+                'nombre'      => $m->material?->nombre ?? '',
+                'cantidad'    => $m->cantidad,
+                'precio_unitario' => $m->precio_unitario,
+                'id_unidad_medida'=> $m->id_unidad_medida,
+                'uni_txt'     => $m->material?->unidadMedida?->abreviatura ?? '',
+            ])->values(),
+            'maquinaria' => $oc->maquinaria->map(fn($m) => [
+                'id'             => $m->id,
+                'id_maquinaria'  => $m->id_maquinaria,
+                'nombre'         => $m->maquinaria?->nombre ?? '',
+                'cantidad'       => $m->cantidad,
+                'precio_unitario'=> $m->precio_unitario,
+                'id_unidad_medida'=> $m->id_unidad_medida,
+                'uni_txt'        => $m->maquinaria?->unidadMedida?->abreviatura ?? '',
+            ])->values(),
+            'mano_obra' => $oc->manoObra->map(fn($m) => [
+                'id'          => $m->id,
+                'id_mano_obra'=> $m->id_mano_obra,
+                'nombre'      => $m->manoObra?->nombre ?? '',
+                'cantidad'    => $m->cantidad,
+                'precio_unitario'=> $m->precio_unitario,
+                'id_unidad_medida'=> $m->id_unidad_medida,
+                'uni_txt'     => $m->manoObra?->unidadMedida?->abreviatura ?? '',
+            ])->values(),
+        ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // PUT — Guardar edición completa de un ObraConcepto
+    // ──────────────────────────────────────────────────────────────
+    public function updateConcepto(Request $request, $id)
+    {
+        $oc = ObraConcepto::findOrFail($id);
+        $data = $request->json()->all();
+
+        DB::beginTransaction();
+        try {
+            // 1. Actualizar o crear concepto si vino nombre nuevo
+            $idConcepto = $data['id_concepto'] ?? $oc->id_concepto;
+            if (empty($idConcepto) && !empty($data['nombre_nuevo'])) {
+                $c = Concepto::firstOrCreate(
+                    ['descripcion' => trim($data['nombre_nuevo'])],
+                    ['p_u' => $data['precio_unitario'] ?? 0]
+                );
+                $idConcepto = $c->id;
+            }
+
+            // 2. Calcular totales del concepto
+            $cant  = floatval($data['cantidad']       ?? $oc->cantidad);
+            $pu    = floatval($data['precio_unitario'] ?? $oc->precio_unitario);
+            $pIva  = floatval($data['porcentaje_iva']  ?? $oc->porcentaje_iva ?? 16);
+            $sub   = round($cant * $pu, 4);
+            $iva   = round($sub * ($pIva / 100), 4);
+            $total = $sub + $iva;
+
+            $oc->update([
+                'id_concepto'     => $idConcepto,
+                'cantidad'        => $cant,
+                'precio_unitario' => $pu,
+                'porcentaje_iva'  => $pIva,
+                'subtotal'        => $sub,
+                'iva'             => $iva,
+                'total_final'     => $total,
+            ]);
+
+            // 3. Reemplazar materiales
+            $oc->materiales()->delete();
+            foreach ($data['materiales'] ?? [] as $mData) {
+                $idMat = $mData['id_material'] ?? null;
+                if (empty($idMat) && !empty($mData['nombre_nuevo'])) {
+                    $m = Material::firstOrCreate(
+                        ['nombre' => trim($mData['nombre_nuevo'])],
+                        ['precio_x_unidad' => $mData['precio_unitario'] ?? 0, 'id_unidad_medida' => $mData['id_unidad_medida'] ?? null]
+                    );
+                    $idMat = $m->id;
+                }
+                if (empty($idMat)) continue;
+                $s2 = round(($mData['cantidad'] ?? 0) * ($mData['precio_unitario'] ?? 0), 4);
+                AsignaMaterial::create([
+                    'id_obra_concepto' => $oc->id,
+                    'id_material'      => $idMat,
+                    'cantidad'         => $mData['cantidad'] ?? 0,
+                    'precio_unitario'  => $mData['precio_unitario'] ?? 0,
+                    'subtotal'         => $s2,
+                    'porcentaje_iva'   => 0,
+                    'iva'              => 0,
+                    'total_final'      => $s2,
+                ]);
+            }
+
+            // 4. Reemplazar maquinaria
+            $oc->maquinaria()->delete();
+            foreach ($data['maquinaria'] ?? [] as $mData) {
+                $idMaq = $mData['id_maquinaria'] ?? null;
+                if (empty($idMaq) && !empty($mData['nombre_nuevo'])) {
+                    $m = Maquinaria::firstOrCreate(
+                        ['nombre' => trim($mData['nombre_nuevo'])],
+                        ['precio_x_unidad' => $mData['precio_unitario'] ?? 0, 'id_unidad_medida' => $mData['id_unidad_medida'] ?? null]
+                    );
+                    $idMaq = $m->id;
+                }
+                if (empty($idMaq)) continue;
+                $s2 = round(($mData['cantidad'] ?? 0) * ($mData['precio_unitario'] ?? 0), 4);
+                AsignaMaquinaria::create([
+                    'id_obra_concepto' => $oc->id,
+                    'id_maquinaria'    => $idMaq,
+                    'cantidad'         => $mData['cantidad'] ?? 0,
+                    'precio_unitario'  => $mData['precio_unitario'] ?? 0,
+                    'subtotal'         => $s2,
+                    'porcentaje_iva'   => 0,
+                    'iva'              => 0,
+                    'total_final'      => $s2,
+                ]);
+            }
+
+            // 5. Reemplazar mano de obra
+            $oc->manoObra()->delete();
+            foreach ($data['mano_obra'] ?? [] as $mData) {
+                $idMo = $mData['id_mano_obra'] ?? null;
+                if (empty($idMo) && !empty($mData['nombre_nuevo'])) {
+                    $m = ManoObra::firstOrCreate(
+                        ['nombre' => trim($mData['nombre_nuevo'])],
+                        ['precio_x_unidad' => $mData['precio_unitario'] ?? 0, 'id_unidad_medida' => $mData['id_unidad_medida'] ?? null]
+                    );
+                    $idMo = $m->id;
+                }
+                if (empty($idMo)) continue;
+                $s2 = round(($mData['cantidad'] ?? 0) * ($mData['precio_unitario'] ?? 0), 4);
+                AsignaManoObra::create([
+                    'id_obra_concepto' => $oc->id,
+                    'id_mano_obra'     => $idMo,
+                    'cantidad'         => $mData['cantidad'] ?? 0,
+                    'precio_unitario'  => $mData['precio_unitario'] ?? 0,
+                    'subtotal'         => $s2,
+                    'porcentaje_iva'   => 0,
+                    'iva'              => 0,
+                    'total_final'      => $s2,
+                ]);
+            }
+
+            $this->recalcularTotalesBloque($oc->id_obra);
+            ObraController::recalcularTotales($oc->id_obra);
+
+            DB::commit();
+            return response()->json(['success' => true, 'subtotal' => $sub, 'iva' => $iva, 'total_final' => $total]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            \Log::error('updateConcepto error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroyMaterial($obraId, $id) { /* futuro */ }
+    public function destroyMaquinaria($obraId, $id) { /* futuro */ }
+    public function destroyManoObra($obraId, $id) { /* futuro */ }
 
     // ──────────────────────────────────────────────────────────────
     // HELPERS

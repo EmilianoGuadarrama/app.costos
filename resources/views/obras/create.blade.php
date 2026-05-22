@@ -540,7 +540,10 @@ function calcularFechaEntrega() {
     out.value = d.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
 }
 
-document.getElementById('fecha_inicio').addEventListener('input', calcularFechaEntrega);
+document.getElementById('fecha_inicio').addEventListener('input', () => {
+    calcularFechaEntrega();
+    if (document.getElementById('inhabCal').style.display === 'block') renderCal();
+});
 document.getElementById('duracion').addEventListener('input', calcularFechaEntrega);
 calcularFechaEntrega();
 
@@ -578,6 +581,9 @@ function renderCal() {
         grid.appendChild(div);
     }
 
+    const fi_val = document.getElementById('fecha_inicio').value;
+    const fechaInicioObj = fi_val ? new Date(fi_val + 'T00:00:00') : null;
+
     for (let d = 1; d <= diasEnMes; d++) {
         const fecha = new Date(calAnio, calMes, d);
         const key   = fecha.toISOString().slice(0,10);
@@ -590,7 +596,15 @@ function renderCal() {
         if (inhabBD.find(x => x.fecha === key)) div.classList.add('saved-inhabil');
         else if (inhabLocales[key] !== undefined) div.classList.add('selected');
 
-        if (dow !== 0) {
+        const esAnterior = (fechaInicioObj && fecha < fechaInicioObj);
+
+        if (esAnterior) {
+            div.classList.add('disabled-day');
+            div.title = 'No se puede seleccionar antes de la fecha de inicio';
+            div.style.opacity = '0.4';
+            div.style.cursor = 'not-allowed';
+            div.style.background = '#e5e7eb';
+        } else if (dow !== 0) {
             div.onclick = () => toggleInhabil(key, d);
         }
         grid.appendChild(div);

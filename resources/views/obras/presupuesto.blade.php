@@ -1,199 +1,889 @@
 @extends('layout')
 @section('title', 'Presupuesto — ' . ($obra->datosDeObra?->nombre ?? 'Obra'))
 @section('content')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
-.pres-wrap { font-family:"Arial",sans-serif; font-size:.82rem; }
-
-/* Contadores */
-.pres-counters { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid #bbb; margin-bottom:0; }
-.pc-box { padding:10px 14px; text-align:center; border-right:1px solid #bbb; }
-.pc-box:last-child { border-right:none; }
-.pc-lbl { font-size:.65rem; text-transform:uppercase; letter-spacing:1px; color:#666; font-weight:700; }
-.pc-val { font-size:1.5rem; font-weight:900; color:#111; }
-
-/* Totales bar */
-.pres-totales { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid #bbb; border-top:none; background:#f0f0f0; margin-bottom:16px; }
-.pt-cell { padding:8px 12px; border-right:1px solid #bbb; text-align:center; }
-.pt-cell:last-child { border-right:none; }
-.pt-lbl { font-size:.63rem; font-weight:700; text-transform:uppercase; color:#666; }
-.pt-val { font-size:.95rem; font-weight:900; color:#111; font-variant-numeric:tabular-nums; }
-
-/* Acciones */
-.pres-actions { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
-.btn-pa { border-radius:9px; padding:.48rem 1rem; font-size:.8rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
-.btn-pa-dark { background:#111827; color:#fff; }
-.btn-pa-blue { background:#2563eb; color:#fff; }
-.btn-pa-green { background:#059669; color:#fff; }
-.btn-pa-outline { background:#fff; color:#374151; border:1.5px solid #e5e7eb; cursor:pointer;}
-.btn-back-sm { color:#6b7280; text-decoration:none; font-size:.85rem; display:flex; align-items:center; gap:4px; }
-
-/* Presupuesto tabla */
-.pres-tabla { width:100%; border-collapse:collapse; font-size:.8rem; min-width:780px; }
-
-/* Fila de ítem */
-.item-row td {
-    padding:7px 10px; border-bottom:1px solid #f0f0f0; border-right:1px solid #f0f0f0;
-    background:#fff; vertical-align:middle;
+:root {
+    --dark:#111827; --mid:#374151; --soft:#6b7280; --line:#e5e7eb;
+    --bg:#f3f4f6;   --white:#fff;
+    --blue:#2563eb; --green:#059669; --red:#dc2626; --amber:#d97706;
 }
-.item-row:hover td { background:#f9fafb; }
+body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 
-.tr-desglose { display: none; }
-.tr-desglose.active { display: table-row; }
-.tr-desglose td { background:#f0f9ff; padding:8px 14px; font-size:.75rem; color:#374151; }
+/* ── HEADER ── */
+.pres-hdr {
+    background:var(--dark); color:#fff;
+    padding:16px 26px; display:flex; justify-content:space-between; align-items:center;
+    position:sticky; top:0; z-index:200;
+    border-bottom:3px solid var(--blue);
+    box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+.pres-hdr-left h1 { font-family:'Garamond','Baskerville',serif; font-size:1.3rem; margin:0; }
+.pres-hdr-left p  { margin:2px 0 0; font-size:.8rem; color:#9ca3af; }
+.btn-back { background:rgba(255,255,255,.08); color:#d1d5db; border:1px solid rgba(255,255,255,.15);
+    border-radius:7px; padding:5px 13px; font-size:.8rem; text-decoration:none;
+    transition:.2s; display:inline-flex; align-items:center; gap:5px; margin-bottom:5px; }
+.btn-back:hover { background:rgba(255,255,255,.2); color:#fff; }
+.hdr-actions { display:flex; gap:8px; align-items:center; }
+.btn-hdr { border:none; border-radius:9px; padding:9px 18px; font-size:.82rem; font-weight:700;
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition:.2s; }
+.btn-hdr-blue  { background:var(--blue);  color:#fff; box-shadow:0 3px 12px rgba(37,99,235,.4); }
+.btn-hdr-blue:hover  { background:#1d4ed8; transform:translateY(-1px); color:#fff;}
+.btn-hdr-green { background:var(--green); color:#fff; box-shadow:0 3px 12px rgba(5,150,105,.4); }
+.btn-hdr-green:hover { background:#047857; transform:translateY(-1px); color:#fff;}
+.btn-hdr-dark  { background:rgba(255,255,255,.1); color:#fff; border:1px solid rgba(255,255,255,.2); }
+.btn-hdr-dark:hover  { background:rgba(255,255,255,.2); }
+.btn-hdr-excel { background:#107c41; color:#fff; }
+.btn-hdr-excel:hover { background:#0a5c30; transform:translateY(-1px); color:#fff; }
+.btn-hdr-pdf   { background:#da0b20; color:#fff; }
+.btn-hdr-pdf:hover   { background:#b00919; transform:translateY(-1px); color:#fff; }
 
-.comp-badge { display:inline-block; padding:2px 6px; border-radius:6px; font-size:.63rem; font-weight:700; margin-right:3px; }
+/* ── TOTALES BAR ── */
+.totales-bar {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    background:#fff; border-bottom:1px solid var(--line);
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+}
+.tot-cell { padding:14px 18px; text-align:center; border-right:1px solid var(--line); }
+.tot-cell:last-child { border-right:none; }
+.tot-lbl { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--soft); }
+.tot-val { font-size:1.4rem; font-weight:900; color:var(--dark); margin-top:3px; }
+.tot-val.highlight { color:var(--blue); }
+
+/* ── BODY ── */
+.pres-body { padding:20px 26px; }
+
+/* ── TABLA ── */
+.pres-table-wrap { overflow-x:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.pres-tabla {
+    width:100%; border-collapse:collapse; font-size:.8rem; min-width:860px;
+    background:#fff;
+}
+.pres-tabla thead th {
+    background:var(--dark); color:#fff; padding:10px 11px;
+    font-size:.69rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    white-space:nowrap;
+}
+
+/* Fila nivel */
+.row-nivel td {
+    background:#e5e7eb; color:var(--dark); padding:12px 14px;
+    font-weight:900; font-size:.9rem; border-top:2px solid var(--mid);
+}
+
+/* Fila bloque */
+.row-bloque td {
+    background:#374151; color:#fff; padding:7px 11px;
+    font-weight:700; font-size:.77rem; text-transform:uppercase;
+    text-align:right;
+}
+.row-bloque td:first-child { text-align:center; }
+
+/* Fila item */
+.row-item td {
+    padding:8px 11px; border-bottom:1px solid #f0f0f0; vertical-align:middle;
+    background:#fff; transition:background .15s;
+}
+.row-item:hover td { background:#f8faff; }
+
+/* Fila desglose */
+.row-desglose { display:none; }
+.row-desglose.open { display:table-row; }
+.row-desglose td {
+    background:#f0f9ff; padding:10px 18px; font-size:.76rem;
+    border-bottom:1px solid #bfdbfe;
+}
+.comp-badge { display:inline-block; padding:2px 7px; border-radius:6px;
+    font-size:.63rem; font-weight:700; margin-right:4px; margin-bottom:2px; }
 .cb-mat { background:#dbeafe; color:#1d4ed8; }
 .cb-maq { background:#fef3c7; color:#92400e; }
 .cb-mo  { background:#d1fae5; color:#065f46; }
 
-/* Total de bloque */
-.bloque-total td {
-    background:#374151; color:#fff; font-weight:900; font-size:.78rem;
-    padding:7px 10px; border:1px solid #4b5563; text-align:right;
+/* Fila gran total */
+.row-gran-total td {
+    background:var(--dark); color:#fff; padding:12px 11px;
+    font-weight:900; font-size:.88rem; text-align:right;
 }
+.row-gran-total td:first-child { text-align:left; }
+.row-gran-total .highlight { color:#fbbf24; font-size:1rem; }
 
-/* Gran total */
-.gran-total td {
-    background:#111827; color:#fff; font-weight:900; font-size:.88rem;
-    padding:10px 12px; border:1px solid #374151; text-align:right;
+/* ── BOTONES DE ACCIÓN EN FILA ── */
+.action-cell { white-space:nowrap; width:80px; text-align:center; }
+.btn-row-edit, .btn-row-del {
+    border:none; border-radius:6px; padding:4px 8px;
+    font-size:.76rem; cursor:pointer; transition:.2s;
+    display:inline-flex; align-items:center; gap:3px; font-weight:600;
 }
-.gran-total td:last-child { color:#fbbf24; }
+.btn-row-edit { background:#eff6ff; color:var(--blue); border:1px solid #bfdbfe; }
+.btn-row-edit:hover { background:var(--blue); color:#fff; }
+.btn-row-del  { background:#fef2f2; color:var(--red);  border:1px solid #fecaca; }
+.btn-row-del:hover  { background:var(--red);  color:#fff; }
+.btn-desglose-toggle { background:transparent; border:1px solid var(--line);
+    border-radius:5px; padding:2px 7px; font-size:.68rem; cursor:pointer;
+    color:var(--soft); transition:.15s; margin-left:5px; }
+.btn-desglose-toggle:hover { background:var(--line); }
+
+/* ── MODAL EDITAR ── */
+.modal-overlay {
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,.65); z-index:1000;
+    align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+    background:#fff; border-radius:16px; width:100%; max-width:520px;
+    box-shadow:0 20px 40px rgba(0,0,0,.3); overflow:hidden;
+    animation:fadeUp .25s ease;
+}
+@keyframes fadeUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal-head {
+    background:var(--dark); color:#fff; padding:18px 22px;
+    display:flex; justify-content:space-between; align-items:center;
+}
+.modal-head h3 { margin:0; font-size:1rem; font-weight:700; }
+.btn-close-modal { background:rgba(255,255,255,.1); border:none; color:#fff;
+    border-radius:7px; padding:4px 10px; cursor:pointer; font-size:1.1rem; transition:.2s; }
+.btn-close-modal:hover { background:rgba(255,255,255,.2); }
+.modal-body { padding:22px; }
+.modal-field { margin-bottom:16px; }
+.modal-field label { display:block; font-size:.75rem; font-weight:700; color:var(--soft);
+    text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
+.modal-field input {
+    width:100%; border:1.5px solid var(--line); border-radius:8px;
+    padding:9px 12px; font-size:.9rem; color:var(--dark);
+}
+.modal-field input:focus { border-color:var(--blue); outline:none; }
+.modal-footer { padding:16px 22px; background:#f9fafb; border-top:1px solid var(--line);
+    display:flex; gap:8px; justify-content:flex-end; }
+.btn-modal-cancel { background:#f3f4f6; color:var(--mid); border:1.5px solid var(--line);
+    border-radius:8px; padding:8px 18px; font-weight:600; cursor:pointer; font-size:.85rem; }
+.btn-modal-save   { background:var(--blue); color:#fff; border:none;
+    border-radius:8px; padding:8px 20px; font-weight:700; cursor:pointer; font-size:.85rem;
+    transition:.2s; }
+.btn-modal-save:hover { background:#1d4ed8; }
+
+/* ── TOAST ── */
+#toast { position:fixed; bottom:22px; right:22px; z-index:9999;
+    padding:12px 20px; border-radius:10px; font-weight:600; font-size:.88rem;
+    display:none; align-items:center; gap:9px; box-shadow:0 10px 25px rgba(0,0,0,.2); }
+#toast.ok  { background:#059669; color:#fff; }
+#toast.err { background:#dc2626; color:#fff; }
 </style>
 
-<div class="pres-wrap">
-    <div class="pres-actions">
-        <a href="{{ route('obras.show', $obra->id) }}" class="btn-back-sm"><i class="bi bi-arrow-left"></i> Datos generales</a>
-        <div style="flex:1"></div>
-        <a href="{{ route('obras.presupuesto.export_excel', $obra->id) }}" class="btn-pa btn-pa-outline" style="border-color:#107c41; color:#107c41;"><i class="bi bi-file-earmark-excel me-1"></i> Excel</a>
-        <a href="{{ route('obras.presupuesto.export_pdf', $obra->id) }}" class="btn-pa btn-pa-outline" style="border-color:#da0b20; color:#da0b20;"><i class="bi bi-file-earmark-pdf me-1"></i> PDF</a>
-        <button type="button" class="btn-pa btn-pa-outline" id="btn-toggle-desglose" onclick="toggleTodosDesgloses()">
-            <i class="bi bi-diagram-3 me-1"></i> Desglosar Matrices
+{{-- ── HEADER ── --}}
+<div class="pres-hdr">
+    <div class="pres-hdr-left">
+        <a href="{{ route('obras.show', $obra->id) }}" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Datos Generales
+        </a>
+        <h1><i class="bi bi-file-earmark-text me-2" style="color:#60a5fa;"></i>Presupuesto de Obra</h1>
+        <p>{{ $obra->datosDeObra?->nombre }}</p>
+    </div>
+    <div class="hdr-actions">
+        <button class="btn-hdr btn-hdr-dark" onclick="toggleTodosDesgloses()">
+            <i class="bi bi-diagram-3"></i> Desglosar
         </button>
-        <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-pa btn-pa-blue">
+        <a href="{{ route('obras.presupuesto.export_excel', $obra->id) }}" class="btn-hdr btn-hdr-excel">
+            <i class="bi bi-file-earmark-excel"></i> Excel
+        </a>
+        <a href="{{ route('obras.presupuesto.export_pdf', $obra->id) }}" class="btn-hdr btn-hdr-pdf">
+            <i class="bi bi-file-earmark-pdf"></i> PDF
+        </a>
+        <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-hdr btn-hdr-blue">
             <i class="bi bi-layers"></i> + Agregar Renglones
         </a>
     </div>
+</div>
 
-    @php
-        $conceptos = $obra->obraConceptos;
-        $gSub = $conceptos->sum('subtotal');
-        $gIva = $conceptos->sum('iva');
-        $gTot = $conceptos->sum('total_final');
+{{-- ── TOTALES BAR ── --}}
+@php
+    $conceptos = $obra->obraConceptos;
+    $gSub = $conceptos->sum('subtotal');
+    $gIva = $conceptos->sum('iva');
+    $gTot = $conceptos->sum('total_final');
 
-        // Agrupar por nivel -> bloque
-        $nivelesList = $obra->niveles->keyBy('id');
-        $porNivel = collect();
-
-        foreach ($conceptos->groupBy('id_nivel') as $idNiv => $filasNiv) {
-            $nomNivel = $idNiv ? ($nivelesList[$idNiv]->descripcion ?? "Nivel $idNiv") : 'GENERAL / SIN NIVEL';
-            
-            $porBloque = collect();
-            foreach ($bloques as $blq) {
-                $filasBloq = $filasNiv->where('id_bloque', $blq->id);
-                if ($filasBloq->isNotEmpty()) {
-                    $porBloque->put($blq->id, ['nombre' => $blq->descripcion, 'filas' => $filasBloq]);
-                }
-            }
-            $sinBloque = $filasNiv->where('id_bloque', null);
-            if ($sinBloque->isNotEmpty()) {
-                $porBloque->put(0, ['nombre' => 'Sin Bloque', 'filas' => $sinBloque]);
-            }
-            
-            $porNivel->put($idNiv, [
-                'nombre' => $nomNivel,
-                'bloques' => $porBloque,
-                'subtotal' => $filasNiv->sum('subtotal'),
-                'iva' => $filasNiv->sum('iva'),
-                'total' => $filasNiv->sum('total_final'),
-            ]);
+    $nivelesList = $obra->niveles->keyBy('id');
+    $porNivel = collect();
+    foreach ($conceptos->groupBy('id_nivel') as $idNiv => $filasNiv) {
+        $nomNivel = $idNiv ? ($nivelesList[$idNiv]->descripcion ?? "Nivel $idNiv") : 'GENERAL / SIN NIVEL';
+        $porBloque = collect();
+        foreach ($bloques as $blq) {
+            $filasBloq = $filasNiv->where('id_bloque', $blq->id);
+            if ($filasBloq->isNotEmpty())
+                $porBloque->put($blq->id, ['nombre' => $blq->descripcion, 'filas' => $filasBloq]);
         }
-    @endphp
+        $sinBloque = $filasNiv->where('id_bloque', null);
+        if ($sinBloque->isNotEmpty())
+            $porBloque->put(0, ['nombre' => 'Sin Bloque', 'filas' => $sinBloque]);
+        $porNivel->put($idNiv, [
+            'nombre'   => $nomNivel,
+            'bloques'  => $porBloque,
+            'subtotal' => $filasNiv->sum('subtotal'),
+            'iva'      => $filasNiv->sum('iva'),
+            'total'    => $filasNiv->sum('total_final'),
+        ]);
+    }
+@endphp
 
-    <div class="pres-totales">
-        <div class="pt-cell"><div class="pt-lbl">Subtotal</div><div class="pt-val">${{ number_format($gSub,2) }}</div></div>
-        <div class="pt-cell"><div class="pt-lbl">IVA</div><div class="pt-val">${{ number_format($gIva,2) }}</div></div>
-        <div class="pt-cell"><div class="pt-lbl">Total Final</div><div class="pt-val">${{ number_format($gTot,2) }}</div></div>
-        <div class="pt-cell"><div class="pt-lbl">Conceptos</div><div class="pt-val">{{ $conceptos->count() }}</div></div>
+<div class="totales-bar">
+    <div class="tot-cell">
+        <div class="tot-lbl">Subtotal</div>
+        <div class="tot-val">${{ number_format($gSub, 2) }}</div>
     </div>
+    <div class="tot-cell">
+        <div class="tot-lbl">IVA</div>
+        <div class="tot-val">${{ number_format($gIva, 2) }}</div>
+    </div>
+    <div class="tot-cell">
+        <div class="tot-lbl">Total Final</div>
+        <div class="tot-val highlight">${{ number_format($gTot, 2) }}</div>
+    </div>
+    <div class="tot-cell">
+        <div class="tot-lbl">Renglones</div>
+        <div class="tot-val">{{ $conceptos->count() }}</div>
+    </div>
+</div>
 
-    @if($conceptos->isEmpty())
-        <div style="text-align:center; padding:40px; color:#9ca3af;">
-            <h4>Sin Presupuesto</h4>
-            <a href="{{ route('obras.presupuesto.export_excel', $obra->id) }}" class="btn-filter" style="border-color:#107c41; color:#107c41;"><i class="bi bi-file-earmark-excel me-1"></i> Excel</a>
-            <a href="{{ route('obras.presupuesto.export_pdf', $obra->id) }}" class="btn-filter" style="border-color:#da0b20; color:#da0b20;"><i class="bi bi-file-earmark-pdf me-1"></i> PDF</a>
-            <a href="{{ route('obras.presupuesto.create', $obra->id) }}" class="btn-add-new"><i class="bi bi-plus-circle me-1"></i> Conceptos</a>
-            <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-add-new"><i class="bi bi-plus-circle me-1"></i> Insumos a Concepto</a>
-        </div>
-    @else
+{{-- ── BODY ── --}}
+<div class="pres-body">
+@if($conceptos->isEmpty())
+    <div style="text-align:center;padding:60px 20px;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+        <i class="bi bi-file-earmark-x" style="font-size:4rem;color:#d1d5db;display:block;margin-bottom:16px;"></i>
+        <h3 style="font-size:1.3rem;font-weight:800;color:#374151;margin-bottom:8px;">Sin Presupuesto</h3>
+        <p style="color:#9ca3af;margin-bottom:20px;">Aún no se han agregado renglones a esta obra.</p>
+        <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-hdr btn-hdr-blue" style="display:inline-flex;">
+            <i class="bi bi-plus-circle"></i> Agregar Primer Renglón
+        </a>
+    </div>
+@else
+    <div class="pres-table-wrap">
         <table class="pres-tabla">
+            <thead>
+                <tr>
+                    <th style="width:6%">Área</th>
+                    <th style="width:32%">Concepto / Descripción</th>
+                    <th style="width:9%">Cantidad</th>
+                    <th style="width:12%">P.U.</th>
+                    <th style="width:12%">Subtotal</th>
+                    <th style="width:9%">IVA</th>
+                    <th style="width:12%">Total</th>
+                    <th style="width:8%">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
             @foreach($porNivel as $idNivel => $nivelData)
-                <tr style="background:#e5e7eb;color:#111;">
-                    <td colspan="4" style="padding:14px;font-weight:900;font-size:1.1rem;"><i class="bi bi-layers me-1"></i> {{ mb_strtoupper($nivelData['nombre']) }}</td>
-                    <td style="text-align:right;font-weight:800;">${{ number_format($nivelData['subtotal'],2) }}</td>
-                    <td style="text-align:right;font-weight:800;">${{ number_format($nivelData['iva'],2) }}</td>
-                    <td style="text-align:right;font-weight:800;color:#2563eb;">${{ number_format($nivelData['total'],2) }}</td>
+                {{-- NIVEL --}}
+                <tr class="row-nivel">
+                    <td colspan="5"><i class="bi bi-layers me-2"></i>{{ mb_strtoupper($nivelData['nombre']) }}</td>
+                    <td style="text-align:right;">${{ number_format($nivelData['iva'],2) }}</td>
+                    <td style="text-align:right;color:#2563eb;">${{ number_format($nivelData['total'],2) }}</td>
+                    <td></td>
                 </tr>
 
                 @foreach($nivelData['bloques'] as $bloqueId => $bloqueData)
-                    <tr class="bloque-total">
-                        <td colspan="4" style="text-align:center;">{{ strtoupper($bloqueData['nombre']) }}</td>
+                    {{-- BLOQUE --}}
+                    <tr class="row-bloque">
+                        <td colspan="4" style="text-align:left;padding-left:28px;">
+                            <i class="bi bi-grid-3x3-gap me-1"></i> {{ strtoupper($bloqueData['nombre']) }}
+                        </td>
                         <td>${{ number_format($bloqueData['filas']->sum('subtotal'),2) }}</td>
                         <td>${{ number_format($bloqueData['filas']->sum('iva'),2) }}</td>
                         <td>${{ number_format($bloqueData['filas']->sum('total_final'),2) }}</td>
+                        <td></td>
                     </tr>
 
                     @foreach($bloqueData['filas'] as $fila)
-                        <tr class="item-row">
-                            <td style="font-weight:700;">{{ $fila->area?->abreviatura ?? '—' }}</td>
-                            <td style="font-weight:600; font-size:.85rem;">
-                                {{ $fila->concepto?->descripcion ?? 'Concepto sin nombre' }}
-                                <button type="button" class="btn-pa-outline btn-desglose-icon" style="padding:2px 5px; font-size:.65rem;" onclick="document.getElementById('desglose_{{ $fila->id }}').classList.toggle('active')">Desglose <i class="bi bi-chevron-down"></i></button>
+                        {{-- FILA CONCEPTO --}}
+                        <tr class="row-item" id="row_fila_{{ $fila->id }}">
+                            <td style="font-weight:800;color:var(--blue);">{{ $fila->area?->abreviatura ?? '—' }}</td>
+                            <td>
+                                <span style="font-weight:600;" id="nom_{{ $fila->id }}">{{ $fila->concepto?->descripcion ?? 'Concepto sin nombre' }}</span>
+                                <button class="btn-desglose-toggle" onclick="toggleDesglose({{ $fila->id }})">
+                                    <i class="bi bi-chevron-down" id="ico_{{ $fila->id }}"></i>
+                                </button>
                             </td>
-                            <td style="text-align:center;">{{ $fila->cantidad }} {{ $fila->concepto?->unidadMedida?->abreviatura ?? 'UM' }}</td>
-                            <td style="text-align:right;">${{ number_format($fila->precio_unitario,2) }}</td>
-                            <td style="text-align:right;">${{ number_format($fila->subtotal,2) }}</td>
+                            <td style="text-align:center;">
+                                <span id="cant_{{ $fila->id }}">{{ $fila->cantidad }}</span>
+                                {{ $fila->concepto?->unidadMedida?->abreviatura ?? '' }}
+                            </td>
+                            <td style="text-align:right;" id="pu_{{ $fila->id }}">${{ number_format($fila->precio_unitario,2) }}</td>
+                            <td style="text-align:right;" id="sub_{{ $fila->id }}">${{ number_format($fila->subtotal,2) }}</td>
                             <td style="text-align:right;">${{ number_format($fila->iva,2) }}</td>
-                            <td style="text-align:right;">${{ number_format($fila->total_final,2) }}</td>
+                            <td style="text-align:right;font-weight:800;" id="tot_{{ $fila->id }}">${{ number_format($fila->total_final,2) }}</td>
+                            <td class="action-cell">
+                                <button class="btn-row-edit" title="Editar"
+                                    onclick="openEditPanel({{ $fila->id }})">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </button>
+                                <form method="POST" action="{{ route('obras.presupuesto.conceptos.destroy', [$obra->id, $fila->id]) }}"
+                                    id="form_del_{{ $fila->id }}" style="display:inline;">
+                                    @csrf @method('DELETE')
+                                </form>
+                                <button class="btn-row-del" title="Eliminar"
+                                    onclick="confirmDel({{ $fila->id }}, '{{ addslashes($fila->concepto?->descripcion ?? 'este concepto') }}')">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </td>
                         </tr>
-                        <tr class="tr-desglose" id="desglose_{{ $fila->id }}">
+
+                        {{-- DESGLOSE --}}
+                        <tr class="row-desglose" id="desglose_{{ $fila->id }}">
+                            <td></td>
                             <td colspan="7">
-                                <strong>Matriz de Costos:</strong><br>
+                                <strong style="font-size:.78rem;color:var(--mid);">Matriz de Costos:</strong>
+                                <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
                                 @foreach($fila->materiales as $mat)
-                                    <span class="comp-badge cb-mat">Material</span> {{ $mat->material?->nombre }} ({{ $mat->cantidad }} {{ $mat->material?->unidadMedida?->abreviatura }})<br>
+                                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:5px 10px;font-size:.75rem;">
+                                        <span class="comp-badge cb-mat">Material</span>
+                                        <strong>{{ $mat->material?->nombre }}</strong>
+                                        — {{ $mat->cantidad }} {{ $mat->material?->unidadMedida?->abreviatura }}
+                                        × ${{ number_format($mat->precio_unitario, 2) }}
+                                    </div>
                                 @endforeach
                                 @foreach($fila->maquinaria as $maq)
-                                    <span class="comp-badge cb-maq">Maquinaria</span> {{ $maq->maquinaria?->nombre }} ({{ $maq->cantidad }} {{ $maq->maquinaria?->unidadMedida?->abreviatura }})<br>
+                                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:5px 10px;font-size:.75rem;">
+                                        <span class="comp-badge cb-maq">Maquinaria</span>
+                                        <strong>{{ $maq->maquinaria?->nombre }}</strong>
+                                        — {{ $maq->cantidad }} {{ $maq->maquinaria?->unidadMedida?->abreviatura }}
+                                        × ${{ number_format($maq->precio_unitario, 2) }}
+                                    </div>
                                 @endforeach
                                 @foreach($fila->manoObra as $mo)
-                                    <span class="comp-badge cb-mo">Mano de Obra</span> {{ $mo->manoObra?->nombre }} ({{ $mo->cantidad }} {{ $mo->manoObra?->unidadMedida?->abreviatura }})<br>
+                                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:5px 10px;font-size:.75rem;">
+                                        <span class="comp-badge cb-mo">Mano de Obra</span>
+                                        <strong>{{ $mo->manoObra?->nombre }}</strong>
+                                        — {{ $mo->cantidad }} {{ $mo->manoObra?->unidadMedida?->abreviatura }}
+                                        × ${{ number_format($mo->precio_unitario, 2) }}
+                                    </div>
                                 @endforeach
                                 @if($fila->materiales->isEmpty() && $fila->maquinaria->isEmpty() && $fila->manoObra->isEmpty())
-                                    <em style="color:#9ca3af;">Este concepto no tiene insumos desglosados, se está usando su precio unitario base.</em>
+                                    <em style="color:#9ca3af;">Sin insumos desglosados — se usa el P.U. base.</em>
                                 @endif
+                                </div>
                             </td>
                         </tr>
                     @endforeach
                 @endforeach
             @endforeach
 
-            <tr class="gran-total">
-                <td colspan="4">TOTAL GENERAL</td>
+            {{-- GRAN TOTAL --}}
+            <tr class="row-gran-total">
+                <td colspan="4"><i class="bi bi-check2-circle me-1"></i> TOTAL GENERAL</td>
                 <td>${{ number_format($gSub,2) }}</td>
                 <td>${{ number_format($gIva,2) }}</td>
-                <td>${{ number_format($gTot,2) }}</td>
+                <td class="highlight">${{ number_format($gTot,2) }}</td>
+                <td></td>
             </tr>
+            </tbody>
         </table>
-    @endif
+    </div>
+@endif
 </div>
 
+{{-- ── PANEL LATERAL DE EDICIÓN COMPLETA ── --}}
+<style>
+/* ── Panel Lateral ── */
+.edit-overlay {
+    display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,.6);z-index:900;
+}
+.edit-overlay.open { display:block; }
+.edit-panel {
+    position:fixed;top:0;right:-680px;width:660px;height:100%;
+    background:#fff;z-index:901;display:flex;flex-direction:column;
+    transition:right .3s cubic-bezier(.4,0,.2,1);
+    box-shadow:-8px 0 40px rgba(0,0,0,.25);
+}
+.edit-panel.open { right:0; }
+.ep-head {
+    background:var(--dark);color:#fff;padding:16px 20px;
+    display:flex;justify-content:space-between;align-items:center;
+    flex-shrink:0;
+}
+.ep-head h2 { margin:0;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px; }
+.ep-body { flex:1;overflow-y:auto;padding:20px; }
+.ep-footer {
+    padding:14px 20px;background:#f9fafb;border-top:1px solid var(--line);
+    display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;
+}
+
+/* Sección dentro del panel */
+.ep-section { margin-bottom:18px; }
+.ep-section-title {
+    font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--soft);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;
+}
+.ep-field { margin-bottom:12px; }
+.ep-field label { display:block;font-size:.72rem;font-weight:700;color:var(--soft);
+    text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px; }
+.ep-field input, .ep-field select {
+    width:100%;border:1.5px solid var(--line);border-radius:8px;
+    padding:8px 11px;font-size:.88rem;color:var(--dark);transition:.15s;
+}
+.ep-field input:focus, .ep-field select:focus { border-color:var(--blue);outline:none; }
+.ep-row { display:flex;gap:10px; }
+.ep-row .ep-field { flex:1; }
+
+/* Tabla insumos en panel */
+.ep-ins-head {
+    display:flex;justify-content:space-between;align-items:center;
+    padding:7px 11px;border-radius:8px 8px 0 0;
+    font-size:.78rem;font-weight:700;
+    border:1px solid;
+}
+.ep-ins-head.mat  { background:#eff6ff;color:var(--blue); border-color:#bfdbfe; }
+.ep-ins-head.mo   { background:#f0fdf4;color:var(--green);border-color:#bbf7d0; }
+.ep-ins-head.maq  { background:#fffbeb;color:var(--amber);border-color:#fde68a; }
+.ep-ins-table { width:100%;border-collapse:collapse;border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;margin-bottom:12px; }
+.ep-ins-table th { padding:5px 8px;font-size:.67rem;font-weight:700;text-transform:uppercase;color:var(--soft);background:#fafafa;border-bottom:1px solid var(--line); }
+.ep-ins-table td { padding:5px 7px;border-bottom:1px solid #f8f9fa;vertical-align:middle; }
+.ep-ins-table input,.ep-ins-table select { width:100%;border:1.5px solid var(--line);border-radius:5px;padding:4px 7px;font-size:.82rem;background:#fff; }
+.ep-ins-table input:focus,.ep-ins-table select:focus { border-color:var(--blue);outline:none; }
+
+/* PU calculado */
+.ep-pu-bar { background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;
+    padding:9px 14px;display:flex;justify-content:space-between;align-items:center;
+    font-size:.85rem;font-weight:700;color:var(--green);margin-top:4px; }
+
+/* Autocomplete en panel */
+.ep-ac-wrap { position:relative; }
+.ep-ac-list {
+    position:absolute;top:100%;left:0;right:0;background:#fff;
+    border:1.5px solid var(--line);border-top:none;max-height:180px;overflow-y:auto;
+    z-index:9999;display:none;border-radius:0 0 9px 9px;
+    box-shadow:0 8px 20px rgba(0,0,0,.1);
+}
+.ep-ac-item { padding:8px 12px;cursor:pointer;font-size:.84rem;color:var(--mid);border-bottom:1px solid #f3f4f6; }
+.ep-ac-item:hover { background:#eff6ff;color:var(--blue); }
+.ep-ac-item.nuevo { color:var(--blue);font-weight:700;background:#f0f9ff; }
+
+.btn-ep-add { border:none;border-radius:7px;padding:4px 11px;font-size:.76rem;font-weight:700;
+    cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:.2s; }
+.btn-ep-add.mat  { background:var(--blue); color:#fff; }
+.btn-ep-add.mo   { background:var(--green);color:#fff; }
+.btn-ep-add.maq  { background:var(--amber);color:#fff; }
+.btn-ep-add:hover { opacity:.85; }
+.btn-ep-close { background:rgba(255,255,255,.1);border:none;color:#fff;
+    border-radius:7px;padding:5px 11px;cursor:pointer;font-size:1rem;transition:.2s; }
+.btn-ep-close:hover { background:rgba(255,255,255,.2); }
+.btn-ep-save { background:var(--blue);color:#fff;border:none;border-radius:8px;
+    padding:9px 22px;font-weight:700;font-size:.88rem;cursor:pointer;transition:.2s; }
+.btn-ep-save:hover { background:#1d4ed8; }
+.btn-ep-save:disabled { opacity:.6;cursor:not-allowed; }
+.btn-ep-cancel { background:#f3f4f6;color:var(--mid);border:1.5px solid var(--line);
+    border-radius:8px;padding:9px 18px;font-weight:600;cursor:pointer;font-size:.88rem; }
+.btn-del-ep { background:#fef2f2;color:var(--red);border:1px solid #fecaca;
+    border-radius:5px;padding:3px 7px;cursor:pointer;transition:.15s;font-size:.78rem; }
+.btn-del-ep:hover { background:var(--red);color:#fff; }
+
+/* Loading spinner */
+.ep-loading { display:flex;align-items:center;justify-content:center;
+    height:200px;font-size:.9rem;color:var(--soft);gap:10px; }
+@keyframes spin { from{transform:rotate(0)}to{transform:rotate(360deg)} }
+.spin-icon { animation:spin 1s linear infinite; }
+</style>
+
+<div class="edit-overlay" id="epOverlay" onclick="closeEditPanel()"></div>
+<div class="edit-panel" id="editPanel">
+    <div class="ep-head">
+        <h2><i class="bi bi-pencil-square" style="color:#60a5fa;"></i> Editar Renglón</h2>
+        <button class="btn-ep-close" onclick="closeEditPanel()">×</button>
+    </div>
+    <div class="ep-body" id="epBody">
+        <div class="ep-loading"><i class="bi bi-arrow-repeat spin-icon"></i> Cargando datos…</div>
+    </div>
+    <div class="ep-footer">
+        <button class="btn-ep-cancel" onclick="closeEditPanel()">Cancelar</button>
+        <button class="btn-ep-save" id="btnEpSave" onclick="guardarEdicionCompleta()">
+            <i class="bi bi-check-lg me-1"></i> Guardar Cambios
+        </button>
+    </div>
+</div>
+
+{{-- ── MODAL ELIMINAR ── --}}
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal-box">
+        <div class="modal-head" style="background:#dc2626;">
+            <h3><i class="bi bi-exclamation-triangle-fill me-2"></i>Eliminar Renglón</h3>
+            <button class="btn-close-modal" onclick="closeDel()">×</button>
+        </div>
+        <div class="modal-body" style="text-align:center;padding:30px 22px;">
+            <i class="bi bi-trash3-fill" style="font-size:3rem;color:#fca5a5;display:block;margin-bottom:12px;"></i>
+            <p style="font-size:.95rem;color:#374151;margin-bottom:4px;">¿Eliminar el renglón:</p>
+            <p style="font-weight:800;color:#111;font-size:1rem;" id="del_nombre"></p>
+            <p style="font-size:.82rem;color:#9ca3af;">Esta acción no se puede deshacer.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-cancel" onclick="closeDel()">Cancelar</button>
+            <button style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-weight:700;cursor:pointer;font-size:.85rem;"
+                onclick="document.getElementById('form_del_'+currentDelId).submit()">
+                <i class="bi bi-trash3-fill me-1"></i> Sí, Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
 <script>
-let todosDesglosados = false;
+const csrfToken   = '{{ csrf_token() }}';
+const editBaseUrl = '{{ url("obra-conceptos") }}';
+
+// Catálogos para autocomplete
+@php
+    $catConceptosArr  = \App\Models\Concepto::orderBy('descripcion')->get()
+        ->map(fn($c) => ['id'=>$c->id,'texto'=>$c->descripcion,'pu'=>$c->p_u,'uni'=>$c->id_unidad_medida])->values()->toJson();
+    $catMaterialesArr = \App\Models\Material::orderBy('nombre')->get()
+        ->map(fn($m) => ['id'=>$m->id,'texto'=>$m->nombre,'pu'=>$m->precio_x_unidad,'uni'=>$m->id_unidad_medida])->values()->toJson();
+    $catMaquinariaArr = \App\Models\Maquinaria::orderBy('nombre')->get()
+        ->map(fn($m) => ['id'=>$m->id,'texto'=>$m->nombre,'pu'=>$m->precio_x_unidad,'uni'=>$m->id_unidad_medida])->values()->toJson();
+    $catManoObraArr   = \App\Models\ManoObra::orderBy('nombre')->get()
+        ->map(fn($m) => ['id'=>$m->id,'texto'=>$m->nombre,'pu'=>$m->precio_x_unidad,'uni'=>$m->id_unidad_medida])->values()->toJson();
+    $unidadesArr      = \App\Models\UnidadMedida::orderBy('abreviatura')->get()
+        ->map(fn($u) => ['id'=>$u->id,'txt'=>$u->abreviatura])->values()->toJson();
+@endphp
+const catConceptos  = {!! $catConceptosArr !!};
+const catMateriales = {!! $catMaterialesArr !!};
+const catMaquinaria = {!! $catMaquinariaArr !!};
+const catManoObra   = {!! $catManoObraArr !!};
+const unidades      = {!! $unidadesArr !!};
+
+function optsUni(selId = '') {
+    return '<option value="">N/A</option>' +
+        unidades.map(u => `<option value="${u.id}" ${u.id == selId ? 'selected' : ''}>${u.txt}</option>`).join('');
+}
+
+/* ── DESGLOSE ── */
+let todosOpen = false;
+function toggleDesglose(id) {
+    const row = document.getElementById('desglose_' + id);
+    const ico = document.getElementById('ico_' + id);
+    row.classList.toggle('open');
+    ico.className = row.classList.contains('open') ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
+}
 function toggleTodosDesgloses() {
-    todosDesglosados = !todosDesglosados;
-    document.querySelectorAll('.tr-desglose').forEach(el => {
-        if(todosDesglosados) el.classList.add('active');
-        else el.classList.remove('active');
+    todosOpen = !todosOpen;
+    document.querySelectorAll('.row-desglose').forEach(el => el.classList.toggle('open', todosOpen));
+    document.querySelectorAll('[id^="ico_"]').forEach(ico => {
+        ico.className = todosOpen ? 'bi bi-chevron-up' : 'bi bi-chevron-down';
     });
 }
+
+/* ── PANEL EDICIÓN COMPLETA ── */
+let currentEditId = null;
+
+async function openEditPanel(id) {
+    currentEditId = id;
+    document.getElementById('epOverlay').classList.add('open');
+    document.getElementById('editPanel').classList.add('open');
+    document.getElementById('epBody').innerHTML = '<div class="ep-loading"><i class="bi bi-arrow-repeat spin-icon"></i> Cargando datos…</div>';
+    document.getElementById('btnEpSave').disabled = true;
+
+    try {
+        const res  = await fetch(`${editBaseUrl}/${id}/edit`);
+        const data = await res.json();
+        renderEditPanel(data);
+        document.getElementById('btnEpSave').disabled = false;
+    } catch(e) {
+        document.getElementById('epBody').innerHTML = '<div class="ep-loading" style="color:#dc2626;"><i class="bi bi-x-circle"></i> Error al cargar datos</div>';
+    }
+}
+
+function closeEditPanel() {
+    document.getElementById('epOverlay').classList.remove('open');
+    document.getElementById('editPanel').classList.remove('open');
+    currentEditId = null;
+}
+
+function renderEditPanel(d) {
+    let insIdx = Date.now();
+
+    const matRows = d.materiales.map((m,i) => insRow(insIdx+i, 'material', m)).join('');
+    const moRows  = d.mano_obra.map((m,i) => insRow(insIdx+100+i, 'mano_obra', m)).join('');
+    const maqRows = d.maquinaria.map((m,i) => insRow(insIdx+200+i, 'maquinaria', m)).join('');
+
+    document.getElementById('epBody').innerHTML = `
+    <div class="ep-section">
+        <div class="ep-section-title">Concepto</div>
+        <div class="ep-field">
+            <label>Descripción</label>
+            <div class="ep-ac-wrap">
+                <input type="text" id="ep_txt_cpt" value="${esc(d.descripcion)}" placeholder="Buscar o escribir…" autocomplete="off">
+                <input type="hidden" id="ep_id_cpt" value="${d.id_concepto ?? ''}">
+                <div class="ep-ac-list" id="ep_list_cpt"></div>
+            </div>
+        </div>
+        <div class="ep-row">
+            <div class="ep-field">
+                <label>Cantidad</label>
+                <input type="number" id="ep_cant" value="${d.cantidad}" min="0.001" step="0.001" oninput="recalcEp()">
+            </div>
+            <div class="ep-field">
+                <label>% IVA</label>
+                <input type="number" id="ep_iva" value="${d.porcentaje_iva}" min="0" max="100" step="1">
+            </div>
+        </div>
+    </div>
+
+    <!-- Materiales -->
+    <div class="ep-section">
+        <div class="ep-ins-head mat">
+            <span><i class="bi bi-box-seam me-1"></i>Materiales</span>
+            <button class="btn-ep-add mat" onclick="addEpIns('material')"><i class="bi bi-plus"></i> Agregar</button>
+        </div>
+        <table class="ep-ins-table" id="ep_tb_mat">
+            <thead><tr><th style="width:42%">Insumo</th><th style="width:16%">Unidad</th><th style="width:14%">Cant.</th><th style="width:18%">P.U.</th><th style="width:10%">Sub.</th><th></th></tr></thead>
+            <tbody>${matRows}</tbody>
+        </table>
+    </div>
+
+    <!-- Mano de Obra -->
+    <div class="ep-section">
+        <div class="ep-ins-head mo">
+            <span><i class="bi bi-person-lines-fill me-1"></i>Mano de Obra</span>
+            <button class="btn-ep-add mo" onclick="addEpIns('mano_obra')"><i class="bi bi-plus"></i> Agregar</button>
+        </div>
+        <table class="ep-ins-table" id="ep_tb_mo">
+            <thead><tr><th style="width:42%">Insumo</th><th style="width:16%">Unidad</th><th style="width:14%">Cant.</th><th style="width:18%">P.U.</th><th style="width:10%">Sub.</th><th></th></tr></thead>
+            <tbody>${moRows}</tbody>
+        </table>
+    </div>
+
+    <!-- Maquinaria -->
+    <div class="ep-section">
+        <div class="ep-ins-head maq">
+            <span><i class="bi bi-truck me-1"></i>Maquinaria</span>
+            <button class="btn-ep-add maq" onclick="addEpIns('maquinaria')"><i class="bi bi-plus"></i> Agregar</button>
+        </div>
+        <table class="ep-ins-table" id="ep_tb_maq">
+            <thead><tr><th style="width:42%">Insumo</th><th style="width:16%">Unidad</th><th style="width:14%">Cant.</th><th style="width:18%">P.U.</th><th style="width:10%">Sub.</th><th></th></tr></thead>
+            <tbody>${maqRows}</tbody>
+        </table>
+    </div>
+
+    <div class="ep-pu-bar">
+        <span><i class="bi bi-calculator-fill me-1"></i>P.U. Calculado</span>
+        <strong id="ep_pu_display">$0.00</strong>
+    </div>`;
+
+    // Setup autocomplete concepto
+    setupEpAC(document.getElementById('ep_txt_cpt'), document.getElementById('ep_id_cpt'), document.getElementById('ep_list_cpt'), catConceptos);
+
+    // Setup autocompletes de insumos ya renderizados
+    document.querySelectorAll('[data-ep-ai]').forEach(inp => {
+        const ii   = inp.dataset.epAi;
+        const tipo = inp.dataset.epTipo;
+        const cat  = tipo === 'material' ? catMateriales : tipo === 'maquinaria' ? catMaquinaria : catManoObra;
+        const idFld = document.getElementById(`ep_id_${ii}`);
+        const puFld = document.getElementById(`ep_pu_${ii}`);
+        const uniFld= document.getElementById(`ep_uni_${ii}`);
+        setupEpAC(inp, idFld, document.getElementById(`ep_list_${ii}`), cat, puFld, uniFld, ii);
+    });
+
+    recalcEp();
+}
+
+function insRow(ii, tipo, data = null) {
+    const nombre = data?.nombre ?? '';
+    const refId  = data ? (tipo === 'material' ? data.id_material : tipo === 'maquinaria' ? data.id_maquinaria : data.id_mano_obra) : '';
+    const cant   = data?.cantidad ?? 1;
+    const pu     = data?.precio_unitario ?? 0;
+    const uniId  = data?.id_unidad_medida ?? '';
+    const sub    = (cant * pu).toFixed(2);
+    return `
+    <tr id="ep_row_${ii}" data-tipo="${tipo}">
+        <td>
+            <div class="ep-ac-wrap">
+                <input type="text" data-ep-ai="${ii}" data-ep-tipo="${tipo}" value="${esc(nombre)}" placeholder="Buscar…" autocomplete="off">
+                <input type="hidden" id="ep_id_${ii}" value="${refId}">
+                <div class="ep-ac-list" id="ep_list_${ii}"></div>
+            </div>
+        </td>
+        <td><select class="ep-ins-uni" id="ep_uni_${ii}">${optsUni(uniId)}</select></td>
+        <td><input type="number" id="ep_cant_${ii}" value="${cant}" min="0.001" step="0.001" oninput="updEpSub('${ii}');recalcEp();"></td>
+        <td><input type="number" id="ep_pu_${ii}" value="${pu}" min="0" step="0.01" oninput="updEpSub('${ii}');recalcEp();"></td>
+        <td><span id="ep_sub_${ii}" style="font-size:.8rem;font-weight:700;">$${sub}</span></td>
+        <td><button type="button" class="btn-del-ep" onclick="document.getElementById('ep_row_${ii}').remove();recalcEp();"><i class="bi bi-x-lg"></i></button></td>
+    </tr>`;
+}
+
+function updEpSub(ii) {
+    const c = parseFloat(document.getElementById(`ep_cant_${ii}`)?.value) || 0;
+    const p = parseFloat(document.getElementById(`ep_pu_${ii}`)?.value)   || 0;
+    const s = document.getElementById(`ep_sub_${ii}`);
+    if (s) s.textContent = '$' + (c*p).toFixed(2);
+}
+
+function recalcEp() {
+    let total = 0;
+    ['ep_tb_mat','ep_tb_mo','ep_tb_maq'].forEach(tbId => {
+        const tb = document.getElementById(tbId);
+        if (!tb) return;
+        tb.querySelectorAll('tbody tr').forEach(tr => {
+            const cant = parseFloat(tr.querySelector('[id^="ep_cant_"]')?.value) || 0;
+            const pu   = parseFloat(tr.querySelector('[id^="ep_pu_"]')?.value)   || 0;
+            total += cant * pu;
+        });
+    });
+    const d = document.getElementById('ep_pu_display');
+    if (d) d.textContent = '$' + total.toFixed(2);
+}
+
+let epInsIdx = 5000;
+function addEpIns(tipo) {
+    epInsIdx++;
+    const tbId  = tipo === 'material' ? 'ep_tb_mat' : tipo === 'maquinaria' ? 'ep_tb_maq' : 'ep_tb_mo';
+    const tbody = document.querySelector(`#${tbId} tbody`);
+    const ii    = epInsIdx;
+    tbody.insertAdjacentHTML('beforeend', insRow(ii, tipo));
+
+    const inp   = document.querySelector(`[data-ep-ai="${ii}"]`);
+    const idFld = document.getElementById(`ep_id_${ii}`);
+    const puFld = document.getElementById(`ep_pu_${ii}`);
+    const uFld  = document.getElementById(`ep_uni_${ii}`);
+    const cat   = tipo === 'material' ? catMateriales : tipo === 'maquinaria' ? catMaquinaria : catManoObra;
+    setupEpAC(inp, idFld, document.getElementById(`ep_list_${ii}`), cat, puFld, uFld, ii);
+}
+
+function setupEpAC(inp, idFld, list, cat, puFld = null, uniFld = null, ii = null) {
+    inp.addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        const filtered = cat.filter(c => c.texto.toLowerCase().includes(q)).slice(0,10);
+        list.innerHTML = '';
+        filtered.forEach(c => {
+            const div = document.createElement('div');
+            div.className   = 'ep-ac-item';
+            div.textContent = c.texto;
+            div.onclick = () => {
+                inp.value   = c.texto;
+                idFld.value = c.id;
+                if (puFld)  puFld.value  = c.pu ?? 0;
+                if (uniFld) uniFld.value = c.uni ?? '';
+                list.style.display = 'none';
+                if (ii) { updEpSub(ii); recalcEp(); }
+            };
+            list.appendChild(div);
+        });
+        const nv = document.createElement('div');
+        nv.className   = 'ep-ac-item nuevo';
+        nv.innerHTML   = '<i class="bi bi-plus-circle me-1"></i>Registrar como nuevo';
+        nv.onclick = () => { idFld.value = ''; list.style.display = 'none'; };
+        list.appendChild(nv);
+        list.style.display = q.length > 0 ? 'block' : 'none';
+    });
+    document.addEventListener('click', e => { if (e.target !== inp) list.style.display = 'none'; });
+}
+
+async function guardarEdicionCompleta() {
+    if (!currentEditId) return;
+    const btn = document.getElementById('btnEpSave');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+
+    const idCpt  = document.getElementById('ep_id_cpt').value;
+    const txtCpt = document.getElementById('ep_txt_cpt').value.trim();
+    const cant   = parseFloat(document.getElementById('ep_cant').value) || 1;
+    const pIva   = parseFloat(document.getElementById('ep_iva').value)  || 0;
+
+    // Calcular PU total de insumos
+    let totalPU = 0;
+    ['ep_tb_mat','ep_tb_mo','ep_tb_maq'].forEach(tbId => {
+        const tb = document.getElementById(tbId);
+        if (!tb) return;
+        tb.querySelectorAll('tbody tr').forEach(tr => {
+            const c2 = parseFloat(tr.querySelector('[id^="ep_cant_"]')?.value) || 0;
+            const p2 = parseFloat(tr.querySelector('[id^="ep_pu_"]')?.value)   || 0;
+            totalPU += c2 * p2;
+        });
+    });
+
+    // Recolectar insumos
+    const materiales = [], maquinaria = [], mano_obra = [];
+    [['ep_tb_mat','material',materiales],['ep_tb_mo','mano_obra',mano_obra],['ep_tb_maq','maquinaria',maquinaria]].forEach(([tbId, tipo, arr]) => {
+        const tb = document.getElementById(tbId);
+        if (!tb) return;
+        tb.querySelectorAll('tbody tr').forEach(tr => {
+            const ii    = tr.id.replace('ep_row_','');
+            const iId   = document.getElementById(`ep_id_${ii}`)?.value;
+            const iTxt  = tr.querySelector('[data-ep-ai]')?.value?.trim();
+            const iCant = parseFloat(document.getElementById(`ep_cant_${ii}`)?.value) || 0;
+            const iPu   = parseFloat(document.getElementById(`ep_pu_${ii}`)?.value)   || 0;
+            const iUni  = document.getElementById(`ep_uni_${ii}`)?.value;
+            if (!iId && !iTxt) return;
+            const key = tipo === 'material' ? 'id_material' : tipo === 'maquinaria' ? 'id_maquinaria' : 'id_mano_obra';
+            arr.push({ [key]: iId||null, nombre_nuevo: iId?'':iTxt, id_unidad_medida: iUni||null, cantidad: iCant, precio_unitario: iPu });
+        });
+    });
+
+    const payload = {
+        id_concepto: idCpt || null,
+        nombre_nuevo: idCpt ? '' : txtCpt,
+        cantidad: cant,
+        precio_unitario: totalPU,
+        porcentaje_iva: pIva,
+        materiales, maquinaria, mano_obra,
+    };
+
+    try {
+        const res  = await fetch(`${editBaseUrl}/${currentEditId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: JSON.stringify(payload),
+        });
+        const json = await res.json();
+        if (res.ok && json.success) {
+            showToast('✓ Renglón guardado', 'ok');
+            closeEditPanel();
+            // Refrescar la fila en la tabla
+            const sub = cant * totalPU;
+            const iv  = sub * (pIva/100);
+            const tot = sub + iv;
+            document.getElementById('cant_' + currentEditId).textContent = cant;
+            document.getElementById('pu_'   + currentEditId).textContent = '$' + totalPU.toFixed(2);
+            document.getElementById('sub_'  + currentEditId).textContent = '$' + sub.toFixed(2);
+            document.getElementById('tot_'  + currentEditId).textContent = '$' + tot.toFixed(2);
+            // Actualizar nombre concepto
+            const nomEl = document.getElementById('nom_' + currentEditId);
+            if (nomEl) nomEl.textContent = txtCpt;
+        } else {
+            showToast('Error: ' + (json.message || 'No se pudo guardar'), 'err');
+        }
+    } catch(e) {
+        showToast('Error de conexión', 'err');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Guardar Cambios';
+}
+
+/* ── MODAL ELIMINAR ── */
+let currentDelId = null;
+function confirmDel(id, nombre) {
+    currentDelId = id;
+    document.getElementById('del_nombre').textContent = nombre;
+    document.getElementById('modalEliminar').classList.add('open');
+}
+function closeDel() {
+    document.getElementById('modalEliminar').classList.remove('open');
+    currentDelId = null;
+}
+
+/* ── TOAST ── */
+function showToast(msg, tipo) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = tipo;
+    t.style.display = 'flex';
+    setTimeout(() => { t.style.display = 'none'; }, 4200);
+}
+
+function esc(s) {
+    return String(s ?? '').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeEditPanel(); closeDel(); }
+});
 </script>
 @endsection
+

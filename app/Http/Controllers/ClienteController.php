@@ -114,4 +114,25 @@ class ClienteController extends Controller
         Cliente::findOrFail($id)->delete();
         return redirect()->route('clientes.index')->with('success', 'Cliente eliminado.');
     }
+
+    /** GET /api/clientes/buscar?q=... — autocompletado */
+    public function buscar(Request $request)
+    {
+        $q = $request->input('q', '');
+        $clientes = Cliente::with('persona')
+            ->whereHas('persona', fn($query) =>
+                $query->where('nombre', 'like', "%{$q}%")
+                      ->orWhere('apellido_paterno', 'like', "%{$q}%")
+            )
+            ->orWhere('nombre_o_razon_social', 'like', "%{$q}%")
+            ->limit(15)->get()
+            ->map(fn($c) => [
+                'id'    => $c->id,
+                'texto' => trim(($c->persona?->nombre ?? '') . ' ' . ($c->persona?->apellido_paterno ?? ''))
+                           ?: ($c->nombre_o_razon_social ?? "Cliente #{$c->id}"),
+                'tel'   => $c->persona?->telefono_1 ?? '',
+            ]);
+        return response()->json($clientes);
+    }
 }
+

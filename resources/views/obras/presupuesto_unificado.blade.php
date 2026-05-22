@@ -3,10 +3,22 @@
 @section('content')
 
 @php
-$catConceptos  = $conceptos->map(fn($c) => ['id'=>$c->id,'texto'=>$c->descripcion,'pu'=>(float)$c->p_u,'um'=>$c->unidadMedida?->abreviatura??'']);
-$catMateriales = $materiales->map(fn($m) => ['id'=>$m->id,'texto'=>$m->nombre,'pu'=>(float)$m->precio_x_unidad,'um'=>$m->unidadMedida?->abreviatura??'']);
-$catMaquinaria = $maquinaria->map(fn($q) => ['id'=>$q->id,'texto'=>$q->nombre,'pu'=>(float)$q->precio_x_unidad,'um'=>$q->unidadMedida?->abreviatura??'']);
-$catUnidades   = \App\Models\UnidadMedida::orderBy('abreviatura')->get()->map(fn($u)=>['id'=>$u->id,'texto'=>$u->nombre.' ('.$u->abreviatura.')']);
+$catConceptos  = $conceptos->map(fn($c) => [
+    'id'         => $c->id,
+    'texto'      => $c->descripcion,
+    'pu'         => (float)$c->p_u,
+    'um'         => $c->unidadMedida?->abreviatura ?? '',
+    'um_id'      => $c->id_unidad_medida,
+    'composicion'=> $c->composicion->map(fn($comp) => [
+        'tipo'        => $comp->tipo,
+        'descripcion' => $comp->descripcion_referencia,
+        'cantidad'    => $comp->cantidad,
+        'unidad'      => $comp->unidad,
+    ]),
+]);
+$catMateriales = $materiales->map(fn($m) => ['id'=>$m->id,'texto'=>$m->nombre,'pu'=>(float)$m->precio_x_unidad,'um'=>$m->unidadMedida?->abreviatura??'','um_id'=>$m->id_unidad_medida]);
+$catMaquinaria = $maquinaria->map(fn($q) => ['id'=>$q->id,'texto'=>$q->nombre,'pu'=>(float)$q->precio_x_unidad,'um'=>$q->unidadMedida?->abreviatura??'','um_id'=>$q->id_unidad_medida]);
+$catUnidades   = \App\Models\UnidadMedida::orderBy('abreviatura')->get()->map(fn($u)=>['id'=>$u->id,'texto'=>$u->nombre.' ('.$u->abreviatura.')','abr'=>$u->abreviatura]);
 $catAreas      = $areas->map(fn($a)=>['id'=>$a->id,'texto'=>$a->abreviatura.' — '.$a->descripcion]);
 @endphp
 
@@ -42,10 +54,29 @@ $catAreas      = $areas->map(fn($a)=>['id'=>$a->id,'texto'=>$a->abreviatura.' �
 .importe-cel{font-weight:700;text-align:right;color:#111;font-size:.82rem;white-space:nowrap;vertical-align:middle!important;}
 .btn-rm{background:none;border:none;color:#d1d5db;cursor:pointer;font-size:.95rem;padding:3px;}
 .btn-rm:hover{color:#dc2626;}
+/* Autocompletado */
+.ac-wrap{position:relative;}
+.ac-list{position:absolute;top:100%;left:0;right:0;z-index:300;background:#fff;border:1.5px solid #d1d5db;border-top:none;border-radius:0 0 8px 8px;max-height:180px;overflow-y:auto;display:none;min-width:220px;}
+.ac-item{padding:7px 10px;font-size:.8rem;cursor:pointer;border-bottom:1px solid #f3f4f6;}
+.ac-item:hover{background:#f0f9ff;}
+.ac-item.nuevo{color:#2563eb;font-weight:700;border-top:1px solid #e5e7eb;}
 /* Panel nuevo registro */
 .nuevo-panel{background:#fafafa;border:1.5px dashed #d1d5db;border-radius:8px;padding:10px;margin-top:5px;display:none;}
 .nuevo-panel label{font-size:.72rem;font-weight:700;color:#6b7280;display:block;margin-bottom:2px;}
 .nuevo-panel .ng{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;}
+/* UM inline */
+.um-ac-wrap{position:relative;display:inline-block;width:100%;}
+.um-mini-panel{background:#fffbeb;border:1px dashed #f59e0b;border-radius:7px;padding:8px;margin-top:4px;display:none;}
+.um-mini-panel label{font-size:.7rem;color:#78350f;display:block;margin-bottom:2px;}
+/* Desglose composición */
+.tr-desglose td{background:#f0f9ff;padding:8px 12px;font-size:.75rem;color:#374151;}
+.comp-badge{display:inline-block;padding:1px 6px;border-radius:6px;font-size:.62rem;font-weight:700;margin-right:4px;}
+.cb-mat{background:#dbeafe;color:#1d4ed8;}
+.cb-maq{background:#fef3c7;color:#92400e;}
+.cb-mo{background:#d1fae5;color:#065f46;}
+.btn-desglose{background:none;border:none;color:#9ca3af;cursor:pointer;font-size:.7rem;padding:2px 5px;border-radius:4px;border:1px solid #e5e7eb;}
+.btn-desglose:hover{color:#2563eb;border-color:#2563eb;}
+/* Totales */
 .totales-caja{background:#111827;color:#fff;border-radius:12px;padding:16px 22px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:18px;}
 .tc-item{text-align:center;}
 .tc-lbl{font-size:.63rem;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;}
@@ -65,7 +96,7 @@ $catAreas      = $areas->map(fn($a)=>['id'=>$a->id,'texto'=>$a->abreviatura.' �
     <div class="alert-err"><ul class="mb-0 ps-3">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
     @endif
 
-    <div class="pu-header">
+    <div class="pu-header mt-3">
         <div>
             <h1 class="pu-title"><i class="bi bi-layers me-2"></i>Agregar Renglones</h1>
             <p class="pu-sub">Obra: <strong>{{ $obra->datosDeObra?->nombre ?? "Obra #$obra->id" }}</strong> — Mezcla conceptos, materiales y maquinaria en un solo lote.</p>
@@ -77,7 +108,7 @@ $catAreas      = $areas->map(fn($a)=>['id'=>$a->id,'texto'=>$a->abreviatura.' �
 
         {{-- Config global --}}
         <div class="cfg-card">
-            <div class="cfg-title"><i class="bi bi-sliders me-1"></i> Configuración del Lote</div>
+            <div class="cfg-title"><i class="bi bi-sliders me-1"></i>Configuración del Lote</div>
             <div class="cfg-grid">
                 <div>
                     <label class="pf-lbl">Bloque *</label>
@@ -109,9 +140,9 @@ $catAreas      = $areas->map(fn($a)=>['id'=>$a->id,'texto'=>$a->abreviatura.' �
 
         {{-- Botones tipo --}}
         <div class="tipo-tabs">
-            <button type="button" class="btn-tipo concepto act" onclick="crearFila('concepto')"><i class="bi bi-card-list me-1"></i> + Concepto</button>
-            <button type="button" class="btn-tipo material"    onclick="crearFila('material')"><i class="bi bi-box-seam me-1"></i> + Material</button>
-            <button type="button" class="btn-tipo maquinaria"  onclick="crearFila('maquinaria')"><i class="bi bi-truck me-1"></i> + Maquinaria</button>
+            <button type="button" class="btn-tipo concepto act" onclick="crearFila('concepto')"><i class="bi bi-card-list me-1"></i>+ Concepto</button>
+            <button type="button" class="btn-tipo material"    onclick="crearFila('material')"><i class="bi bi-box-seam me-1"></i>+ Material</button>
+            <button type="button" class="btn-tipo maquinaria"  onclick="crearFila('maquinaria')"><i class="bi bi-truck me-1"></i>+ Maquinaria</button>
         </div>
 
         {{-- Tabla --}}
@@ -119,7 +150,7 @@ $catAreas      = $areas->map(fn($a)=>['id'=>$a->id,'texto'=>$a->abreviatura.' �
             <table class="ren-tabla">
                 <thead><tr>
                     <th style="width:4%">Tipo</th>
-                    <th style="width:32%">Artículo</th>
+                    <th style="width:30%">Artículo</th>
                     <th style="width:9%">Bloque</th>
                     <th style="width:9%">Área</th>
                     <th style="width:8%">Nivel</th>
@@ -127,12 +158,12 @@ $catAreas      = $areas->map(fn($a)=>['id'=>$a->id,'texto'=>$a->abreviatura.' �
                     <th style="width:7%">Cant.</th>
                     <th style="width:6%">IVA%</th>
                     <th style="width:10%">Total</th>
-                    <th style="width:6%"></th>
+                    <th style="width:8%"></th>
                 </tr></thead>
                 <tbody id="tbodyFilas"></tbody>
             </table>
             <div id="emptyMsg" style="text-align:center;padding:20px;color:#9ca3af;font-size:.85rem;">
-                <i class="bi bi-plus-circle me-1"></i> Usa los botones para agregar renglones
+                <i class="bi bi-plus-circle me-1"></i>Usa los botones para agregar renglones
             </div>
         </div>
 
@@ -144,7 +175,7 @@ $catAreas      = $areas->map(fn($a)=>['id'=>$a->id,'texto'=>$a->abreviatura.' �
 
         <div class="form-actions">
             <a href="{{ route('obras.presupuesto', $obra->id) }}" class="btn-cancelar">Cancelar</a>
-            <button type="submit" class="btn-guardar"><i class="bi bi-check-lg me-1"></i> Guardar Renglones</button>
+            <button type="submit" class="btn-guardar"><i class="bi bi-check-lg me-1"></i>Guardar Renglones</button>
         </div>
     </form>
 </div>
@@ -162,6 +193,7 @@ let idx = 0;
 
 function opts(arr){ return arr.map(r=>`<option value="${r.id}">${r.texto}</option>`).join(''); }
 
+// ── Función principal crear fila ──────────────────────────────────────────────
 function crearFila(tipo) {
     idx++;
     const ri = idx;
@@ -173,10 +205,12 @@ function crearFila(tipo) {
     const iVal = document.getElementById('iva_global').value;
 
     let cat = tipo==='concepto' ? catConceptos : tipo==='material' ? catMateriales : catMaquinaria;
-    let selName = tipo==='concepto' ? `filas[${ri}][id_concepto]` : tipo==='material' ? `filas[${ri}][id_material]` : `filas[${ri}][id_maquinaria]`;
-    let badge   = tipo==='concepto' ? 'CON' : tipo==='material' ? 'MAT' : 'MAQ';
+    let selName = tipo==='concepto' ? `filas[${ri}][id_concepto]`
+                : tipo==='material' ? `filas[${ri}][id_material]`
+                : `filas[${ri}][id_maquinaria]`;
+    let badge = tipo==='concepto' ? 'CON' : tipo==='material' ? 'MAT' : 'MAQ';
 
-    // Panel de nuevo registro (campos adicionales según tipo)
+    // Panel nuevo registro según tipo
     let extraFields = '';
     if(tipo==='concepto'){
         extraFields = `
@@ -184,13 +218,28 @@ function crearFila(tipo) {
             <div><label>Área del concepto</label><select name="filas[${ri}][nuevo_id_area]" class="inp-s"><option value="">—</option>${opts(catAreas2)}</select></div>
             <div><label>P.U. base ($)</label><input type="number" step="0.01" min="0" name="filas[${ri}][nuevo_pu]" class="inp-s" value="0"></div>
           </div>
-          <div class="ng">
-            <div><label>Unidad de medida</label><select name="filas[${ri}][nuevo_id_um]" class="inp-s"><option value="">—</option>${opts(catUnidades)}</select></div>
+          <div>
+            <label>Unidad de medida</label>
+            <div class="um-ac-wrap">
+              <input type="text" id="umNTxt_${ri}" class="inp-s" placeholder="Buscar UM..." autocomplete="off">
+              <input type="hidden" name="filas[${ri}][nuevo_id_um]" id="umNId_${ri}">
+              <div class="ac-list" id="umNList_${ri}"></div>
+              <div class="um-mini-panel" id="umNPanel_${ri}">
+                <label>Nueva UM: <input type="text" id="umNAbr_${ri}" class="inp-s" placeholder="Abreviatura" style="width:80px;display:inline-block;"></label>
+                <button type="button" onclick="crearUMRapida(${ri})" style="margin-left:4px;padding:2px 8px;border-radius:6px;background:#f59e0b;color:#fff;border:none;cursor:pointer;font-size:.75rem;">Crear</button>
+              </div>
+            </div>
           </div>`;
     } else {
         extraFields = `
           <div class="ng">
-            <div><label>Unidad de medida</label><select name="filas[${ri}][nuevo_id_um]" class="inp-s"><option value="">—</option>${opts(catUnidades)}</select></div>
+            <div><label>Unidad de medida</label>
+              <div class="um-ac-wrap">
+                <input type="text" id="umNTxt_${ri}" class="inp-s" placeholder="Buscar UM..." autocomplete="off">
+                <input type="hidden" name="filas[${ri}][nuevo_id_um]" id="umNId_${ri}">
+                <div class="ac-list" id="umNList_${ri}"></div>
+              </div>
+            </div>
             <div><label>Precio base ($)</label><input type="number" step="0.01" min="0" name="filas[${ri}][nuevo_precio]" class="inp-s" value="0"></div>
           </div>
           <div><label>Descripción (opcional)</label><input type="text" name="filas[${ri}][nuevo_desc]" class="inp-s" placeholder="Descripción…"></div>`;
@@ -202,26 +251,23 @@ function crearFila(tipo) {
     tr.innerHTML = `
       <td style="vertical-align:middle;"><span class="badge-tipo ${tipo}">${badge}</span><input type="hidden" name="filas[${ri}][tipo]" value="${tipo}"></td>
       <td>
-        <select name="${selName}" class="inp-s sel-art" onchange="alCambiarArt(this,${ri})">
-          <option value="">— Seleccionar —</option>
-          ${cat.map(c=>`<option value="${c.id}" data-pu="${c.pu}" data-um="${c.um}">${c.texto}</option>`).join('')}
-          <option value="_nuevo">✏ Registrar nuevo...</option>
-        </select>
+        <div class="ac-wrap">
+          <input type="text" class="inp-s" id="artTxt_${ri}" placeholder="Escribir para buscar..." autocomplete="off">
+          <input type="hidden" name="${selName}" id="artId_${ri}" value="">
+          <div class="ac-list" id="artList_${ri}"></div>
+        </div>
         <div class="nuevo-panel" id="nuevoPan_${ri}">
           <label style="font-size:.75rem;font-weight:800;color:#374151;margin-bottom:6px;display:block;">📋 Registrar nuevo ${tipo}</label>
           <div><label>Nombre / Descripción *</label><input type="text" name="filas[${ri}][nombre_nuevo]" class="inp-s" placeholder="${tipo==='concepto'?'Descripción del concepto':'Nombre del '+tipo}"></div>
           ${extraFields}
         </div>
+        <div id="desgloseBtn_${ri}" style="display:none;margin-top:4px;">
+          <button type="button" class="btn-desglose" onclick="toggleDesglose(${ri})"><i class="bi bi-diagram-3 me-1"></i>Ver composición</button>
+        </div>
       </td>
-      <td>
-        <select name="filas[${ri}][id_bloque]" class="inp-s sel-bloque"><option value="">—</option>${opts(bloques)}</select>
-      </td>
-      <td>
-        <select name="filas[${ri}][id_area]" class="inp-s sel-area"><option value="">—</option>${opts(catAreas2)}</select>
-      </td>
-      <td>
-        <select name="filas[${ri}][id_nivel]" class="inp-s sel-nivel"><option value="">—</option>${opts(niveles)}</select>
-      </td>
+      <td><select name="filas[${ri}][id_bloque]" class="inp-s sel-bloque"><option value="">—</option>${opts(bloques)}</select></td>
+      <td><select name="filas[${ri}][id_area]" class="inp-s sel-area"><option value="">—</option>${opts(catAreas2)}</select></td>
+      <td><select name="filas[${ri}][id_nivel]" class="inp-s sel-nivel"><option value="">—</option>${opts(niveles)}</select></td>
       <td><input type="number" step="0.01" min="0" name="filas[${ri}][precio_unitario]" class="inp-s inp-pu" value="0" oninput="recalcFila(${ri})"></td>
       <td><input type="number" step="0.01" min="0.01" name="filas[${ri}][cantidad]" class="inp-s inp-cant" value="1" oninput="recalcFila(${ri})"></td>
       <td><input type="number" step="1" min="0" max="100" name="filas[${ri}][porcentaje_iva]" class="inp-s inp-iva" value="${iVal}" style="width:52px;" oninput="recalcFila(${ri})"></td>
@@ -232,27 +278,147 @@ function crearFila(tipo) {
     if(bVal) tr.querySelector('.sel-bloque').value = bVal;
     if(aVal) tr.querySelector('.sel-area').value   = aVal;
     if(nVal) tr.querySelector('.sel-nivel').value  = nVal;
+
+    // Configurar autocompletado del artículo
+    setupArtAC(ri, cat, tipo);
+    // Configurar autocompletado de UM nueva (si aplica)
+    if(document.getElementById('umNTxt_'+ri)) setupUMAC(ri);
 }
 
-function alCambiarArt(sel, ri) {
-    const val = sel.value;
-    const tr  = sel.closest('tr');
-    const pan = document.getElementById('nuevoPan_'+ri);
-    if(val==='_nuevo'){
-        sel.value='';
-        pan.style.display='block';
-        return;
-    }
-    pan.style.display='none';
-    const opt = sel.options[sel.selectedIndex];
-    tr.querySelector('.inp-pu').value = parseFloat(opt.dataset.pu||0).toFixed(2);
-    recalcFila(ri);
+// ── Autocompletado artículo ───────────────────────────────────────────────────
+function setupArtAC(ri, cat, tipo) {
+    const inp  = document.getElementById('artTxt_'+ri);
+    const list = document.getElementById('artList_'+ri);
+    const idFld= document.getElementById('artId_'+ri);
+    const pan  = document.getElementById('nuevoPan_'+ri);
+    const dBtn = document.getElementById('desgloseBtn_'+ri);
+
+    inp.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        const filtered = cat.filter(c => c.texto.toLowerCase().includes(q));
+        list.innerHTML = '';
+
+        filtered.slice(0,15).forEach(c => {
+            const div = document.createElement('div');
+            div.className = 'ac-item';
+            div.textContent = c.texto + (c.um ? ' ['+c.um+']' : '');
+            div.onclick = () => {
+                inp.value = c.texto;
+                idFld.value = c.id;
+                list.style.display='none';
+                pan.style.display='none';
+                // Rellenar P.U. desde catálogo
+                const tr = inp.closest('tr');
+                tr.querySelector('.inp-pu').value = c.pu.toFixed(2);
+                recalcFila(ri);
+                // Mostrar botón de desglose si tiene composición
+                if(tipo==='concepto' && c.composicion && c.composicion.length > 0) {
+                    dBtn.style.display='block';
+                    dBtn.dataset.comp = JSON.stringify(c.composicion);
+                }
+            };
+            list.appendChild(div);
+        });
+
+        // Opción registrar nuevo
+        const nuevo = document.createElement('div');
+        nuevo.className = 'ac-item nuevo';
+        nuevo.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Registrar nuevo: "' + this.value + '"';
+        nuevo.onclick = () => {
+            idFld.value = '';
+            pan.style.display='block';
+            list.style.display='none';
+            pan.querySelector('input[type=text]').value = inp.value;
+        };
+        list.appendChild(nuevo);
+        list.style.display = 'block';
+    });
+
+    document.addEventListener('click', e => {
+        if(!e.target.closest('#artTxt_'+ri) && !e.target.closest('#artList_'+ri)) list.style.display='none';
+    });
 }
 
+// ── Autocompletado UM en nuevos artículos ──────────────────────────────────
+function setupUMAC(ri) {
+    const inp  = document.getElementById('umNTxt_'+ri);
+    const list = document.getElementById('umNList_'+ri);
+    const idFld= document.getElementById('umNId_'+ri);
+    if (!inp || !list) return;
+
+    inp.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        const filtered = catUnidades.filter(u => u.texto.toLowerCase().includes(q) || u.abr.toLowerCase().includes(q));
+        list.innerHTML = '';
+        filtered.slice(0,12).forEach(u => {
+            const div = document.createElement('div');
+            div.className = 'ac-item';
+            div.textContent = u.texto;
+            div.onclick = () => { inp.value = u.abr; idFld.value = u.id; list.style.display='none'; };
+            list.appendChild(div);
+        });
+        const panel = document.getElementById('umNPanel_'+ri);
+        const crear = document.createElement('div');
+        crear.className = 'ac-item nuevo';
+        crear.innerHTML = '<i class="bi bi-plus-circle me-1"></i>Nueva UM: "'+this.value+'"';
+        crear.onclick = () => { if(panel) { panel.style.display='block'; document.getElementById('umNAbr_'+ri).value = inp.value.toUpperCase(); } list.style.display='none'; };
+        list.appendChild(crear);
+        list.style.display = 'block';
+    });
+    document.addEventListener('click', e => { if(!e.target.closest('#umNTxt_'+ri)) list.style.display='none'; });
+}
+
+async function crearUMRapida(ri) {
+    const abr = document.getElementById('umNAbr_'+ri)?.value?.trim();
+    if (!abr) return;
+    const resp = await fetch('{{ route("api.unidades.storeRapida") }}', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+        body: JSON.stringify({abreviatura: abr})
+    });
+    const data = await resp.json();
+    document.getElementById('umNTxt_'+ri).value = data.abreviatura;
+    document.getElementById('umNId_'+ri).value  = data.id;
+    const panel = document.getElementById('umNPanel_'+ri);
+    if (panel) panel.style.display='none';
+    catUnidades.push({id: data.id, texto: data.texto, abr: data.abreviatura});
+}
+
+// ── Desglose de composición ───────────────────────────────────────────────────
+function toggleDesglose(ri) {
+    const existente = document.getElementById('desglose_'+ri);
+    if (existente) { existente.remove(); return; }
+
+    const trMain = document.querySelector('tr[data-ri="'+ri+'"]');
+    const btn = document.getElementById('desgloseBtn_'+ri);
+    const comp = JSON.parse(btn.dataset.comp || '[]');
+    if (!comp.length) return;
+
+    const trDes = document.createElement('tr');
+    trDes.id = 'desglose_'+ri;
+    trDes.className = 'tr-desglose';
+
+    const iconos = {material:'cb-mat',maquinaria:'cb-maq',mano_obra:'cb-mo'};
+    const nombres = {material:'Material',maquinaria:'Maquinaria',mano_obra:'Mano de Obra'};
+
+    let html = '<td colspan="10" class="tr-desglose"><strong style="font-size:.72rem;color:#6b7280;">Composición del concepto:</strong><br>';
+    comp.forEach(c => {
+        html += `<span class="comp-badge ${iconos[c.tipo]}">${nombres[c.tipo]}</span> ${c.descripcion}${c.cantidad!=1?' × '+c.cantidad:''}${c.unidad?' '+c.unidad:''}&nbsp;&nbsp;`;
+    });
+    html += '</td>';
+    trDes.innerHTML = html;
+    trMain.insertAdjacentElement('afterend', trDes);
+}
+
+// ── Controles de tabla ────────────────────────────────────────────────────────
 function quitarFila(btn){
-    btn.closest('tr').remove();
+    const tr = btn.closest('tr');
+    const ri = tr.dataset.ri;
+    const des = document.getElementById('desglose_'+ri);
+    if(des) des.remove();
+    tr.remove();
     recalcTodo();
-    if(!document.querySelector('#tbodyFilas tr'))
+    if(!document.querySelector('#tbodyFilas tr:not([class=tr-desglose])'))
         document.getElementById('emptyMsg').style.display='block';
 }
 

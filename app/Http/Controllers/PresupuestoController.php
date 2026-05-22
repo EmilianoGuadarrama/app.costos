@@ -25,7 +25,7 @@ class PresupuestoController extends Controller
             'datosDeObra', 'encargado.persona', 'niveles', 'totalObra',
         ])->findOrFail($obraId);
 
-        $conceptos  = AsignaConcepto::with(['bloque','area','concepto.unidadMedida','nivel'])
+        $conceptos  = AsignaConcepto::with(['bloque','area','concepto.unidadMedida','concepto.composicion','nivel'])
             ->where('id_obra', $obraId)->get();
         $materiales = AsignaMaterial::with(['bloque','area','material.unidadMedida','nivel'])
             ->where('id_obra', $obraId)->get();
@@ -144,7 +144,7 @@ class PresupuestoController extends Controller
         $obra       = ObraIniciada::with(['datosDeObra','niveles'])->findOrFail($obraId);
         $bloques    = Bloque::orderBy('id')->get();
         $areas      = Area::orderBy('abreviatura')->get();
-        $conceptos  = Concepto::with('area', 'unidadMedida')->orderBy('descripcion')->get();
+        $conceptos  = Concepto::with('area', 'unidadMedida', 'composicion')->orderBy('descripcion')->get();
         $materiales = Material::with('unidadMedida')->orderBy('nombre')->get();
         $maquinaria = Maquinaria::with('unidadMedida')->orderBy('nombre')->get();
 

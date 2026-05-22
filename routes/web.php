@@ -75,3 +75,14 @@ Route::resource('egresos', EgresoController::class);
 // Caja general — solo index y show (no hay CRUD completo)
 Route::get('caja_general', [CajaGeneralController::class, 'index'])->name('caja_general.index');
 Route::get('caja_general/{id}', [CajaGeneralController::class, 'show'])->name('caja_general.show');
+
+// ==========================================
+// 6. API — Autocompletado y helpers
+// ==========================================
+Route::get('/api/conceptos/buscar', [ConceptoController::class, 'buscar'])->name('api.conceptos.buscar');
+Route::get('/api/unidad_medida/lista', [\App\Http\Controllers\UnidadMedidaController::class, 'lista'])->name('api.unidades.lista');
+Route::post('/api/unidad_medida/rapida', [\App\Http\Controllers\UnidadMedidaController::class, 'storeRapida'])->name('api.unidades.storeRapida');
+Route::get('/api/dias_inhabiles', [\App\Http\Controllers\DiasInhabilesController::class, 'index'])->name('api.dias_inhabiles.index');
+Route::post('/api/dias_inhabiles', [\App\Http\Controllers\DiasInhabilesController::class, 'store'])->name('api.dias_inhabiles.store');
+Route::delete('/api/dias_inhabiles/{id}', [\App\Http\Controllers\DiasInhabilesController::class, 'destroy'])->name('api.dias_inhabiles.destroy');
+Route::get('/api/clientes/buscar', [\App\Http\Controllers\ClienteController::class, 'buscar'])->name('api.clientes.buscar');

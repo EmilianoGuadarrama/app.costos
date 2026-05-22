@@ -46,4 +46,28 @@ class UnidadMedidaController extends Controller
         UnidadMedida::findOrFail($id)->delete();
         return redirect()->route('unidad_medida.index')->with('success', 'Unidad eliminada.');
     }
+
+    /** GET /api/unidad_medida/lista  — para autocompletado */
+    public function lista(Request $request)
+    {
+        $q = $request->input('q', '');
+        $unidades = UnidadMedida::when($q, fn($query) => $query->where('abreviatura','like',"%{$q}%")->orWhere('nombre','like',"%{$q}%"))
+            ->orderBy('abreviatura')->limit(30)->get()
+            ->map(fn($u) => ['id' => $u->id, 'texto' => $u->abreviatura.' — '.$u->nombre, 'abreviatura' => $u->abreviatura]);
+        return response()->json($unidades);
+    }
+
+    /** POST /api/unidad_medida/rapida  — crea una unidad rápida desde el formulario */
+    public function storeRapida(Request $request)
+    {
+        $request->validate([
+            'abreviatura' => 'required|string|max:50',
+            'nombre'      => 'nullable|string|max:255',
+        ]);
+        $um = UnidadMedida::firstOrCreate(
+            ['abreviatura' => strtoupper(trim($request->abreviatura))],
+            ['nombre'      => trim($request->nombre ?? $request->abreviatura)]
+        );
+        return response()->json(['id' => $um->id, 'abreviatura' => $um->abreviatura, 'texto' => $um->abreviatura.' — '.$um->nombre]);
+    }
 }

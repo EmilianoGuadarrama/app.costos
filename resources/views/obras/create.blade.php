@@ -84,6 +84,43 @@ label.fl span { color: #dc2626; margin-left: 2px; }
     padding: 12px 16px; color: #b91c1c; font-size: .85rem; margin-bottom: 18px;
 }
 
+/* Autocompletado cliente */
+.ac-wrap { position: relative; }
+.ac-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+           background: #fff; border: 1.5px solid #d1d5db; border-top: none;
+           border-radius: 0 0 8px 8px; max-height: 180px; overflow-y: auto; display: none; }
+.ac-item { padding: 7px 12px; font-size: .83rem; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
+.ac-item:hover { background: #f0f9ff; }
+.ac-item.nuevo { color: #2563eb; font-weight: 700; }
+
+/* Panel nuevo cliente */
+.cliente-panel { background: #f0fdf4; border: 1.5px dashed #86efac; border-radius: 10px; padding: 14px 16px; margin-top: 10px; display: none; }
+.cliente-panel .cp-title { font-size: .75rem; font-weight: 800; color: #166534; margin-bottom: 10px; }
+
+/* Calendario días inhábiles */
+.inhab-toggle { background: none; border: 1px dashed #f59e0b; color: #92400e; border-radius: 8px;
+                padding: 5px 12px; font-size: .78rem; cursor: pointer; margin-top: 8px;
+                display: inline-flex; align-items: center; gap: 5px; }
+.inhab-toggle:hover { background: #fffbeb; }
+.inhab-cal { display: none; margin-top: 12px; background: #fffbeb; border: 1px solid #fde68a;
+             border-radius: 12px; padding: 14px; }
+.inhab-cal-header { display: flex; justify-content: space-between; align-items: center;
+                    margin-bottom: 10px; font-weight: 700; font-size: .85rem; color: #92400e; }
+.inhab-cal-header button { background: none; border: 1px solid #fde68a; border-radius: 6px;
+                           padding: 2px 8px; cursor: pointer; font-weight: 700; color: #92400e; }
+.inhab-days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; font-size: .75rem; }
+.day-name { color: #92400e; font-weight: 700; padding: 4px 2px; }
+.day-cell { padding: 5px 2px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+.day-cell:hover:not(.other-month):not(.sunday) { background: #fde68a; }
+.day-cell.sunday { color: #d1d5db; cursor: default; text-decoration: line-through; }
+.day-cell.other-month { color: #e5e7eb; cursor: default; }
+.day-cell.selected { background: #f59e0b; color: #fff; font-weight: 700; border-radius: 6px; }
+.day-cell.saved-inhabil { background: #f97316; color: #fff; font-weight: 700; border-radius: 6px; }
+.inhab-list { margin-top: 10px; font-size: .78rem; color: #92400e; }
+.inhab-chip { display: inline-flex; align-items: center; gap: 4px; background: #fde68a;
+              border-radius: 12px; padding: 2px 8px; margin: 2px; font-size: .73rem; }
+.btn-rm-chip { background: none; border: none; cursor: pointer; color: #92400e; padding: 0 2px; font-size: .75rem; }
+
 @media(max-width: 640px) { .fg-2, .fg-3 { grid-template-columns: 1fr; } }
 </style>
 
@@ -145,7 +182,48 @@ label.fl span { color: #dc2626; margin-left: 2px; }
             </div>
         </div>
 
-        {{-- ── 2. Responsable ── --}}
+        {{-- ── 2. Cliente ── --}}
+        <div class="fs-card">
+            <div class="fs-card-title"><i class="bi bi-person-badge"></i> Cliente de la Obra</div>
+            <div class="fg-1">
+                <div>
+                    <label class="fl">Buscar cliente existente</label>
+                    <div class="ac-wrap">
+                        <input type="text" id="cliente_txt" class="fc" placeholder="Escribir nombre del cliente…" autocomplete="off">
+                        <div class="ac-list" id="cliente_list"></div>
+                    </div>
+                    <input type="hidden" name="id_cliente" id="id_cliente_hid" value="{{ old('id_cliente') }}">
+
+                    @if($clientes->isEmpty())
+                        <p class="fc-hint" style="color:#f59e0b;"><i class="bi bi-info-circle"></i> No hay clientes registrados.</p>
+                    @endif
+
+                    {{-- Panel registrar nuevo cliente --}}
+                    <div class="cliente-panel" id="clienteNuevoPanel">
+                        <div class="cp-title"><i class="bi bi-person-plus me-1"></i>Registrar nuevo cliente</div>
+                        <div class="fg-2" style="margin-bottom:10px;">
+                            <div>
+                                <label class="fl">Nombre completo *</label>
+                                <input type="text" name="cliente_nuevo_nombre" id="clienteNuevoNombre" class="fc" placeholder="Nombre del cliente">
+                            </div>
+                            <div>
+                                <label class="fl">Teléfono</label>
+                                <input type="text" name="cliente_nuevo_tel" class="fc" placeholder="Ej. 55 1234 5678">
+                            </div>
+                        </div>
+                        <div class="fg-1">
+                            <div>
+                                <label class="fl">Correo electrónico</label>
+                                <input type="email" name="cliente_nuevo_email" class="fc" placeholder="correo@ejemplo.com">
+                            </div>
+                        </div>
+                        <p class="fc-hint" style="margin-top:8px;">El cliente se registrará automáticamente al guardar la obra.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ── 3. Responsable ── --}}
         <div class="fs-card">
             <div class="fs-card-title"><i class="bi bi-person-badge"></i> Encargado / Responsable</div>
             <div class="fg-2">
@@ -162,18 +240,14 @@ label.fl span { color: #dc2626; margin-left: 2px; }
                         @endforeach
                     </select>
                     @if($empleados->isEmpty())
-                        <p class="fc-hint" style="color:#f59e0b;">
-                            <i class="bi bi-info-circle"></i>
-                            No hay empleados registrados.
-                            <a href="{{ route('clientes.index') }}" style="color:#2563eb;">Agregar empleado</a>
-                        </p>
+                        <p class="fc-hint" style="color:#f59e0b;"><i class="bi bi-info-circle"></i> No hay empleados registrados.</p>
                     @endif
                 </div>
                 <div></div>
             </div>
         </div>
 
-        {{-- ── 3. Fechas y duración ── --}}
+        {{-- ── 4. Fechas y duración ── --}}
         <div class="fs-card">
             <div class="fs-card-title"><i class="bi bi-calendar3"></i> Tiempos</div>
             <div class="fg-3">
@@ -183,20 +257,49 @@ label.fl span { color: #dc2626; margin-left: 2px; }
                            value="{{ old('fecha_inicio', now()->format('Y-m-d')) }}" required>
                 </div>
                 <div>
-                    <label class="fl" for="duracion">Duración (días)</label>
+                    <label class="fl" for="duracion">Duración (días hábiles)</label>
                     <input type="number" id="duracion" name="duracion" class="fc"
                            min="1" value="{{ old('duracion') }}" placeholder="Ej. 180">
+                    <p class="fc-hint">No se contarán domingos ni días inhábiles marcados.</p>
                 </div>
                 <div>
                     <label class="fl">Fecha est. de entrega</label>
                     <input type="text" id="fecha_entrega_calc" class="fc" readonly
-                           style="background:#f9fafb;color:#6b7280;"
+                           style="background:#f9fafb;color:#374151;font-weight:600;"
                            placeholder="Se calcula automáticamente">
+                </div>
+            </div>
+
+            {{-- Días inhábiles --}}
+            <div style="margin-top:14px;">
+                <button type="button" class="inhab-toggle" onclick="toggleCalInhab()">
+                    <i class="bi bi-calendar-x"></i>
+                    Marcar días inhábiles / festivos
+                    <span id="inhabBadge" style="background:#f59e0b;color:#fff;border-radius:10px;padding:1px 7px;font-size:.7rem;display:none;"></span>
+                </button>
+
+                <div class="inhab-cal" id="inhabCal">
+                    <div class="inhab-cal-header">
+                        <button type="button" onclick="cambiarMes(-1)">&#8249;</button>
+                        <span id="mesLabel"></span>
+                        <button type="button" onclick="cambiarMes(1)">&#8250;</button>
+                    </div>
+                    <div class="inhab-days-grid">
+                        <div class="day-name">Dom</div><div class="day-name">Lun</div><div class="day-name">Mar</div>
+                        <div class="day-name">Mié</div><div class="day-name">Jue</div><div class="day-name">Vie</div>
+                        <div class="day-name">Sáb</div>
+                    </div>
+                    <div class="inhab-days-grid" id="diasGrid"></div>
+                    <div class="inhab-list" id="inhabList">
+                        <strong>Días inhábiles marcados:</strong><br>
+                        <div id="inhabChips" style="margin-top:4px;">Ninguno</div>
+                    </div>
+                    <div style="margin-top:10px;font-size:.72rem;color:#92400e;"><i class="bi bi-info-circle me-1"></i>Los domingos ya no se cuentan automáticamente. Haz clic en un día para marcarlo/desmarcarlo como inhábil.</div>
                 </div>
             </div>
         </div>
 
-        {{-- ── 4. Estimaciones económicas ── --}}
+        {{-- ── 5. Estimaciones económicas ── --}}
         <div class="fs-card">
             <div class="fs-card-title"><i class="bi bi-cash-stack"></i> Estimaciones (opcional)</div>
             <div class="fg-2">
@@ -216,7 +319,7 @@ label.fl span { color: #dc2626; margin-left: 2px; }
             </div>
         </div>
 
-        {{-- ── 5. Niveles ── --}}
+        {{-- ── 6. Niveles ── --}}
         <div class="fs-card">
             <div class="fs-card-title"><i class="bi bi-layers"></i> Niveles de la Obra</div>
             <p style="font-size:.82rem;color:#6b7280;margin-bottom:14px;">
@@ -230,6 +333,9 @@ label.fl span { color: #dc2626; margin-left: 2px; }
             </button>
         </div>
 
+        {{-- Campos ocultos días inhábiles --}}
+        <input type="hidden" id="diasInhabilesJson" name="dias_inhabiles_json" value="[]">
+
         <div class="form-actions">
             <a href="{{ route('obras.index') }}" class="btn-cancel">
                 <i class="bi bi-x-lg me-1"></i> Cancelar
@@ -242,6 +348,54 @@ label.fl span { color: #dc2626; margin-left: 2px; }
 </div>
 
 <script>
+// ── AUTOCOMPLETADO CLIENTE ─────────────────────────────────────────────────
+const clienteInput = document.getElementById('cliente_txt');
+const clienteList  = document.getElementById('cliente_list');
+const clienteHid   = document.getElementById('id_cliente_hid');
+const clientePanel = document.getElementById('clienteNuevoPanel');
+
+clienteInput.addEventListener('input', async function() {
+    const q = this.value.trim();
+    clienteHid.value = '';
+    clientePanel.style.display = 'none';
+    if (!q) { clienteList.style.display='none'; return; }
+
+    // Búsqueda con API
+    const resp = await fetch(`{{ route('api.clientes.buscar') }}?q=${encodeURIComponent(q)}`);
+    const data = await resp.json();
+
+    clienteList.innerHTML = '';
+    data.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'ac-item';
+        div.textContent = c.texto + (c.tel ? ' · '+c.tel : '');
+        div.onclick = () => {
+            clienteInput.value = c.texto;
+            clienteHid.value = c.id;
+            clienteList.style.display='none';
+            clientePanel.style.display='none';
+        };
+        clienteList.appendChild(div);
+    });
+
+    const nv = document.createElement('div');
+    nv.className = 'ac-item nuevo';
+    nv.innerHTML = '<i class="bi bi-person-plus me-1"></i>Registrar nuevo cliente: "' + q + '"';
+    nv.onclick = () => {
+        clienteHid.value = '';
+        clientePanel.style.display='block';
+        document.getElementById('clienteNuevoNombre').value = q;
+        clienteList.style.display='none';
+    };
+    clienteList.appendChild(nv);
+    clienteList.style.display = 'block';
+});
+
+document.addEventListener('click', e => {
+    if(!e.target.closest('.ac-wrap')) clienteList.style.display='none';
+});
+
+// ── NIVELES ────────────────────────────────────────────────────────────────
 let nivelIdx = 0;
 
 function agregarNivel(desc = '', m2 = '') {
@@ -268,29 +422,133 @@ function agregarNivel(desc = '', m2 = '') {
     cont.appendChild(div);
 }
 
-// Iniciar con 1 nivel por defecto
 agregarNivel('Planta Baja');
-
 document.getElementById('btnAddNivel').addEventListener('click', () => agregarNivel());
 
-// Calcular fecha de entrega estimada
+// ── CÁLCULO FECHA SIN DOMINGOS + DÍAS INHÁBILES ────────────────────────────
+let inhabLocales = {}; // {YYYY-MM-DD: 'descripcion'}
+
+// Pre-cargar los días inhábiles guardados en BD
+@php
+$inhabBD = isset($diasInhabile) ? $diasInhabile->map(fn($d) => ['fecha' => $d->fecha->format('Y-m-d'), 'descripcion' => $d->descripcion ?? '']) : collect();
+@endphp
+const inhabBD = @json($inhabBD);
+inhabBD.forEach(d => { inhabLocales[d.fecha] = d.descripcion || 'Día inhábil'; });
+
 function calcularFechaEntrega() {
     const fi  = document.getElementById('fecha_inicio').value;
     const dur = parseInt(document.getElementById('duracion').value);
     const out = document.getElementById('fecha_entrega_calc');
-    if (fi && dur > 0) {
-        const d = new Date(fi);
-        d.setDate(d.getDate() + dur);
-        out.value = d.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
-    } else {
-        out.value = '';
+    if (!fi || !dur || dur < 1) { out.value = ''; return; }
+
+    let d = new Date(fi + 'T12:00:00'); // Mediodía para evitar problema de TZ
+    let diasRestantes = dur;
+
+    while (diasRestantes > 0) {
+        d.setDate(d.getDate() + 1);
+        const dayOfWeek = d.getDay(); // 0 = domingo
+        const key = d.toISOString().slice(0,10);
+        if (dayOfWeek === 0) continue;         // Omitir domingos
+        if (inhabLocales[key] !== undefined) continue; // Omitir inhábiles
+        diasRestantes--;
     }
+
+    out.value = d.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
 }
+
 document.getElementById('fecha_inicio').addEventListener('input', calcularFechaEntrega);
 document.getElementById('duracion').addEventListener('input', calcularFechaEntrega);
 calcularFechaEntrega();
 
-// Calcular total estimado desde m² × precio/m²
+// ── CALENDARIO DE DÍAS INHÁBILES ───────────────────────────────────────────
+let calMes  = new Date().getMonth();
+let calAnio = new Date().getFullYear();
+
+function toggleCalInhab() {
+    const cal = document.getElementById('inhabCal');
+    cal.style.display = cal.style.display === 'block' ? 'none' : 'block';
+    if (cal.style.display === 'block') renderCal();
+}
+
+function cambiarMes(delta) {
+    calMes += delta;
+    if (calMes < 0)  { calMes = 11; calAnio--; }
+    if (calMes > 11) { calMes = 0;  calAnio++; }
+    renderCal();
+}
+
+function renderCal() {
+    const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    document.getElementById('mesLabel').textContent = meses[calMes] + ' ' + calAnio;
+
+    const grid = document.getElementById('diasGrid');
+    grid.innerHTML = '';
+
+    const primerDia = new Date(calAnio, calMes, 1).getDay(); // 0=dom
+    const diasEnMes = new Date(calAnio, calMes + 1, 0).getDate();
+
+    // Celdas vacías antes del primer día
+    for (let i = 0; i < primerDia; i++) {
+        const div = document.createElement('div');
+        div.className = 'day-cell other-month';
+        grid.appendChild(div);
+    }
+
+    for (let d = 1; d <= diasEnMes; d++) {
+        const fecha = new Date(calAnio, calMes, d);
+        const key   = fecha.toISOString().slice(0,10);
+        const dow   = fecha.getDay();
+
+        const div = document.createElement('div');
+        div.className = 'day-cell' + (dow===0 ? ' sunday' : '');
+        div.textContent = d;
+
+        if (inhabBD.find(x => x.fecha === key)) div.classList.add('saved-inhabil');
+        else if (inhabLocales[key] !== undefined) div.classList.add('selected');
+
+        if (dow !== 0) {
+            div.onclick = () => toggleInhabil(key, d);
+        }
+        grid.appendChild(div);
+    }
+    renderChips();
+}
+
+function toggleInhabil(key, dia) {
+    if (inhabLocales[key] !== undefined) {
+        delete inhabLocales[key];
+    } else {
+        inhabLocales[key] = 'Día inhábil personalizado';
+    }
+    document.getElementById('diasInhabilesJson').value = JSON.stringify(inhabLocales);
+    renderCal();
+    calcularFechaEntrega();
+    actualizarBadge();
+}
+
+function renderChips() {
+    const chips = document.getElementById('inhabChips');
+    const claves = Object.keys(inhabLocales);
+    if (!claves.length) { chips.textContent = 'Ninguno'; return; }
+    chips.innerHTML = claves.sort().map(k => {
+        const [y,m,d] = k.split('-');
+        return `<span class="inhab-chip">${d}/${m}/${y}
+            <button type="button" class="btn-rm-chip" onclick="toggleInhabil('${k}')">✕</button>
+        </span>`;
+    }).join('');
+}
+
+function actualizarBadge() {
+    const badge = document.getElementById('inhabBadge');
+    const n = Object.keys(inhabLocales).length;
+    badge.textContent = n > 0 ? n : '';
+    badge.style.display = n > 0 ? 'inline-block' : 'none';
+}
+
+// Inicializar badge con los días de BD
+actualizarBadge();
+
+// ── TOTAL ESTIMADO ─────────────────────────────────────────────────────────
 function calcularTotalEstimado() {
     const m2    = parseFloat(document.getElementById('dimensiones_m2').value   || 0);
     const pxm2  = parseFloat(document.getElementById('precio_por_m2_estimado').value || 0);

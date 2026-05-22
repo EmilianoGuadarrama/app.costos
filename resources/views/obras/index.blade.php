@@ -154,9 +154,22 @@
             <a href="{{ route('obras.show', $obra->id) }}" class="btn-obra btn-ver" id="btn-ver-{{ $obra->id }}">
                 <i class="bi bi-eye me-1"></i>Ver
             </a>
+            @php
+                $tieneRenglones = $obra->asignaConceptos()->exists()
+                               || $obra->asignaMateriales()->exists()
+                               || $obra->asignaMaquinaria()->exists();
+            @endphp
+            @if($tieneRenglones)
             <a href="{{ route('obras.presupuesto', $obra->id) }}" class="btn-obra btn-presup" id="btn-presup-{{ $obra->id }}">
                 <i class="bi bi-file-earmark-text me-1"></i>Presupuesto
             </a>
+            @else
+            <button type="button" class="btn-obra btn-presup" id="btn-presup-{{ $obra->id }}"
+                    onclick="alertaSinPresup({{ $obra->id }}, '{{ addslashes($datos?->nombre ?? 'Obra #'.$obra->id) }}')"
+                    style="cursor:pointer;border:none;text-align:center;">
+                <i class="bi bi-file-earmark-text me-1"></i>Presupuesto
+            </button>
+            @endif
             @if($caja)
             <a href="{{ route('caja_general.show', $caja->id) }}" class="btn-obra btn-caja" id="btn-caja-{{ $obra->id }}">
                 <i class="bi bi-wallet2 me-1"></i>Caja
@@ -167,4 +180,35 @@
     @endforeach
 </div>
 @endif
+
+<!-- Modal Presupuesto Vacío -->
+<div id="modalSinPresup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(17,24,39,0.7); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; padding:32px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);">
+        <div style="width:64px; height:64px; background:#fef3c7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+            <i class="bi bi-file-earmark-x" style="font-size:2rem; color:#d97706;"></i>
+        </div>
+        <h3 style="font-size:1.2rem; font-weight:800; color:#111; margin-bottom:8px;">Presupuesto Vacío</h3>
+        <p style="font-size:.9rem; color:#4b5563; margin-bottom:24px;">La obra <strong id="modalObraNombre"></strong> aún no tiene renglones en su presupuesto.</p>
+        
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <a href="#" id="modalBtnAgregar" class="btn btn-primary" style="background:#2563eb; border:none; border-radius:10px; padding:10px; font-weight:700;">
+                <i class="bi bi-plus-lg me-1"></i> Agregar Renglones
+            </a>
+            <button type="button" onclick="cerrarAlertaPresup()" style="background:transparent; border:1.5px solid #e5e7eb; border-radius:10px; padding:10px; color:#4b5563; font-weight:600; cursor:pointer;">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function alertaSinPresup(obraId, nombreObra) {
+    document.getElementById('modalObraNombre').textContent = nombreObra;
+    document.getElementById('modalBtnAgregar').href = `/obras/${obraId}/presupuesto/agregar`;
+    document.getElementById('modalSinPresup').style.display = 'flex';
+}
+function cerrarAlertaPresup() {
+    document.getElementById('modalSinPresup').style.display = 'none';
+}
+</script>
 @endsection

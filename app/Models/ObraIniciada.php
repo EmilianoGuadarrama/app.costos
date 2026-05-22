@@ -13,7 +13,7 @@ class ObraIniciada extends Model
 {
     protected $table = 'obras_iniciadas';
     protected $fillable = [
-        'id_datos_de_obra','encargado_id_empleado','fecha_inicio','duracion',
+        'id_datos_de_obra','encargado_id_empleado','id_cliente','fecha_inicio','duracion',
         'precio_por_m2_estimado','total_de_obra_estimado','total_presupuestado','total_por_m2',
     ];
 
@@ -21,6 +21,7 @@ class ObraIniciada extends Model
 
     public function datosDeObra()    { return $this->belongsTo(DatosDeObra::class, 'id_datos_de_obra'); }
     public function encargado()      { return $this->belongsTo(Empleado::class, 'encargado_id_empleado'); }
+    public function cliente()        { return $this->belongsTo(Cliente::class, 'id_cliente'); }
     public function niveles()        { return $this->hasMany(Nivel::class, 'id_obra'); }
     public function obrasProceso()   { return $this->hasMany(ObraProceso::class, 'id_obras_iniciadas'); }
     public function asignaConceptos(){ return $this->hasMany(AsignaConcepto::class, 'id_obra'); }

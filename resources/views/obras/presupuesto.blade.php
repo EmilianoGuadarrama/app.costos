@@ -29,8 +29,20 @@
 .btn-pa-blue:hover { background:#1d4ed8; color:#fff; }
 .btn-pa-green { background:#059669; color:#fff; }
 .btn-pa-green:hover { background:#047857; color:#fff; }
+.btn-pa-outline { background:#fff; color:#374151; border:1.5px solid #e5e7eb; }
+.btn-pa-outline:hover { border-color:#374151; }
+.btn-pa-amber { background:#f59e0b; color:#fff; }
+.btn-pa-amber:hover { background:#d97706; color:#fff; }
 .btn-back-sm { color:#6b7280; text-decoration:none; font-size:.85rem; display:flex; align-items:center; gap:4px; }
 .btn-back-sm:hover { color:#111; }
+/* Desglose */
+.tr-desglose td { background:#f0f9ff; padding:8px 14px; font-size:.75rem; color:#374151; }
+.comp-badge { display:inline-block; padding:1px 6px; border-radius:6px; font-size:.63rem; font-weight:700; margin-right:3px; }
+.cb-mat { background:#dbeafe; color:#1d4ed8; }
+.cb-maq { background:#fef3c7; color:#92400e; }
+.cb-mo  { background:#d1fae5; color:#065f46; }
+.btn-desglose-icon { background:none; border:none; cursor:pointer; color:#d1d5db; font-size:.75rem; padding:2px 5px; border-radius:4px; border:1px solid #e5e7eb; margin-left:4px; }
+.btn-desglose-icon:hover { color:#2563eb; border-color:#2563eb; background:#eff6ff; }
 
 /* Info bar */
 .pres-info { display:flex; gap:20px; flex-wrap:wrap; padding:9px 14px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; margin-bottom:12px; font-size:.82rem; }
@@ -128,6 +140,9 @@
             <i class="bi bi-arrow-left"></i> Datos generales
         </a>
         <div style="flex:1"></div>
+        <button type="button" class="btn-pa btn-pa-outline" id="btn-toggle-desglose" onclick="toggleTodosDesgloses()">
+            <i class="bi bi-diagram-3 me-1"></i> Desglosar Matriz
+        </button>
         <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-pa btn-pa-blue" id="btn-agregar-todo">
             <i class="bi bi-layers"></i> + Agregar Renglones
         </a>
@@ -169,6 +184,12 @@
                 'subtotal'    => (float)$c->subtotal,
                 'iva'         => (float)$c->iva,
                 'total'       => (float)$c->total_final,
+                'composicion' => $c->concepto?->composicion?->map(fn($comp) => [
+                    'tipo'        => $comp->tipo,
+                    'descripcion' => $comp->descripcion_referencia,
+                    'cantidad'    => (float)$comp->cantidad,
+                    'unidad'      => $comp->unidad ?? '',
+                ])->toArray() ?? [],
             ]);
         }
         foreach ($materiales as $m) {
@@ -294,18 +315,13 @@
     </div>
 
     @if($todasFilas->isEmpty())
-        <div class="empty-presup">
-            <i class="bi bi-file-earmark-text" style="font-size:3.5rem;color:#d1d5db;display:block;margin-bottom:12px;"></i>
-            <h4>Sin renglones en el presupuesto</h4>
-            <p>Agrega conceptos o materiales para construir el presupuesto por bloques.</p>
-            <div style="display:flex;gap:10px;justify-content:center;margin-top:14px;">
-                <a href="{{ route('obras.presupuesto.create', $obra->id) }}" class="btn-pa btn-pa-blue">
-                    <i class="bi bi-plus-lg"></i> Agregar Conceptos
-                </a>
-                <a href="{{ route('obras.presupuesto.materiales.create', $obra->id) }}" class="btn-pa btn-pa-green">
-                    <i class="bi bi-box-seam"></i> Agregar Materiales
-                </a>
-            </div>
+        <div class="empty-presup" style="padding:40px 20px;background:#fff;border-radius:14px;border:1.5px dashed #e5e7eb;margin-top:8px;">
+            <i class="bi bi-file-earmark-text" style="font-size:3.5rem;color:#d1d5db;display:block;margin-bottom:16px;"></i>
+            <h4 style="font-size:1.25rem;font-weight:800;color:#374151;margin-bottom:8px;">Esta obra no tiene renglones en el presupuesto</h4>
+            <p style="color:#6b7280;font-size:.9rem;max-width:400px;margin:0 auto 20px;">Para ver el presupuesto primero debes agregar conceptos, materiales o maquinaria haciendo clic en el botón de abajo.</p>
+            <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-pa btn-pa-blue" style="display:inline-flex;margin:0 auto;font-size:.95rem;padding:.7rem 1.8rem;" id="btn-agregar-renglon-empty">
+                <i class="bi bi-plus-lg me-1"></i> Agregar primer renglón
+            </a>
         </div>
     @else
     <div style="overflow-x:auto; margin-top:2px;">
@@ -347,12 +363,20 @@
 
                 {{-- Renglones (Sin agrupar por área, iteración directa del bloque) --}}
                 @foreach($filasBloq as $fila)
-                <tr class="item-row">
+                <tr class="item-row" data-fila-id="{{ $fila['tipo'] }}_{{ $fila['id'] }}">
                     <td style="font-weight:700;color:#111;">{{ $fila['area_abr'] }}</td>
                     <td style="color:#6b7280;font-size:.7rem;text-transform:uppercase;">
                         @if($fila['tipo'] === 'concepto') CONCEPTO @else {{ $fila['tipo'] }} @endif
                     </td>
-                    <td style="color:#111;font-size:.8rem;font-weight:600;">{{ $fila['descripcion'] }}</td>
+                    <td style="color:#111;font-size:.8rem;font-weight:600;">
+                        {{ $fila['descripcion'] }}
+                        @if($fila['tipo'] === 'concepto' && isset($fila['composicion']) && count($fila['composicion']) > 0)
+                            <button type="button" class="btn-desglose-icon" title="Ver composición"
+                                data-comp='@json($fila['composicion'])'
+                                onclick="toggleDesgloseRow(this, '{{ $fila['tipo'] }}_{{ $fila['id'] }}')"
+                            ><i class="bi bi-diagram-3"></i></button>
+                        @endif
+                    </td>
                     <td style="text-align:right;">
                         <input type="number" step="0.01" min="0" name="items[{{ $fila['tipo'] }}][{{ $fila['id'] }}][pu]" value="{{ $fila['pu'] }}" style="width:90px;padding:4px;border:1px solid #d1d5db;border-radius:4px;text-align:right;">
                     </td>
@@ -382,23 +406,64 @@
     </div>
     
     <script>
+    // ── DESGLOSE DE COMPOSICIÓN ───────────────────────────────────────────────
+    let desgloseActivo = false;
+    const iconos  = {material:'cb-mat', maquinaria:'cb-maq', mano_obra:'cb-mo'};
+    const nombres = {material:'Material', maquinaria:'Maquinaria', mano_obra:'Mano de Obra'};
+
+    function toggleDesgloseRow(btn, filaId) {
+        const trMain = btn.closest('tr');
+        const existente = document.getElementById('desglose_'+filaId);
+        if (existente) { existente.remove(); btn.style.color=''; return; }
+        const comp = JSON.parse(btn.dataset.comp || '[]');
+        if (!comp.length) return;
+
+        const tr = document.createElement('tr');
+        tr.id = 'desglose_'+filaId;
+        tr.className = 'tr-desglose';
+        let html = '<td colspan="9" class="tr-desglose"><strong style="font-size:.7rem;color:#6b7280;margin-right:8px;"><i class="bi bi-diagram-3 me-1"></i>Composición:</strong>';
+        comp.forEach(c => {
+            const cls = iconos[c.tipo] || 'cb-mat';
+            const nom = nombres[c.tipo] || c.tipo;
+            html += `<span class="comp-badge ${cls}">${nom}</span>${c.descripcion}${c.cantidad!=1?' × '+c.cantidad:''} ${c.unidad||''}&nbsp;&nbsp;&nbsp;`;
+        });
+        html += '</td>';
+        tr.innerHTML = html;
+        trMain.insertAdjacentElement('afterend', tr);
+        btn.style.color = '#2563eb';
+    }
+
+    function toggleTodosDesgloses() {
+        const botones = document.querySelectorAll('.btn-desglose-icon');
+        desgloseActivo = !desgloseActivo;
+        const btn = document.getElementById('btn-toggle-desglose');
+        if (desgloseActivo) {
+            botones.forEach(b => {
+                const fi = b.closest('tr')?.dataset?.filaId;
+                if (fi && !document.getElementById('desglose_'+fi)) toggleDesgloseRow(b, fi);
+            });
+            btn.innerHTML = '<i class="bi bi-diagram-3 me-1"></i> Ocultar Desglose';
+            btn.style.background = '#eff6ff'; btn.style.color='#2563eb'; btn.style.borderColor='#2563eb';
+        } else {
+            document.querySelectorAll('[id^="desglose_"]').forEach(e => e.remove());
+            botones.forEach(b => b.style.color = '');
+            btn.innerHTML = '<i class="bi bi-diagram-3 me-1"></i> Desglosar Matriz';
+            btn.style = '';
+        }
+    }
+
+    // ── EXPORTAR EXCEL ───────────────────────────────────────────────────────
     function exportarExcel() {
         let tabla = document.getElementById("tabla-presupuesto");
-        let html = tabla.outerHTML;
-        
-        // Reemplazar inputs por sus valores para que se vea bien en excel
         let tempDiv = document.createElement('div');
-        tempDiv.innerHTML = html;
+        tempDiv.innerHTML = tabla.outerHTML;
         let inputs = tempDiv.querySelectorAll('input');
         inputs.forEach(input => {
             let val = input.value;
             let parent = input.parentNode;
             parent.innerHTML = val;
         });
-        
-        html = tempDiv.innerHTML;
-        
-        let url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(html);
+        let url = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(tempDiv.innerHTML);
         let link = document.createElement("a");
         link.href = url;
         link.download = "presupuesto_{{ $obra->id }}.xls";

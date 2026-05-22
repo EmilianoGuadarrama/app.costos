@@ -8,6 +8,8 @@ use App\Models\Cliente;
 use App\Models\Nivel;
 use App\Models\TotalObra;
 use App\Models\CajaGeneral;
+use App\Models\DiaInhabil;
+use App\Models\Persona;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -32,10 +34,11 @@ class ObraController extends Controller
 
     public function create()
     {
-        $empleados = Empleado::with('persona')->get();
-        $clientes  = Cliente::with('persona')->get();
+        $empleados    = Empleado::with('persona')->get();
+        $clientes     = Cliente::with('persona')->get();
+        $diasInhabile = DiaInhabil::orderBy('fecha')->get();
 
-        return view('obras.create', compact('empleados', 'clientes'));
+        return view('obras.create', compact('empleados', 'clientes', 'diasInhabile'));
     }
 
     public function store(Request $request)
@@ -46,14 +49,31 @@ class ObraController extends Controller
             'fecha_inicio'         => 'required|date',
             'duracion'             => 'nullable|string|max:100',
             'encargado_id_empleado'=> 'nullable|exists:empleados,id',
+            'id_cliente'           => 'nullable|exists:clientes,id',
             'dimensiones_m2'       => 'nullable|numeric',
             'num_niveles'          => 'nullable|integer|min:1',
             'niveles'              => 'nullable|array',
             'niveles.*.descripcion'=> 'required|string|max:255',
+            // Cliente nuevo inline
+            'cliente_nuevo_nombre' => 'nullable|string|max:255',
+            'cliente_nuevo_tel'    => 'nullable|string|max:20',
+            'cliente_nuevo_email'  => 'nullable|email|max:255',
         ]);
 
         DB::beginTransaction();
         try {
+            // 0. Cliente nuevo inline (si se proporcionó)
+            $idCliente = $request->id_cliente;
+            if (!$idCliente && $request->filled('cliente_nuevo_nombre')) {
+                $persona = Persona::create([
+                    'nombre'     => $request->cliente_nuevo_nombre,
+                    'telefono_1' => $request->cliente_nuevo_tel ?? '',
+                    'email'      => $request->cliente_nuevo_email ?? '',
+                ]);
+                $clienteNuevo = Cliente::create(['id_persona' => $persona->id]);
+                $idCliente = $clienteNuevo->id;
+            }
+
             // 1. datos_de_obra
             $datos = DatosDeObra::create([
                 'nombre'        => $request->nombre,
@@ -66,6 +86,7 @@ class ObraController extends Controller
             $obra = ObraIniciada::create([
                 'id_datos_de_obra'        => $datos->id,
                 'encargado_id_empleado'   => $request->encargado_id_empleado,
+                'id_cliente'              => $idCliente,
                 'fecha_inicio'            => $request->fecha_inicio,
                 'duracion'                => $request->duracion,
                 'precio_por_m2_estimado'  => $request->precio_por_m2_estimado,

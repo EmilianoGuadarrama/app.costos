@@ -97,7 +97,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($caja->obra->ingresos->sortByDesc('fecha') as $ing)
+                        @php
+                            $meses = ['01'=>'Enero','02'=>'Febrero','03'=>'Marzo','04'=>'Abril','05'=>'Mayo','06'=>'Junio','07'=>'Julio','08'=>'Agosto','09'=>'Septiembre','10'=>'Octubre','11'=>'Noviembre','12'=>'Diciembre'];
+                            $ingresosAgrupados = $caja->obra->ingresos->sortByDesc('fecha')->groupBy(function($item) use ($meses) {
+                                $c = \Carbon\Carbon::parse($item->fecha);
+                                return $meses[$c->format('m')] . ' ' . $c->format('Y');
+                            });
+                        @endphp
+                        @foreach($ingresosAgrupados as $mes => $items)
+                        <tr style="background:#f8fafc;">
+                            <td colspan="2" style="font-weight:700; text-transform:uppercase; color:#475569; border-bottom:1px solid #e2e8f0; padding-top:12px; padding-bottom:12px; font-size:0.75rem;">
+                                <i class="bi bi-calendar3 me-1"></i> {{ $mes }}
+                            </td>
+                            <td style="text-align:right; font-weight:800; color:#059669; border-bottom:1px solid #e2e8f0; padding-top:12px; padding-bottom:12px;">
+                                +${{ number_format($items->sum('monto_dado'), 2) }}
+                            </td>
+                        </tr>
+                        @foreach($items as $ing)
                         <tr>
                             <td class="td-fecha">{{ \Carbon\Carbon::parse($ing->fecha)->format('d/m/Y') }}</td>
                             <td>
@@ -108,6 +124,7 @@
                             </td>
                             <td class="td-monto ing">+${{ number_format($ing->monto_dado, 2) }}</td>
                         </tr>
+                        @endforeach
                         @endforeach
                     </tbody>
                 </table>
@@ -134,7 +151,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($caja->obra->egresos->sortByDesc('fecha') as $eg)
+                        @php
+                            $meses = ['01'=>'Enero','02'=>'Febrero','03'=>'Marzo','04'=>'Abril','05'=>'Mayo','06'=>'Junio','07'=>'Julio','08'=>'Agosto','09'=>'Septiembre','10'=>'Octubre','11'=>'Noviembre','12'=>'Diciembre'];
+                            $egresosAgrupados = $caja->obra->egresos->sortByDesc('fecha')->groupBy(function($item) use ($meses) {
+                                $c = \Carbon\Carbon::parse($item->fecha);
+                                return $meses[$c->format('m')] . ' ' . $c->format('Y');
+                            });
+                        @endphp
+                        @foreach($egresosAgrupados as $mes => $items)
+                        <tr style="background:#fef2f2;">
+                            <td colspan="2" style="font-weight:700; text-transform:uppercase; color:#991b1b; border-bottom:1px solid #fecaca; padding-top:12px; padding-bottom:12px; font-size:0.75rem;">
+                                <i class="bi bi-calendar3 me-1"></i> {{ $mes }}
+                            </td>
+                            <td style="text-align:right; font-weight:800; color:#dc2626; border-bottom:1px solid #fecaca; padding-top:12px; padding-bottom:12px;">
+                                -${{ number_format($items->sum('pago'), 2) }}
+                            </td>
+                        </tr>
+                        @foreach($items as $eg)
                         <tr>
                             <td class="td-fecha">{{ \Carbon\Carbon::parse($eg->fecha)->format('d/m/Y') }}</td>
                             <td>
@@ -145,6 +178,7 @@
                             </td>
                             <td class="td-monto eg">-${{ number_format($eg->pago, 2) }}</td>
                         </tr>
+                        @endforeach
                         @endforeach
                     </tbody>
                 </table>

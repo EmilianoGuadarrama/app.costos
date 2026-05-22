@@ -1,297 +1,19 @@
-@extends('layout')
-@section('title', 'Agregar al Presupuesto — ' . ($obra->datosDeObra?->nombre ?? 'Obra'))
 
-@section('content')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<style>
-:root {
-    --dark:#111827; --mid:#374151; --soft:#6b7280; --line:#e5e7eb;
-    --bg:#f3f4f6;   --white:#fff;
-    --blue:#2563eb; --blue-l:#eff6ff; --blue-b:#bfdbfe;
-    --green:#059669; --green-l:#f0fdf4; --green-b:#bbf7d0;
-    --amber:#d97706; --amber-l:#fffbeb; --amber-b:#fde68a;
-    --red:#dc2626;
-}
-body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
-
-/* ── HEADER ── */
-.pu-hdr{
-    display:flex;justify-content:space-between;align-items:center;
-    background:var(--dark);color:#fff;padding:16px 26px;
-    position:sticky;top:0;z-index:300;
-    border-bottom:3px solid var(--blue);
-    box-shadow:0 4px 24px rgba(0,0,0,.5);
-}
-.pu-hdr-left h1{font-family:'Garamond','Baskerville',serif;font-size:1.35rem;margin:0;}
-.pu-hdr-left p{margin:2px 0 0;font-size:.8rem;color:#9ca3af;}
-.btn-back{background:rgba(255,255,255,.08);color:#d1d5db;border:1px solid rgba(255,255,255,.15);
-    border-radius:7px;padding:5px 13px;font-size:.8rem;text-decoration:none;
-    transition:.2s;display:inline-flex;align-items:center;gap:5px;margin-bottom:5px;}
-.btn-back:hover{background:rgba(255,255,255,.18);color:#fff;}
-.btn-save{
-    background:var(--blue);color:#fff;border:none;border-radius:10px;
-    padding:11px 26px;font-weight:700;font-size:.9rem;cursor:pointer;
-    display:inline-flex;align-items:center;gap:8px;transition:.2s;
-    box-shadow:0 4px 14px rgba(37,99,235,.45);
-}
-.btn-save:hover{background:#1d4ed8;transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.55);}
-.btn-save:disabled{opacity:.6;cursor:not-allowed;transform:none;}
-
-/* ── GLOBALS BAR ── */
-.pu-globals{
-    background:#fff;border-bottom:1px solid var(--line);
-    padding:13px 26px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;
-}
-.gl-group{display:flex;flex-direction:column;gap:3px;flex:1;min-width:150px;}
-.gl-group label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--soft);}
-.gl-group select{border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.85rem;color:var(--dark);background:var(--bg);}
-.gl-group select:focus{border-color:var(--blue);outline:none;}
-
-/* ── BODY ── */
-.pu-body{padding:20px 26px;}
-.btn-add-cpt{
-    background:var(--dark);color:#fff;border:none;border-radius:10px;
-    padding:10px 20px;font-weight:700;font-size:.85rem;cursor:pointer;
-    display:inline-flex;align-items:center;gap:7px;transition:.2s;margin-bottom:16px;
-}
-.btn-add-cpt:hover{background:var(--mid);transform:translateY(-1px);}
-
-/* ── TARJETA CONCEPTO ── */
-.cpt-card{background:#fff;border-radius:14px;border:1px solid var(--line);
-    margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:hidden;}
-.cpt-hdr{
-    background:var(--dark);color:#fff;padding:12px 18px;
-    display:flex;justify-content:space-between;align-items:center;
-}
-.cpt-hdr h3{margin:0;font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:7px;}
-.btn-quitar{background:rgba(220,38,38,.15);color:#fca5a5;border:1px solid rgba(220,38,38,.25);
-    border-radius:7px;padding:4px 12px;font-size:.78rem;cursor:pointer;transition:.2s;
-    display:inline-flex;align-items:center;gap:4px;}
-.btn-quitar:hover{background:var(--red);color:#fff;border-color:var(--red);}
-
-/* ── CAMPOS CONCEPTO ── */
-.cpt-flds{
-    padding:14px 18px 10px;background:#f8faff;border-bottom:1px solid var(--line);
-    display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;
-}
-.fld{display:flex;flex-direction:column;gap:3px;}
-.fld label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--soft);}
-.fld input,.fld select{
-    width:100%; box-sizing:border-box;
-    border:1.5px solid var(--line);border-radius:7px;padding:7px 9px;
-    font-size:.85rem;color:var(--dark);background:#fff;transition:.15s;
-}
-.fld input:focus,.fld select:focus{border-color:var(--blue);outline:none;}
-.fld.f-desc{flex:3;min-width:200px;}
-.fld.f-sm{flex:1;min-width:110px;}
-.fld.f-xs{flex:0 0 75px;}
-.fld.f-pu{flex:0 0 110px;}
-.pu-display{
-    background:var(--dark);color:#fff;border-radius:7px;padding:7px 10px;
-    font-size:.85rem;font-weight:700;text-align:center;min-width:90px;
-    display:inline-block;border:none;
-}
-
-/* ── AUTOCOMPLETE ── */
-.ac-wrap{position:relative;}
-.ac-list{
-    position:absolute;top:100%;left:0;right:0;background:#fff;
-    border:1.5px solid var(--line);border-top:none;
-    max-height:220px;overflow-y:auto;z-index:9999;
-    display:none;border-radius:0 0 10px 10px;
-    box-shadow:0 10px 25px rgba(0,0,0,.12);
-}
-.ac-item{padding:9px 13px;cursor:pointer;font-size:.85rem;color:var(--mid);border-bottom:1px solid #f3f4f6;}
-.ac-item:hover{background:#eff6ff;color:var(--blue);}
-.ac-item.nuevo{color:var(--blue);font-weight:700;background:#f0f9ff;}
-
-/* ── INSUMOS INLINE ── */
-.ins-wrap{padding:14px 18px;}
-.ins-row-header{
-    display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:6px;padding:7px 12px;border-radius:8px;font-size:.8rem;font-weight:700;
-}
-.ins-row-header.mat{background:var(--blue-l);color:var(--blue);border:1px solid var(--blue-b);}
-.ins-row-header.mo {background:var(--green-l);color:var(--green);border:1px solid var(--green-b);}
-.ins-row-header.maq{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b);}
-.btn-ai{border:none;border-radius:7px;padding:4px 12px;font-size:.76rem;font-weight:700;
-    cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
-.btn-ai.mat{background:var(--blue);color:#fff;}
-.btn-ai.mo {background:var(--green);color:#fff;}
-.btn-ai.maq{background:var(--amber);color:#fff;}
-.btn-ai:hover{opacity:.85;transform:translateY(-1px);}
-.ins-table{width:100%;border-collapse:collapse;margin-bottom:8px;}
-.ins-table th{
-    padding:5px 8px;font-size:.66rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.4px;color:var(--soft);border-bottom:1px solid var(--line);background:#fafafa;
-}
-.ins-table td{padding:5px 7px;border-bottom:1px solid #f8f9fa;vertical-align:middle;}
-.ins-table input,.ins-table select{
-    width:100%;border:1.5px solid var(--line);border-radius:6px;
-    padding:5px 7px;font-size:.82rem;background:#fff;color:var(--dark);
-}
-.ins-table input:focus,.ins-table select:focus{border-color:var(--blue);outline:none;}
-.btn-del{background:#fef2f2;color:var(--red);border:1px solid #fecaca;
-    border-radius:5px;padding:3px 7px;cursor:pointer;font-size:.78rem;transition:.15s;}
-.btn-del:hover{background:var(--red);color:#fff;}
-
-/* ── P.U. resumen ── */
-.pu-calc{
-    display:flex;align-items:center;gap:8px;padding:8px 14px;
-    background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-top:8px;
-    font-size:.82rem;color:var(--green);font-weight:700;
-}
-.pu-calc span{color:var(--dark);font-weight:400;}
-
-/* ── Toast ── */
-#toast{
-    position:fixed;bottom:22px;right:22px;z-index:9999;
-    padding:12px 20px;border-radius:10px;font-weight:600;font-size:.88rem;
-    display:none;align-items:center;gap:9px;box-shadow:0 10px 25px rgba(0,0,0,.2);
-}
-#toast.ok {background:#059669;color:#fff;}
-#toast.err{background:#dc2626;color:#fff;}
-@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-</style>
-
-{{-- HEADER --}}
-<div class="pu-hdr">
-    <div class="pu-hdr-left">
-        <a href="{{ route('obras.presupuesto', $obra->id) }}" class="btn-back">
-            <i class="bi bi-arrow-left"></i> Volver al Presupuesto
-        </a>
-        <h1><i class="bi bi-layers me-2" style="color:#60a5fa;"></i>Agregar Renglones al Presupuesto</h1>
-        <p>Obra: <strong style="color:#fff;">{{ $obra->datosDeObra?->nombre }}</strong></p>
-    </div>
-    <button class="btn-save" onclick="guardarPresupuesto()" id="btnGuardar">
-        <i class="bi bi-cloud-arrow-up-fill"></i> Agregar Conceptos
-    </button>
-</div>
-
-{{-- AJUSTES GLOBALES --}}
-<div class="pu-globals">
-    <div class="gl-group">
-        <label>Bloque por defecto</label>
-        <div class="ac-wrap" style="width:100%;">
-            <input type="text" id="g_bloque_txt" placeholder="Buscar o crear..." autocomplete="off" style="width:100%; border:1.5px solid var(--line); border-radius:8px; padding:8px 10px; font-size:.85rem; background:var(--bg);">
-            <input type="hidden" id="g_bloque">
-            <div class="ac-list" id="g_bloque_list"></div>
-        </div>
-    </div>
-    <div class="gl-group">
-        <label>Área por defecto</label>
-        <div class="ac-wrap" style="width:100%;">
-            <input type="text" id="g_area_txt" placeholder="Buscar o crear..." autocomplete="off" style="width:100%; border:1.5px solid var(--line); border-radius:8px; padding:8px 10px; font-size:.85rem; background:var(--bg);">
-            <input type="hidden" id="g_area">
-            <div class="ac-list" id="g_area_list"></div>
-        </div>
-    </div>
-    <div class="gl-group">
-        <label>Nivel / Planta por defecto</label>
-        <select id="g_nivel">
-            <option value="">— Nivel —</option>
-            @foreach($niveles as $n)
-                <option value="{{ $n->id }}" @if($niveles->count() === 1) selected @endif>
-                    {{ $n->descripcion }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-</div>
-
-{{-- BODY --}}
-<div class="pu-body">
-    <button type="button" class="btn-add-cpt" onclick="addConcepto()">
-        <i class="bi bi-plus-circle-fill"></i> Agregar Nuevo Concepto
-    </button>
-    <div id="conceptosContainer"></div>
-    
-    {{-- RESUMEN TOTAL --}}
-    <div class="pu-footer-total" style="background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px; margin-top:20px; box-shadow:0 4px 15px rgba(0,0,0,0.05); display:flex; justify-content:flex-end; gap:30px;">
-        <div style="text-align:right;">
-            <p style="margin:0; font-size:0.85rem; color:var(--soft); font-weight:700; text-transform:uppercase;">Subtotal</p>
-            <h4 id="tot_subtotal" style="margin:0; font-size:1.2rem; color:var(--mid);">$0.00</h4>
-        </div>
-        <div style="text-align:right;">
-            <p style="margin:0; font-size:0.85rem; color:var(--soft); font-weight:700; text-transform:uppercase;">I.V.A.</p>
-            <h4 id="tot_iva" style="margin:0; font-size:1.2rem; color:var(--mid);">$0.00</h4>
-        </div>
-        <div style="text-align:right;">
-            <p style="margin:0; font-size:0.85rem; color:var(--soft); font-weight:700; text-transform:uppercase;">Total a Agregar</p>
-            <h4 id="tot_final" style="margin:0; font-size:1.5rem; color:var(--blue); font-weight:800;">$0.00</h4>
-        </div>
-    </div>
-</div>
-
-<div id="toast"></div>
-
-<script>
 /* ─────────── DATOS DEL SERVIDOR ─────────── */
-@php
-    // Incluir composición en los conceptos para auto-cargar insumos
-    $catConceptosArr = $conceptos->map(function($c) {
-        return [
-            'id'          => $c->id,
-            'texto'       => $c->descripcion,
-            'pu'          => $c->p_u,
-            'uni'         => $c->id_unidad_medida,
-            'composicion' => $c->composicion->map(fn($comp) => [
-                'tipo'        => $comp->tipo,
-                'ref_id'      => $comp->referencia_id,
-                'descripcion' => $comp->descripcion_referencia,
-                'cantidad'    => $comp->cantidad,
-                'unidad'      => $comp->unidad,
-            ])->values()->toArray(),
-        ];
-    })->values()->toJson();
 
-    $catMaterialesArr = $materiales->map(fn($m) => [
-        'id'    => $m->id,
-        'texto' => $m->nombre,
-        'pu'    => $m->precio_x_unidad,
-        'uni'   => $m->id_unidad_medida,
-        'uniTxt'=> $m->unidadMedida?->abreviatura ?? '',
-    ])->values()->toJson();
 
-    $catMaquinariaArr = $maquinaria->map(fn($m) => [
-        'id'    => $m->id,
-        'texto' => $m->nombre,
-        'pu'    => $m->precio_x_unidad,
-        'uni'   => $m->id_unidad_medida,
-        'uniTxt'=> $m->unidadMedida?->abreviatura ?? '',
-    ])->values()->toJson();
+const catConceptos  = [];
+const catMateriales = [];
+const catMaquinaria = [];
+const catManoObra   = [];
+const catAreas      = [];
+const catBloques    = [];
 
-    $catManoObraArr = $mano_obra->map(fn($m) => [
-        'id'    => $m->id,
-        'texto' => $m->nombre,
-        'pu'    => $m->precio_x_unidad,
-        'uni'   => $m->id_unidad_medida,
-        'uniTxt'=> $m->unidadMedida?->abreviatura ?? '',
-    ])->values()->toJson();
-
-    $catAreasArr = $areas->map(fn($a) => [
-        'id'    => $a->id,
-        'texto' => $a->abreviatura . ($a->descripcion ? ' - '.$a->descripcion : ''),
-    ])->values()->toJson();
-
-    $catBloquesArr = $bloques->map(fn($b) => [
-        'id'    => $b->id,
-        'texto' => $b->descripcion,
-    ])->values()->toJson();
-@endphp
-
-const catConceptos  = {!! $catConceptosArr !!};
-const catMateriales = {!! $catMaterialesArr !!};
-const catMaquinaria = {!! $catMaquinariaArr !!};
-const catManoObra   = {!! $catManoObraArr !!};
-const catAreas      = {!! $catAreasArr !!};
-const catBloques    = {!! $catBloquesArr !!};
-
-const bloques   = @json($bloques);
-const unidades  = @json($unidades);
-const niveles   = @json($niveles);
-const storeUrl  = '{{ route("obras.presupuesto.unificado.store", $obra->id) }}';
-const csrfToken = '{{ csrf_token() }}';
+const bloques   = [];
+const unidades  = [];
+const niveles   = [];
+const storeUrl  = '1';
+const csrfToken = '1';
 
 let conceptIndex = 0;
 
@@ -346,7 +68,7 @@ function addConcepto() {
     const html = `
     <div class="cpt-card" id="card_c_${ci}" data-ci="${ci}">
 
-        {{-- Cabecera --}}
+        1
         <div class="cpt-hdr">
             <h3><i class="bi bi-layers-fill" style="color:#60a5fa;"></i> Concepto #${ci}</h3>
             <button class="btn-quitar" onclick="document.getElementById('card_c_${ci}').remove(); updateGlobalTotals();">
@@ -354,7 +76,7 @@ function addConcepto() {
             </button>
         </div>
 
-        {{-- Campos del concepto --}}
+        1
         <div class="cpt-flds">
             <div class="fld f-desc">
                 <label>Descripción del Concepto</label>
@@ -399,10 +121,10 @@ function addConcepto() {
             </div>
         </div>
 
-        {{-- Secciones de Insumos --}}
+        1
         <div class="ins-wrap">
 
-            {{-- MATERIALES --}}
+            1
             <div class="ins-row-header mat">
                 <span><i class="bi bi-box-seam me-1"></i>Materiales</span>
                 <button class="btn-ai mat" onclick="addInsumo(${ci},'material')"><i class="bi bi-plus"></i> Agregar Material</button>
@@ -419,7 +141,7 @@ function addConcepto() {
                 <tbody></tbody>
             </table>
 
-            {{-- MANO DE OBRA --}}
+            1
             <div class="ins-row-header mo" style="margin-top:10px;">
                 <span><i class="bi bi-person-lines-fill me-1"></i>Mano de Obra</span>
                 <button class="btn-ai mo" onclick="addInsumo(${ci},'mano_obra')"><i class="bi bi-plus"></i> Agregar Mano de Obra</button>
@@ -436,7 +158,7 @@ function addConcepto() {
                 <tbody></tbody>
             </table>
 
-            {{-- MAQUINARIA --}}
+            1
             <div class="ins-row-header maq" style="margin-top:10px;">
                 <span><i class="bi bi-truck me-1"></i>Maquinaria</span>
                 <button class="btn-ai maq" onclick="addInsumo(${ci},'maquinaria')"><i class="bi bi-plus"></i> Agregar Maquinaria</button>
@@ -453,7 +175,7 @@ function addConcepto() {
                 <tbody></tbody>
             </table>
 
-            {{-- TOTAL P.U. --}}
+            1
             <div class="pu-calc">
                 <i class="bi bi-calculator-fill"></i>
                 <span>P.U. Total del Concepto:</span>
@@ -907,5 +629,3 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(aplicarGlobalesAConceptos, 150);
     });
 });
-</script>
-@endsection

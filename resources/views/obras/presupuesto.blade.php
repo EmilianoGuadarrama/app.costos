@@ -330,36 +330,51 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
                         <tr class="row-desglose" id="desglose_{{ $fila->id }}">
                             <td></td>
                             <td colspan="7">
-                                <strong style="font-size:.78rem;color:var(--mid);">Matriz de Costos:</strong>
-                                <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
-                                @foreach($fila->materiales as $mat)
-                                    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:5px 10px;font-size:.75rem;">
-                                        <span class="comp-badge cb-mat">Material</span>
-                                        <strong>{{ $mat->material?->nombre }}</strong>
-                                        — {{ $mat->cantidad }} {{ $mat->material?->unidadMedida?->abreviatura }}
-                                        × ${{ number_format($mat->precio_unitario, 2) }}
-                                    </div>
-                                @endforeach
-                                @foreach($fila->maquinaria as $maq)
-                                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:5px 10px;font-size:.75rem;">
-                                        <span class="comp-badge cb-maq">Maquinaria</span>
-                                        <strong>{{ $maq->maquinaria?->nombre }}</strong>
-                                        — {{ $maq->cantidad }} {{ $maq->maquinaria?->unidadMedida?->abreviatura }}
-                                        × ${{ number_format($maq->precio_unitario, 2) }}
-                                    </div>
-                                @endforeach
-                                @foreach($fila->manoObra as $mo)
-                                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:5px 10px;font-size:.75rem;">
-                                        <span class="comp-badge cb-mo">Mano de Obra</span>
-                                        <strong>{{ $mo->manoObra?->nombre }}</strong>
-                                        — {{ $mo->cantidad }} {{ $mo->manoObra?->unidadMedida?->abreviatura }}
-                                        × ${{ number_format($mo->precio_unitario, 2) }}
-                                    </div>
-                                @endforeach
+                                <strong style="font-size:.85rem;color:var(--dark);"><i class="bi bi-diagram-3-fill me-1"></i>Matriz de Costos:</strong>
                                 @if($fila->materiales->isEmpty() && $fila->maquinaria->isEmpty() && $fila->manoObra->isEmpty())
-                                    <em style="color:#9ca3af;">Sin insumos desglosados — se usa el P.U. base.</em>
+                                    <div style="margin-top:6px;"><em style="color:#9ca3af; font-size: 0.8rem;">Sin insumos desglosados — se usa el P.U. base.</em></div>
+                                @else
+                                    <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.8rem; background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                        <thead style="background: #f9fafb; border-bottom: 2px solid #e5e7eb; color: #4b5563; text-transform: uppercase; letter-spacing: 0.5px;">
+                                            <tr>
+                                                <th style="padding: 8px 12px; text-align: left; font-weight: 700; width: 12%;">Tipo</th>
+                                                <th style="padding: 8px 12px; text-align: left; font-weight: 700; width: 45%;">Insumo</th>
+                                                <th style="padding: 8px 12px; text-align: center; font-weight: 700;">Cantidad</th>
+                                                <th style="padding: 8px 12px; text-align: right; font-weight: 700;">Precio Unit.</th>
+                                                <th style="padding: 8px 12px; text-align: right; font-weight: 700;">Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($fila->materiales as $mat)
+                                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                                    <td style="padding: 8px 12px;"><span class="comp-badge cb-mat" style="margin:0;">Material</span></td>
+                                                    <td style="padding: 8px 12px; color: #111827;"><strong>{{ $mat->material?->nombre }}</strong></td>
+                                                    <td style="padding: 8px 12px; text-align: center; color: #4b5563;">{{ number_format($mat->cantidad, 2) }} {{ $mat->material?->unidadMedida?->abreviatura }}</td>
+                                                    <td style="padding: 8px 12px; text-align: right; color: #4b5563;">${{ number_format($mat->precio_unitario, 2) }}</td>
+                                                    <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #111827;">${{ number_format($mat->cantidad * $mat->precio_unitario, 2) }}</td>
+                                                </tr>
+                                            @endforeach
+                                            @foreach($fila->maquinaria as $maq)
+                                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                                    <td style="padding: 8px 12px;"><span class="comp-badge cb-maq" style="margin:0;">Maquinaria</span></td>
+                                                    <td style="padding: 8px 12px; color: #111827;"><strong>{{ $maq->maquinaria?->nombre }}</strong></td>
+                                                    <td style="padding: 8px 12px; text-align: center; color: #4b5563;">{{ number_format($maq->cantidad, 2) }} {{ $maq->maquinaria?->unidadMedida?->abreviatura }}</td>
+                                                    <td style="padding: 8px 12px; text-align: right; color: #4b5563;">${{ number_format($maq->precio_unitario, 2) }}</td>
+                                                    <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #111827;">${{ number_format($maq->cantidad * $maq->precio_unitario, 2) }}</td>
+                                                </tr>
+                                            @endforeach
+                                            @foreach($fila->manoObra as $mo)
+                                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                                    <td style="padding: 8px 12px;"><span class="comp-badge cb-mo" style="margin:0;">Mano de Obra</span></td>
+                                                    <td style="padding: 8px 12px; color: #111827;"><strong>{{ $mo->manoObra?->nombre }}</strong></td>
+                                                    <td style="padding: 8px 12px; text-align: center; color: #4b5563;">{{ number_format($mo->cantidad, 2) }} {{ $mo->manoObra?->unidadMedida?->abreviatura }}</td>
+                                                    <td style="padding: 8px 12px; text-align: right; color: #4b5563;">${{ number_format($mo->precio_unitario, 2) }}</td>
+                                                    <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #111827;">${{ number_format($mo->cantidad * $mo->precio_unitario, 2) }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 @endif
-                                </div>
                             </td>
                         </tr>
                     @endforeach

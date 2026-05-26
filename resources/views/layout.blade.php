@@ -10,18 +10,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        body{
-            margin:0;
-            background:#f3f4f6;
-            font-family:"Helvetica Neue", Arial, sans-serif;
+        body {
+            margin: 0;
+            background: #f3f4f6;
+            font-family: "Helvetica Neue", Arial, sans-serif;
         }
 
-        .app-layout{
-            min-height:100vh;
-            display:flex;
-            gap:20px;
-            padding:20px;
-            align-items:flex-start;
+        .app-layout {
+            min-height: 100vh;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            align-items: flex-start;
         }
 
         @media print {
@@ -31,171 +31,189 @@
             body { background: #fff !important; }
         }
 
-        .sidebar{
-            width:260px;
-            min-width:260px;
-            background-color:#1c1c1c;
-            color:#fff;
-            padding:30px 22px;
-            border-radius:16px;
-            display:flex;
-            flex-direction:column;
-            justify-content:space-between;
-            box-shadow:4px 0 15px rgba(0,0,0,0.2);
-            min-height:calc(100vh - 40px);
-            position:sticky;
-            top:20px;
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 248px;
+            min-width: 248px;
+            background-color: #111111;
+            color: #fff;
+            padding: 26px 18px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 2px 0 12px rgba(0,0,0,.18);
+            min-height: calc(100vh - 40px);
+            position: sticky;
+            top: 20px;
         }
 
-        .sidebar .brand-box{
-            margin-bottom:2rem;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            text-align:center;
+        .sidebar .brand-box {
+            margin-bottom: 1.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-bottom: 1.4rem;
+            border-bottom: 1px solid #222;
         }
 
-        .sidebar img.logo-sidebar{
-            width:160px;
-            height:90px;
-            object-fit:contain;
-            background-color:#ffffff;
-            border-radius:14px;
-            padding:12px;
-            margin-bottom:15px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.25);
+        .sidebar img.logo-sidebar {
+            width: 140px;
+            height: 80px;
+            object-fit: contain;
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
         }
 
-        .sidebar .brand-text{
-            color:#ccc;
-            font-size:.78rem;
-            letter-spacing:3px;
-            text-transform:uppercase;
-            margin:0;
-            text-align:center;
+        .sidebar .brand-text {
+            color: #555;
+            font-size: .72rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin: 0;
         }
 
-        .sidebar-menu{
-            list-style:none;
-            padding:0;
-            margin:0;
+        /* Sección de categorías del menú */
+        .sidebar-section-label {
+            font-size: .58rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #444;
+            font-weight: 700;
+            padding: 14px 10px 5px;
+            margin-bottom: 2px;
         }
 
-        .sidebar-menu .nav-item{
-            margin-bottom:8px;
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
-        .sidebar .nav-link{
-            color:#e0e0e0;
-            display:flex;
-            align-items:center;
-            gap:14px;
-            background:transparent;
-            border-radius:12px;
-            padding:12px 16px;
-            transition:all .25s ease;
-            font-weight:500;
-            text-decoration:none;
-            font-size:0.92rem;
+        .sidebar-menu .nav-item {
+            margin-bottom: 3px;
+        }
+
+        .sidebar .nav-link {
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            background: transparent;
+            border-radius: 9px;
+            padding: 10px 13px;
+            transition: all .2s ease;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: .875rem;
             cursor: pointer;
+            letter-spacing: .1px;
         }
 
-        .sidebar .nav-link i{
-            color:#9ca3af;
-            width:20px;
-            text-align:center;
-            transition:color .25s ease;
-            font-size:1rem;
+        .sidebar .nav-link i {
+            color: #555;
+            width: 18px;
+            text-align: center;
+            transition: color .2s ease;
+            font-size: .95rem;
+            flex-shrink: 0;
         }
 
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active{
-            background-color:#2c2c2c;
-            color:#fff;
+        .sidebar .nav-link:hover {
+            background-color: #1c1c1c;
+            color: #e0e0e0;
         }
+        .sidebar .nav-link:hover i { color: #999; }
 
-        .sidebar .nav-link:hover i,
-        .sidebar .nav-link.active i{
-            color:#fff;
+        .sidebar .nav-link.active {
+            background-color: #1e1e1e;
+            color: #fff;
         }
+        .sidebar .nav-link.active i { color: #ccc; }
 
-        /* Dropdown custom styles */
+        /* Dropdown */
         .sidebar .dropdown-toggle::after {
             display: inline-block;
             margin-left: auto;
-            vertical-align: middle;
             content: "";
-            border-top: 0.3em solid;
-            border-right: 0.3em solid transparent;
+            border-top: .28em solid;
+            border-right: .28em solid transparent;
             border-bottom: 0;
-            border-left: 0.3em solid transparent;
-            transition: transform .25s ease;
+            border-left: .28em solid transparent;
+            transition: transform .2s ease;
+            opacity: .45;
         }
         .sidebar .dropdown-toggle[aria-expanded="true"]::after {
             transform: rotate(180deg);
+            opacity: .7;
         }
 
+        /* Submenú */
         .submenu {
             list-style: none;
-            padding: 0 0 0 15px;
-            margin: 5px 0 10px 0;
-            border-left: 1px solid #333;
+            padding: 2px 0 4px 12px;
+            margin: 0 0 4px 0;
+            border-left: 1px solid #232323;
         }
-
+        .submenu .nav-item { margin-bottom: 1px; }
         .submenu .nav-link {
-            padding: 8px 16px;
-            font-size: 0.88rem;
-            color: #aaa;
+            padding: 7px 13px;
+            font-size: .835rem;
+            color: #666;
+            border-radius: 7px;
+            font-weight: 500;
         }
-
-        .submenu .nav-link:hover,
+        .submenu .nav-link:hover {
+            color: #ccc;
+            background: transparent;
+        }
         .submenu .nav-link.active {
             color: #fff;
-            background-color: transparent;
+            background: #1c1c1c;
+        }
+        /* Sin iconos en el submenú */
+        .submenu .nav-link i { display: none !important; }
+
+        /* Footer */
+        .sidebar .footer-text {
+            font-size: .66rem;
+            color: #3a3a3a;
+            margin-top: 18px;
+            border-top: 1px solid #1e1e1e;
+            padding-top: 14px;
+            text-align: center;
+            letter-spacing: .5px;
+        }
+        .sidebar .footer-text p { margin-bottom: 4px; }
+
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            min-width: 0;
         }
 
-        .sidebar .footer-text{
-            font-size:.7rem;
-            color:#666;
-            margin-top:22px;
-            border-top:1px solid #333;
-            padding-top:18px;
-            text-align:center;
+        .content-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,.07);
+            padding: 30px;
+            min-height: calc(100vh - 40px);
         }
 
-        .sidebar .footer-text p{
-            margin-bottom:6px;
-        }
-
-        .main-content{
-            flex:1;
-            min-width:0;
-        }
-
-        .content-card{
-            background:#fff;
-            border-radius:16px;
-            box-shadow:0 8px 22px rgba(0,0,0,.08);
-            padding:30px;
-            min-height:calc(100vh - 40px);
-        }
-
-        @media (max-width: 991.98px){
-            .app-layout{
-                flex-direction:column;
+        @media (max-width: 991.98px) {
+            .app-layout { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                min-width: 100%;
+                min-height: auto;
+                position: relative;
+                top: 0;
             }
-
-            .sidebar{
-                width:100%;
-                min-width:100%;
-                min-height:auto;
-                position:relative;
-                top:0;
-            }
-
-            .content-card{
-                min-height:auto;
-            }
+            .content-card { min-height: auto; }
         }
     </style>
 </head>
@@ -237,8 +255,8 @@
                         <ul class="submenu">
                             <li><a href="{{ route('conceptos.index') }}" class="nav-link {{ request()->routeIs('conceptos*') ? 'active' : '' }}">Conceptos</a></li>
                             <li><a href="{{ route('materiales.index') }}" class="nav-link {{ request()->routeIs('materiales*') ? 'active' : '' }}">Materiales</a></li>
-                            <li><a href="{{ route('maquinaria.index') }}" class="nav-link {{ request()->routeIs('maquinaria*') ? 'active' : '' }}"><i class="bi bi-truck me-1"></i>Maquinaria</a></li>
-                            <li><a href="{{ route('mano_obra.index') }}" class="nav-link {{ request()->routeIs('mano_obra*') ? 'active' : '' }}"><i class="bi bi-person-lines-fill me-1"></i>Mano de Obra</a></li>
+                            <li><a href="{{ route('maquinaria.index') }}" class="nav-link {{ request()->routeIs('maquinaria*') ? 'active' : '' }}">Maquinaria</a></li>
+                            <li><a href="{{ route('mano_obra.index') }}" class="nav-link {{ request()->routeIs('mano_obra*') ? 'active' : '' }}">Mano de Obra</a></li>
                             <li><a href="{{ route('areas.index') }}" class="nav-link {{ request()->routeIs('areas*') ? 'active' : '' }}">Areas</a></li>
                             <li><a href="{{ route('unidad_medida.index') }}" class="nav-link {{ request()->routeIs('unidad_medida*') ? 'active' : '' }}">Unidades</a></li>
                         </ul>

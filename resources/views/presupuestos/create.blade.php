@@ -2,28 +2,49 @@
 @section('title','Nuevo Presupuesto Rápido')
 @section('content')
 <style>
-.pf-wrap { font-family: "Arial", sans-serif; }
-.pf-header { margin-bottom: 24px; }
-.pf-title { font-size: 1.7rem; font-weight: 800; color: #111; margin: 0; }
-.pf-subtitle { color: #6b7280; margin: 4px 0 0; font-size: .9rem; }
+/* ── Formulario: Nuevo Presupuesto ── */
+.pf-wrap { font-family: "Arial", sans-serif; color: #111; }
 
-/* Sección de datos generales */
+.btn-back-link {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: .82rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    transition: color .2s;
+}
+.btn-back-link:hover { color: #111; }
+
+.pf-header { margin-bottom: 24px; }
+.pf-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+    font-family: "Garamond","Baskerville",serif;
+}
+.pf-subtitle { color: #6b7280; margin: 5px 0 0; font-size: .9rem; }
+
+/* Tarjeta */
 .pf-card {
     background: #fff;
     border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0,0,0,.04);
+    border-radius: 14px;
+    padding: 26px 28px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
 }
 .pf-card-title {
-    font-size: .72rem;
+    font-size: .68rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
     color: #9ca3af;
     margin-bottom: 18px;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
     border-bottom: 1px solid #f3f4f6;
 }
 .pf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -31,37 +52,66 @@
 .pf-label { font-size: .8rem; font-weight: 700; color: #374151; display: block; margin-bottom: 5px; }
 .pf-control, .pf-select {
     width: 100%; padding: .55rem .85rem;
-    border: 1.5px solid #e5e7eb; border-radius: 9px;
+    border: 1.5px solid #e5e7eb; border-radius: 8px;
     font-size: .88rem; transition: border-color .18s;
-    background: #fff;
+    background: #fff; color: #111;
 }
 .pf-control:focus, .pf-select:focus {
-    border-color: #111827; outline: none;
+    border-color: #111; outline: none;
     box-shadow: 0 0 0 3px rgba(17,24,39,.06);
 }
-.pf-error { color: #dc2626; font-size: .78rem; margin-top: 3px; }
+.pf-error { color: #b91c1c; font-size: .76rem; margin-top: 3px; }
 
-/* Tabla de renglones */
+.alert-err {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #b91c1c;
+    font-size: .85rem;
+    margin-bottom: 18px;
+}
+
+/* Toolbar de renglones */
 .renglon-toolbar {
     display: flex;
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 .btn-add-bloque {
-    background: #111827; color: #fff; border: none; border-radius: 9px;
-    padding: .5rem 1rem; font-size: .8rem; font-weight: 700; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 6px;
-    transition: background .18s;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: .5rem 1.1rem;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    transition: background .2s;
 }
 .btn-add-bloque:hover { background: #374151; }
 .btn-add-concepto {
-    background: #2563eb; color: #fff; border: none; border-radius: 9px;
-    padding: .5rem 1rem; font-size: .8rem; font-weight: 700; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 6px;
+    background: #374151;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: .5rem 1.1rem;
+    font-size: .78rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .2s;
 }
-.btn-add-concepto:hover { background: #1d4ed8; }
+.btn-add-concepto:hover { background: #111; }
 
 /* Bloque en el formulario */
 .bloque-form {
@@ -80,66 +130,145 @@
 }
 .bloque-form-title { flex: 1; font-weight: 700; font-size: .88rem; }
 .btn-remove-bloque {
-    background: none; border: none; color: #9ca3af; cursor: pointer;
-    font-size: .9rem; padding: 2px 6px;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: .9rem;
+    padding: 2px 8px;
+    transition: color .2s;
 }
 .btn-remove-bloque:hover { color: #fff; }
 
-/* Tabla de renglones dentro del bloque */
+/* Tabla de renglones */
 .renglones-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
 .renglones-table th {
-    background: #f9fafb; color: #6b7280; font-size: .68rem; text-transform: uppercase;
-    letter-spacing: .5px; padding: 7px 10px; border-bottom: 1px solid #e5e7eb;
-    font-weight: 700; text-align: left;
+    background: #f9fafb;
+    color: #6b7280;
+    font-size: .66rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    font-weight: 700;
+    text-align: left;
 }
-.renglones-table td { padding: 6px 8px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+.renglones-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
 .renglones-table tr:last-child td { border-bottom: none; }
 .renglones-table .inp-sm {
-    padding: .35rem .6rem; font-size: .82rem; border: 1.5px solid #e5e7eb; border-radius: 7px;
-    width: 100%; background: #fff;
+    padding: .35rem .6rem;
+    font-size: .82rem;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 7px;
+    width: 100%;
+    background: #fff;
+    color: #111;
+    transition: border-color .15s;
 }
-.renglones-table .inp-sm:focus { border-color: #2563eb; outline: none; }
+.renglones-table .inp-sm:focus { border-color: #111; outline: none; }
 .renglones-table .importe-val {
-    font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; color: #111;
+    font-weight: 700;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: #111;
 }
-.btn-rm-row { background: none; border: none; color: #d1d5db; cursor: pointer; font-size: 1rem; }
-.btn-rm-row:hover { color: #dc2626; }
+.btn-rm-row {
+    background: none;
+    border: none;
+    color: #d1d5db;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: color .2s;
+}
+.btn-rm-row:hover { color: #b91c1c; }
 .btn-add-row {
-    background: none; border: 1px dashed #d1d5db; color: #6b7280;
-    padding: 5px 12px; border-radius: 7px; font-size: .78rem; cursor: pointer;
+    background: none;
+    border: 1px dashed #d1d5db;
+    color: #9ca3af;
+    padding: 5px 14px;
+    border-radius: 7px;
+    font-size: .76rem;
+    cursor: pointer;
     margin: 8px 10px;
+    transition: all .2s;
 }
-.btn-add-row:hover { border-color: #2563eb; color: #2563eb; }
+.btn-add-row:hover { border-color: #374151; color: #374151; }
 
 /* Caja de totales */
 .totales-caja {
-    background: #111827; color: #fff; border-radius: 12px; padding: 20px 24px;
-    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 22px 26px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
 }
 .tc-item { text-align: center; }
-.tc-label { font-size: .65rem; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; }
-.tc-value { font-size: 1.25rem; font-weight: 900; margin-top: 4px; font-variant-numeric: tabular-nums; }
-.tc-value.accent { color: #fbbf24; }
+.tc-label {
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #9ca3af;
+    font-weight: 700;
+}
+.tc-value {
+    font-size: 1.35rem;
+    font-weight: 900;
+    margin-top: 5px;
+    font-variant-numeric: tabular-nums;
+    color: #111;
+}
+.tc-value.accent { color: #111; }
+.tc-total-box {
+    background: #111;
+    border-radius: 10px;
+    padding: 14px;
+}
+.tc-total-box .tc-label { color: #6b7280; }
+.tc-total-box .tc-value { color: #fff; }
 
+/* Acciones del formulario */
 .form-actions {
-    display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #f3f4f6;
 }
 .btn-guardar {
-    background: #111827; color: #fff; border: none; border-radius: 10px;
-    padding: .75rem 1.8rem; font-size: .9rem; font-weight: 700; cursor: pointer;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: .75rem 1.8rem;
+    font-size: .85rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: .4px;
+    transition: background .2s;
 }
 .btn-guardar:hover { background: #374151; }
 .btn-cancelar {
-    background: transparent; color: #6b7280; border: 1.5px solid #e5e7eb;
-    border-radius: 10px; padding: .75rem 1.4rem; font-size: .9rem; font-weight: 600;
-    text-decoration: none; display: inline-flex; align-items: center;
+    background: transparent;
+    color: #6b7280;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    padding: .75rem 1.4rem;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: all .2s;
 }
 .btn-cancelar:hover { border-color: #111; color: #111; }
-
-.btn-back-link { color: #6b7280; text-decoration: none; font-size: .88rem; display: inline-flex; align-items: center; gap: 5px; margin-bottom: 18px; }
-.btn-back-link:hover { color: #111; }
-
-.alert-err { background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 12px 16px; color: #b91c1c; font-size: .85rem; margin-bottom: 16px; }
 </style>
 
 <div class="pf-wrap">
@@ -154,14 +283,14 @@
     @endif
 
     <div class="pf-header">
-        <h1 class="pf-title"><i class="bi bi-file-earmark-plus me-2"></i>Nuevo Presupuesto</h1>
+        <h1 class="pf-title">Nuevo Presupuesto</h1>
         <p class="pf-subtitle">Crea un presupuesto organizado por bloques y áreas de trabajo</p>
     </div>
 
     <form action="{{ route('presupuestos.store') }}" method="POST" id="formPresupuesto">
         @csrf
 
-        <!-- Datos generales -->
+        {{-- Datos generales --}}
         <div class="pf-card">
             <div class="pf-card-title"><i class="bi bi-info-circle me-1"></i> Datos Generales</div>
             <div class="pf-grid-2" style="margin-bottom:16px;">
@@ -198,7 +327,7 @@
             </div>
         </div>
 
-        <!-- Renglones por bloque -->
+        {{-- Renglones por bloque --}}
         <div class="pf-card">
             <div class="pf-card-title"><i class="bi bi-list-columns me-1"></i> Renglones del Presupuesto</div>
 
@@ -206,13 +335,13 @@
                 <button type="button" class="btn-add-bloque" id="btnNuevoBloque">
                     <i class="bi bi-plus-square"></i> Agregar Bloque
                 </button>
-                <small style="color:#9ca3af;">Organiza los conceptos en bloques (Albañilerías, Eléctrico, Plomería…)</small>
+                <small style="color:#9ca3af;font-size:.76rem;">Organiza los conceptos en bloques (Albañilerías, Eléctrico, Plomería…)</small>
             </div>
 
             <div id="contenedorBloques"></div>
         </div>
 
-        <!-- Totales -->
+        {{-- Totales --}}
         <div class="totales-caja">
             <div class="tc-item">
                 <div class="tc-label">Subtotal (sin IVA)</div>
@@ -222,7 +351,7 @@
                 <div class="tc-label">IVA (16%)</div>
                 <div class="tc-value">$<span id="spanIva">0.00</span></div>
             </div>
-            <div class="tc-item">
+            <div class="tc-item tc-total-box">
                 <div class="tc-label">Total Final</div>
                 <div class="tc-value accent">$<span id="spanTotal">0.00</span></div>
             </div>
@@ -253,14 +382,12 @@ const catConceptos = @json($conceptos->map(fn($c) => [
 let bloqueIdx = 0;
 let renglonIdx = 0;
 
-// ── Opciones de bloque para el select ──
 function opcionesBloques() {
     let opts = '<option value="">— Sin bloque —</option>';
     catBloques.forEach(b => { opts += `<option value="${b.id}">${b.nombre}</option>`; });
     return opts;
 }
 
-// ── Opciones de concepto para el select ──
 function opcionesConceptos() {
     let opts = '<option value="">— Seleccione concepto —</option>';
     catConceptos.forEach(c => {
@@ -271,7 +398,6 @@ function opcionesConceptos() {
     return opts;
 }
 
-// ── Crear un nuevo bloque en el formulario ──
 function crearBloque() {
     const bi = bloqueIdx++;
     const div = document.createElement('div');
@@ -280,7 +406,7 @@ function crearBloque() {
     div.innerHTML = `
         <div class="bloque-form-header">
             <span class="bloque-form-title">
-                <select name="bloques[${bi}][bloque_id]" class="inp-sm" style="background:#333;color:#fff;border-color:#444;width:200px;" onchange="actualizarTitulo(this)">
+                <select name="bloques[${bi}][bloque_id]" class="inp-sm" style="background:#2c2c2c;color:#fff;border-color:#444;width:210px;" onchange="actualizarTitulo(this)">
                     ${opcionesBloques()}
                 </select>
             </span>
@@ -312,7 +438,6 @@ function crearBloque() {
     agregarRenglon(bi);
 }
 
-// ── Agregar un renglón a un bloque ──
 function agregarRenglon(bi) {
     const ri = renglonIdx++;
     const tbody = document.querySelector(`.tbody-renglones[data-bloque="${bi}"]`);
@@ -331,15 +456,13 @@ function agregarRenglon(bi) {
         <td><input type="number" step="0.0001" min="0" name="detalles[${ri}][cantidad]" class="inp-sm inp-cant" value="0" oninput="recalcularFila(this.closest('tr'))"></td>
         <td class="importe-val"><span class="lbl-sub">$0.00</span><input type="hidden" name="detalles[${ri}][subtotal]" class="hid-sub" value="0"></td>
         <td><input type="number" step="1" min="0" max="100" name="detalles[${ri}][porcentaje_iva]" class="inp-sm inp-iva" value="16" style="width:60px;" oninput="recalcularFila(this.closest('tr'))"></td>
-        <td class="importe-val" style="color:#2563eb;"><span class="lbl-tot">$0.00</span><input type="hidden" name="detalles[${ri}][total_final]" class="hid-tot" value="0"></td>
+        <td class="importe-val"><span class="lbl-tot">$0.00</span><input type="hidden" name="detalles[${ri}][total_final]" class="hid-tot" value="0"></td>
         <td><button type="button" class="btn-rm-row" onclick="this.closest('tr').remove();recalcularTodo()"><i class="bi bi-trash3"></i></button></td>
     `;
     tbody.appendChild(tr);
-    // Heredar bloque_id del bloque padre
     sincronizarBloqueId(tr);
 }
 
-// ── Sincronizar bloque_id heredado ──
 function sincronizarBloqueId(tr) {
     const tbody = tr.closest('tbody');
     const bi = tbody.dataset.bloque;
@@ -349,7 +472,6 @@ function sincronizarBloqueId(tr) {
     tr.querySelector('.hid-bloque').value = val;
 }
 
-// ── Al cambiar el select de bloque, sincronizar todos sus renglones ──
 document.getElementById('contenedorBloques').addEventListener('change', (e) => {
     if (e.target.name && e.target.name.includes('bloque_id') && !e.target.classList.contains('hid-bloque')) {
         const bloqueForm = e.target.closest('.bloque-form');
@@ -397,7 +519,7 @@ function recalcularTodo() {
 
 document.getElementById('btnNuevoBloque').addEventListener('click', crearBloque);
 
-// ── Iniciar con un bloque vacío si no hay viejos renglones ──
+// Iniciar con un bloque vacío
 crearBloque();
 </script>
 @endsection

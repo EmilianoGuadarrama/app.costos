@@ -1,5 +1,4 @@
 @extends('layout')
-
 @section('title','Presupuestos')
 
 @section('content')
@@ -12,25 +11,25 @@
     .header-section p{ margin:6px 0 0; color:#666; font-family:Arial,sans-serif; font-size:.92rem; }
     .header-actions{ display:flex; gap:10px; flex-wrap:wrap; }
     .btn-filter{ background:#fff; color:#111; border:1px solid #d9d9d9; padding:10px 16px; border-radius:6px; font-size:.8rem; letter-spacing:1px; text-transform:uppercase; font-family:Arial,sans-serif; }
-    .btn-add-new{ background:#111; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-size:.8rem; letter-spacing:1px; text-transform:uppercase; text-decoration:none; font-family:Arial,sans-serif; cursor:pointer; transition:background .3s ease; }
+    .btn-add-new{ background:#111; color:#fff; border:none; padding:10px 20px; border-radius:6px; font-size:.8rem; letter-spacing:1px; text-transform:uppercase; text-decoration:none; font-family:Arial,sans-serif; cursor:pointer; transition:background .3s ease; display:inline-flex; align-items:center; gap:6px; }
     .btn-add-new:hover{ background:#333; color:#fff; }
-    .project-table{ width:100%; border-collapse:separate; border-spacing:0 12px; }
-    .project-table thead th{ text-align:left; color:#888; font-size:.75rem; letter-spacing:2px; text-transform:uppercase; padding:0 20px 10px; font-family:Arial,sans-serif; }
+    .project-table{ width:100%; border-collapse:separate; border-spacing:0 10px; }
+    .project-table thead th{ text-align:left; color:#888; font-size:.72rem; letter-spacing:2px; text-transform:uppercase; padding:0 20px 10px; font-family:Arial,sans-serif; }
     .project-row{ background:#fff; outline:1px solid #eee; transition:all .3s ease; }
     .project-row:hover{ transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,0,0,.05); }
     .project-row td{ padding:15px 20px; vertical-align:middle; }
     .title-main{ font-weight:700; font-size:1.05rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .badge-dark-mini{ font-family:Arial,sans-serif; font-size:.7rem; font-weight:700; padding:2px 8px; border-radius:6px; background:#111; color:#fff; }
-    .badge-soft{ display:inline-flex; align-items:center; padding:4px 10px; border-radius:12px; background:#eee; color:#333; font-family:Arial,sans-serif; font-size:.75rem; font-weight:700; }
+    .badge-dark-mini{ font-family:Arial,sans-serif; font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:6px; background:#111; color:#fff; }
+    .badge-soft{ display:inline-flex; align-items:center; padding:4px 10px; border-radius:10px; background:#eee; color:#333; font-family:Arial,sans-serif; font-size:.75rem; font-weight:700; }
     .badge-borrador{ background:#e5e7eb; color:#374151; }
     .badge-aprobado{ background:#d1fae5; color:#065f46; }
     .badge-rechazado{ background:#fee2e2; color:#991b1b; }
     .desc-text{ color:#666; font-size:.85rem; line-height:1.4; margin-top:5px; font-family:Arial,sans-serif; }
-    .info-stack{ font-family:Arial,sans-serif; font-size:.9rem; color:#555; line-height:1.55; }
-    .amount-text{ font-family:Arial,sans-serif; font-size:1rem; font-weight:700; color:#111; }
-    .muted-note{ font-family:Arial,sans-serif; font-size:.85rem; color:#888; font-style:italic; }
+    .info-stack{ font-family:Arial,sans-serif; font-size:.88rem; color:#555; line-height:1.6; }
+    .amount-text{ font-family:Arial,sans-serif; font-size:.98rem; font-weight:700; color:#111; }
+    .muted-note{ font-family:Arial,sans-serif; font-size:.85rem; color:#aaa; font-style:italic; }
     .action-cell{ text-align:right; white-space:nowrap; }
-    .btn-icon-action{ background:none; border:none; font-size:1.15rem; cursor:pointer; transition:transform .2s ease, color .3s ease; padding:5px; margin-left:10px; display:inline-flex; align-items:center; justify-content:center; color:#888; text-decoration:none; }
+    .btn-icon-action{ background:none; border:none; font-size:1.1rem; cursor:pointer; transition:transform .2s ease, color .3s ease; padding:5px; margin-left:8px; display:inline-flex; align-items:center; justify-content:center; color:#bbb; text-decoration:none; }
     .btn-icon-action:hover{ transform:scale(1.15); color:#111; }
     .empty-state{ text-align:center; padding:28px 18px !important; color:#777; font-style:italic; font-family:Arial,sans-serif; background:#fff; }
     .modal-content{ border:none; border-radius:16px; box-shadow:0 20px 50px rgba(0,0,0,.15); }
@@ -40,15 +39,15 @@
     .modal-footer{ border-top:1px solid #ececec; padding:16px 22px; }
     .detail-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
     .detail-box{ background:#fafafa; border:1px solid #ececec; border-radius:12px; padding:16px; }
-    .detail-box h6{ font-size:.82rem; text-transform:uppercase; letter-spacing:1.5px; color:#777; margin-bottom:10px; font-weight:700; }
-    .detail-box p{ margin:0 0 8px; line-height:1.5; font-size:.95rem; }
+    .detail-box h6{ font-size:.78rem; text-transform:uppercase; letter-spacing:1.5px; color:#777; margin-bottom:10px; font-weight:700; }
+    .detail-box p{ margin:0 0 8px; line-height:1.5; font-size:.92rem; }
     .detail-box strong{ color:#111; }
-    .btn-modal-dark{ background:#111; color:#fff; border:none; border-radius:8px; padding:9px 18px; font-family:Arial,sans-serif; font-size:.82rem; letter-spacing:1px; text-transform:uppercase; text-decoration:none; }
+    .btn-modal-dark{ background:#111; color:#fff; border:none; border-radius:8px; padding:9px 18px; font-family:Arial,sans-serif; font-size:.78rem; letter-spacing:1px; text-transform:uppercase; text-decoration:none; }
     .btn-modal-dark:hover{ background:#333; color:#fff; }
-    .btn-modal-light{ background:#fff; color:#111; border:1px solid #d9d9d9; border-radius:8px; padding:9px 18px; font-family:Arial,sans-serif; font-size:.82rem; letter-spacing:1px; text-transform:uppercase; }
-    .btn-modal-danger{ background:#b91c1c; color:#fff; border:none; border-radius:8px; padding:9px 18px; font-family:Arial,sans-serif; font-size:.82rem; letter-spacing:1px; text-transform:uppercase; }
+    .btn-modal-light{ background:#fff; color:#111; border:1px solid #d9d9d9; border-radius:8px; padding:9px 18px; font-family:Arial,sans-serif; font-size:.78rem; letter-spacing:1px; text-transform:uppercase; }
+    .btn-modal-danger{ background:#b91c1c; color:#fff; border:none; border-radius:8px; padding:9px 18px; font-family:Arial,sans-serif; font-size:.78rem; letter-spacing:1px; text-transform:uppercase; }
     .btn-modal-danger:hover{ background:#991b1b; color:#fff; }
-    @media (max-width: 992px){ .index-panel{ padding:24px; } .project-table{ min-width:1100px; } .detail-grid{ grid-template-columns:1fr; } }
+    @media (max-width: 992px){ .index-panel{ padding:24px; } .project-table{ min-width:1000px; } .detail-grid{ grid-template-columns:1fr; } }
 </style>
 
 <div class="dash-index-view">
@@ -60,10 +59,13 @@
             <div class="alert alert-danger mb-4" style="font-family:Arial;font-size:.85rem;"><ul class="mb-0">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
         @endif
         <div class="header-section">
-            <div><h1>Presupuestos</h1><p>Listado general de conceptos presupuestados con cantidades e importes.</p></div>
+            <div>
+                <h1>Presupuestos</h1>
+                <p>Listado general de presupuestos de obra con cantidades e importes.</p>
+            </div>
             <div class="header-actions">
                 <button class="btn-filter" type="button"><i class="bi bi-funnel me-1"></i> Filtrar</button>
-                <a href="{{ route('presupuestos.create') }}" class="btn-add-new"><i class="bi bi-plus-circle me-1"></i> Nuevo Presupuesto</a>
+                <a href="{{ route('presupuestos.create') }}" class="btn-add-new"><i class="bi bi-plus-circle"></i> Nuevo Presupuesto</a>
             </div>
         </div>
         <div class="table-responsive">
@@ -87,9 +89,9 @@
                             <div class="desc-text">Proyecto: {{ $presupuesto->proyecto->nombre ?? 'Sin proyecto' }}<br>Estado: <span class="badge-soft {{ $estadoClase }}">{{ ucfirst($presupuesto->estado ?? 'borrador') }}</span></div>
                         </td>
                         <td>@if($tieneDetalles)<div class="info-stack"><div><strong>Conceptos:</strong> {{ $detalles->count() }}</div><div><strong>Cantidad total:</strong> {{ number_format($cantidadTotal, 2) }}</div></div>@else<div class="muted-note">Sin detalles capturados</div>@endif</td>
-                        <td>@if(!is_null($importeFinal))<span class="badge-soft amount-text">{{ number_format($importeFinal, 2) }}</span>@else<div class="muted-note">Pendiente de captura</div>@endif</td>
+                        <td>@if(!is_null($importeFinal))<span class="amount-text">$ {{ number_format($importeFinal, 2) }}</span>@else<div class="muted-note">Pendiente de captura</div>@endif</td>
                         <td class="action-cell">
-                            <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verPresModal{{ $presId }}"><i class="bi bi-eye"></i></button>
+                            <button type="button" class="btn-icon-action" title="Ver detalles" data-bs-toggle="modal" data-bs-target="#verPresModal{{ $presId }}"><i class="bi bi-eye"></i></button>
                             <button type="button" class="btn-icon-action" title="Eliminar" data-bs-toggle="modal" data-bs-target="#eliminarPresModal{{ $presId }}"><i class="bi bi-trash3"></i></button>
                         </td>
                     </tr>
@@ -98,7 +100,7 @@
                             <div class="modal-header"><h5 class="modal-title">{{ $presupuesto->nombre ?? 'Presupuesto' }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
                             <div class="modal-body"><div class="detail-grid">
                                 <div class="detail-box"><h6>Información</h6><p><strong>Nombre:</strong> {{ $presupuesto->nombre ?? '—' }}</p><p><strong>Proyecto:</strong> {{ $presupuesto->proyecto->nombre ?? '—' }}</p><p><strong>Estado:</strong> {{ ucfirst($presupuesto->estado ?? 'borrador') }}</p></div>
-                                <div class="detail-box"><h6>Montos</h6>@if($tieneDetalles)<p><strong>Conceptos:</strong> {{ $detalles->count() }}</p><p><strong>Cantidad total:</strong> {{ number_format($cantidadTotal, 2) }}</p>@endif<p><strong>Importe:</strong> {{ !is_null($importeFinal) ? number_format($importeFinal, 2) : 'Pendiente' }}</p></div>
+                                <div class="detail-box"><h6>Montos</h6>@if($tieneDetalles)<p><strong>Conceptos:</strong> {{ $detalles->count() }}</p><p><strong>Cantidad total:</strong> {{ number_format($cantidadTotal, 2) }}</p>@endif<p><strong>Importe:</strong> {{ !is_null($importeFinal) ? '$ ' . number_format($importeFinal, 2) : 'Pendiente' }}</p></div>
                             </div></div>
                             <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button><a href="{{ route('presupuestos.edit', $presId) }}" class="btn-modal-dark">Editar</a></div>
                         </div></div>

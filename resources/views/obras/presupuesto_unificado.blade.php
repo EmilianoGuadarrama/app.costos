@@ -5,37 +5,43 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <style>
 :root {
-    --dark:#111827; --mid:#374151; --soft:#6b7280; --line:#e5e7eb;
+    --dark:#111111; --mid:#374151; --soft:#6b7280; --line:#e5e7eb;
     --bg:#f3f4f6;   --white:#fff;
-    --blue:#2563eb; --blue-l:#eff6ff; --blue-b:#bfdbfe;
+    --blue:#374151; --blue-l:#f3f4f6; --blue-b:#e5e7eb;
     --green:#059669; --green-l:#f0fdf4; --green-b:#bbf7d0;
     --amber:#d97706; --amber-l:#fffbeb; --amber-b:#fde68a;
-    --red:#dc2626;
+    --red:#b91c1c;
 }
 body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
 
 /* ── HEADER ── */
 .pu-hdr{
     display:flex;justify-content:space-between;align-items:center;
-    background:var(--dark);color:#fff;padding:16px 26px;
+    background:#111111;color:#fff;padding:16px 26px;
     position:sticky;top:0;z-index:300;
-    border-bottom:3px solid var(--blue);
-    box-shadow:0 4px 24px rgba(0,0,0,.5);
+    border-bottom:1px solid #222;
+    box-shadow:0 2px 12px rgba(0,0,0,.2);
 }
-.pu-hdr-left h1{font-family:'Garamond','Baskerville',serif;font-size:1.35rem;margin:0;}
-.pu-hdr-left p{margin:2px 0 0;font-size:.8rem;color:#9ca3af;}
+.pu-hdr-left h1 {
+    font-family:'Garamond','Baskerville',serif;
+    font-size:1.45rem;
+    margin:0;
+    font-weight:700;
+    letter-spacing:.3px;
+}
+.pu-hdr-left p { margin:3px 0 0; font-size:.78rem; color:#6b7280; letter-spacing:.2px; }
 .btn-back{background:rgba(255,255,255,.08);color:#d1d5db;border:1px solid rgba(255,255,255,.15);
     border-radius:7px;padding:5px 13px;font-size:.8rem;text-decoration:none;
     transition:.2s;display:inline-flex;align-items:center;gap:5px;margin-bottom:5px;}
 .btn-back:hover{background:rgba(255,255,255,.18);color:#fff;}
 .btn-save{
-    background:var(--blue);color:#fff;border:none;border-radius:10px;
-    padding:11px 26px;font-weight:700;font-size:.9rem;cursor:pointer;
+    background:#fff;color:#111;border:1px solid rgba(255,255,255,.3);border-radius:9px;
+    padding:10px 24px;font-weight:700;font-size:.82rem;cursor:pointer;
     display:inline-flex;align-items:center;gap:8px;transition:.2s;
-    box-shadow:0 4px 14px rgba(37,99,235,.45);
+    letter-spacing:.3px;text-transform:uppercase;
 }
-.btn-save:hover{background:#1d4ed8;transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.55);}
-.btn-save:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.btn-save:hover{background:#f3f4f6;color:#111;}
+.btn-save:disabled{opacity:.6;cursor:not-allowed;}
 
 /* ── GLOBALS BAR ── */
 .pu-globals{
@@ -45,7 +51,7 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
 .gl-group{display:flex;flex-direction:column;gap:3px;flex:1;min-width:150px;}
 .gl-group label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--soft);}
 .gl-group select{border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.85rem;color:var(--dark);background:var(--bg);}
-.gl-group select:focus{border-color:var(--blue);outline:none;}
+.gl-group select:focus{border-color:#374151;outline:none;}
 
 /* ── BODY ── */
 .pu-body{padding:20px 26px;}
@@ -81,7 +87,7 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
     border:1.5px solid var(--line);border-radius:7px;padding:7px 9px;
     font-size:.85rem;color:var(--dark);background:#fff;transition:.15s;
 }
-.fld input:focus,.fld select:focus{border-color:var(--blue);outline:none;}
+.fld input:focus,.fld select:focus{border-color:#374151;outline:none;box-shadow:0 0 0 3px rgba(55,65,81,.06);}
 .fld.f-desc{flex:3;min-width:200px;}
 .fld.f-sm{flex:1;min-width:110px;}
 .fld.f-xs{flex:0 0 75px;}
@@ -102,8 +108,8 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
     box-shadow:0 10px 25px rgba(0,0,0,.12);
 }
 .ac-item{padding:9px 13px;cursor:pointer;font-size:.85rem;color:var(--mid);border-bottom:1px solid #f3f4f6;}
-.ac-item:hover{background:#eff6ff;color:var(--blue);}
-.ac-item.nuevo{color:var(--blue);font-weight:700;background:#f0f9ff;}
+.ac-item:hover{background:#f3f4f6;color:#111;}
+.ac-item.nuevo{color:#374151;font-weight:700;background:#f9fafb;}
 
 /* ── INSUMOS INLINE ── */
 .ins-wrap{padding:14px 18px;}
@@ -116,10 +122,10 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
 .ins-row-header.maq{background:var(--amber-l);color:var(--amber);border:1px solid var(--amber-b);}
 .btn-ai{border:none;border-radius:7px;padding:4px 12px;font-size:.76rem;font-weight:700;
     cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:.2s;}
-.btn-ai.mat{background:var(--blue);color:#fff;}
+.btn-ai.mat{background:#374151;color:#fff;}
 .btn-ai.mo {background:var(--green);color:#fff;}
 .btn-ai.maq{background:var(--amber);color:#fff;}
-.btn-ai:hover{opacity:.85;transform:translateY(-1px);}
+.btn-ai:hover{opacity:.85;}
 .ins-table{width:100%;border-collapse:collapse;margin-bottom:8px;}
 .ins-table th{
     padding:5px 8px;font-size:.66rem;font-weight:700;text-transform:uppercase;
@@ -130,18 +136,18 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
     width:100%;border:1.5px solid var(--line);border-radius:6px;
     padding:5px 7px;font-size:.82rem;background:#fff;color:var(--dark);
 }
-.ins-table input:focus,.ins-table select:focus{border-color:var(--blue);outline:none;}
+.ins-table input:focus,.ins-table select:focus{border-color:#374151;outline:none;}
 .btn-del{background:#fef2f2;color:var(--red);border:1px solid #fecaca;
     border-radius:5px;padding:3px 7px;cursor:pointer;font-size:.78rem;transition:.15s;}
-.btn-del:hover{background:var(--red);color:#fff;}
+.btn-del:hover{background:#b91c1c;color:#fff;}
 
 /* ── P.U. resumen ── */
 .pu-calc{
     display:flex;align-items:center;gap:8px;padding:8px 14px;
-    background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-top:8px;
-    font-size:.82rem;color:var(--green);font-weight:700;
+    background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;margin-top:8px;
+    font-size:.82rem;color:#111;font-weight:700;
 }
-.pu-calc span{color:var(--dark);font-weight:400;}
+.pu-calc span{color:var(--soft);font-weight:400;}
 
 /* ── Toast ── */
 #toast{
@@ -160,7 +166,7 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
         <a href="{{ route('obras.presupuesto', $obra->id) }}" class="btn-back">
             <i class="bi bi-arrow-left"></i> Volver al Presupuesto
         </a>
-        <h1><i class="bi bi-layers me-2" style="color:#60a5fa;"></i>Agregar Renglones al Presupuesto</h1>
+        <h1><i class="bi bi-layers me-2" style="color:#9ca3af;"></i>Agregar Renglones al Presupuesto</h1>
         <p>Obra: <strong style="color:#fff;">{{ $obra->datosDeObra?->nombre }}</strong></p>
     </div>
     <button class="btn-save" onclick="guardarPresupuesto()" id="btnGuardar">
@@ -218,7 +224,7 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
         </div>
         <div style="text-align:right;">
             <p style="margin:0; font-size:0.85rem; color:var(--soft); font-weight:700; text-transform:uppercase;">Total a Agregar</p>
-            <h4 id="tot_final" style="margin:0; font-size:1.5rem; color:var(--blue); font-weight:800;">$0.00</h4>
+            <h4 id="tot_final" style="margin:0; font-size:1.5rem; color:#111; font-weight:800;">$0.00</h4>
         </div>
     </div>
 </div>

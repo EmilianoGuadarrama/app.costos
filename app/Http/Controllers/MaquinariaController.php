@@ -23,7 +23,7 @@ class MaquinariaController extends Controller
     {
         $request->validate([
             'nombre'           => 'required|string|max:255',
-            'id_unidad_medida' => 'required|exists:unidad_medida,id',
+            'id_unidad_medida' => 'required|exists:unidades_medida,id',
             'precio_x_unidad'  => 'required|numeric|min:0',
         ]);
         Maquinaria::create($request->only('nombre','descripcion','id_unidad_medida','precio_x_unidad'));
@@ -42,7 +42,7 @@ class MaquinariaController extends Controller
         $maquinaria = Maquinaria::findOrFail($id);
         $request->validate([
             'nombre'           => 'required|string|max:255',
-            'id_unidad_medida' => 'required|exists:unidad_medida,id',
+            'id_unidad_medida' => 'required|exists:unidades_medida,id',
             'precio_x_unidad'  => 'required|numeric|min:0',
         ]);
         $maquinaria->update($request->only('nombre','descripcion','id_unidad_medida','precio_x_unidad'));
@@ -53,5 +53,29 @@ class MaquinariaController extends Controller
     {
         Maquinaria::findOrFail($id)->delete();
         return redirect()->route('maquinaria.index')->with('success', 'Maquinaria eliminada.');
+    }
+
+    /** POST /api/maquinaria/rapida */
+    public function storeRapida(Request $request)
+    {
+        $request->validate([
+            'nombre'           => 'required|string|max:255',
+            'id_unidad_medida' => 'nullable|exists:unidades_medida,id',
+            'precio_x_unidad'  => 'required|numeric|min:0',
+        ]);
+        $maq = Maquinaria::create([
+            'nombre'           => trim($request->nombre),
+            'descripcion'      => trim($request->descripcion ?? ''),
+            'id_unidad_medida' => $request->id_unidad_medida ?: null,
+            'precio_x_unidad'  => $request->precio_x_unidad,
+        ]);
+        $maq->load('unidadMedida');
+        return response()->json([
+            'id'     => $maq->id,
+            'texto'  => $maq->nombre,
+            'pu'     => (float) $maq->precio_x_unidad,
+            'uni'    => $maq->id_unidad_medida,
+            'uniTxt' => $maq->unidadMedida?->abreviatura ?? '',
+        ]);
     }
 }

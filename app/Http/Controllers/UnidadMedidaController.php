@@ -63,10 +63,14 @@ class UnidadMedidaController extends Controller
         $request->validate([
             'abreviatura' => 'required|string|max:50',
             'nombre'      => 'nullable|string|max:255',
+            'descripcion' => 'nullable|string|max:255',
         ]);
         $um = UnidadMedida::firstOrCreate(
             ['abreviatura' => strtoupper(trim($request->abreviatura))],
-            ['nombre'      => trim($request->nombre ?? $request->abreviatura)]
+            [
+                'nombre'      => trim($request->nombre ?? $request->abreviatura),
+                'descripcion' => $request->descripcion ? trim($request->descripcion) : null
+            ]
         );
         return response()->json(['id' => $um->id, 'abreviatura' => $um->abreviatura, 'texto' => $um->abreviatura.' — '.$um->nombre]);
     }

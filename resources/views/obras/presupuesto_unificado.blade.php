@@ -137,9 +137,16 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
     padding:5px 7px;font-size:.82rem;background:#fff;color:var(--dark);
 }
 .ins-table input:focus,.ins-table select:focus{border-color:#374151;outline:none;}
+.ins-table td .ac-wrap { position:relative; }
+.ins-table td .uni-ac-list, .ins-table td .ac-list { min-width:200px; font-size:.8rem; }
 .btn-del{background:#fef2f2;color:var(--red);border:1px solid #fecaca;
     border-radius:5px;padding:3px 7px;cursor:pointer;font-size:.78rem;transition:.15s;}
 .btn-del:hover{background:#b91c1c;color:#fff;}
+/* Input de unidad en campos de concepto */
+.c-uni-txt { width:100%; box-sizing:border-box; border:1.5px solid var(--line); border-radius:7px; padding:7px 9px; font-size:.85rem; color:var(--dark); background:#fff; transition:.15s; }
+.c-uni-txt:focus { border-color:#374151; outline:none; box-shadow:0 0 0 3px rgba(55,65,81,.06); }
+.i-uni-txt { width:100%; box-sizing:border-box; border:1.5px solid var(--line); border-radius:6px; padding:5px 7px; font-size:.82rem; background:#fff; color:var(--dark); }
+.i-uni-txt:focus { border-color:#374151; outline:none; }
 
 /* ── P.U. resumen ── */
 .pu-calc{
@@ -158,6 +165,40 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
 #toast.ok {background:#059669;color:#fff;}
 #toast.err{background:#dc2626;color:#fff;}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* ── MODAL REGISTRO RÁPIDO ── */
+#modalOverlay {
+    position:fixed;inset:0;z-index:10000;
+    background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;
+}
+#modalOverlay.active{display:flex;}
+#modalBox {
+    background:#fff;border-radius:18px;width:100%;max-width:540px;
+    padding:28px 32px;box-shadow:0 25px 60px rgba(0,0,0,.3);
+    max-height:90vh;overflow-y:auto;
+    animation:modalIn .2s ease;
+}
+@keyframes modalIn{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-title{font-size:1.1rem;font-weight:800;color:#111;margin:0 0 4px;display:flex;align-items:center;gap:8px;}
+.modal-sub{font-size:.82rem;color:#6b7280;margin:0 0 20px;}
+.modal-close{float:right;background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9ca3af;line-height:1;}
+.modal-close:hover{color:#111;}
+.m-field{margin-bottom:14px;}
+.m-label{font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:5px;}
+.m-label span{color:#dc2626;}
+.m-ctrl{width:100%;padding:.55rem .85rem;box-sizing:border-box;border:1.5px solid #e5e7eb;border-radius:9px;font-size:.86rem;background:#fff;color:#111;transition:.2s;}
+.m-ctrl:focus{border-color:#374151;outline:none;box-shadow:0 0 0 3px rgba(55,65,81,.08);}
+.m-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.m-hint{font-size:.72rem;color:#9ca3af;margin-top:3px;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid #f3f4f6;}
+.btn-modal-save{background:#111827;color:#fff;border:none;border-radius:9px;padding:.65rem 1.6rem;font-size:.88rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:.2s;}
+.btn-modal-save:hover{background:#374151;}
+.btn-modal-save:disabled{opacity:.6;cursor:not-allowed;}
+.btn-modal-cancel{background:transparent;color:#6b7280;border:1.5px solid #e5e7eb;border-radius:9px;padding:.65rem 1.2rem;font-size:.88rem;font-weight:600;cursor:pointer;transition:.2s;}
+.btn-modal-cancel:hover{border-color:#111;color:#111;}
+.ac-item.nuevo-full{color:#059669;font-weight:700;background:#f0fdf4;border-top:1px solid #bbf7d0;}
+.ac-item.nuevo-full:hover{background:#dcfce7;}
 </style>
 
 {{-- HEADER --}}
@@ -225,6 +266,25 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
         <div style="text-align:right;">
             <p style="margin:0; font-size:0.85rem; color:var(--soft); font-weight:700; text-transform:uppercase;">Total a Agregar</p>
             <h4 id="tot_final" style="margin:0; font-size:1.5rem; color:#111; font-weight:800;">$0.00</h4>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL REGISTRO RÁPIDO ──────────────────────────────────────────── --}}
+<div id="modalOverlay" onclick="if(event.target===this)cerrarModal()">
+    <div id="modalBox">
+        <p class="modal-title">
+            <i id="modalIcon" class="bi bi-plus-circle"></i>
+            <span id="modalTitulo">Registrar</span>
+            <button class="modal-close ms-auto" onclick="cerrarModal()">&times;</button>
+        </p>
+        <p class="modal-sub" id="modalSub"></p>
+        <div id="modalBody"></div>
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="cerrarModal()"><i class="bi bi-x-lg me-1"></i>Cancelar</button>
+            <button class="btn-modal-save" id="btnModalGuardar" onclick="guardarModal()">
+                <i class="bi bi-check-lg me-1"></i>Guardar y usar
+            </button>
         </div>
     </div>
 </div>
@@ -298,6 +358,15 @@ const unidades  = @json($unidades);
 const niveles   = @json($niveles);
 const storeUrl  = '{{ route("obras.presupuesto.unificado.store", $obra->id) }}';
 const csrfToken = '{{ csrf_token() }}';
+window._csrfToken = csrfToken;
+window._apiUrls = {
+    unidad:    '{{ route("api.unidades.storeRapida") }}',
+    area:      '{{ route("api.areas.storeRapida") }}',
+    bloque:    '{{ route("api.bloques.storeRapida") }}',
+    material:  '{{ route("api.materiales.storeRapida") }}',
+    mano_obra: '{{ route("api.mano_obra.storeRapida") }}',
+    maquinaria:'{{ route("api.maquinaria.storeRapida") }}'
+};
 
 let conceptIndex = 0;
 
@@ -305,6 +374,75 @@ let conceptIndex = 0;
 function optsUnidades(selId = '') {
     return `<option value="">N/A</option>` +
         unidades.map(u => `<option value="${u.id}" ${u.id == selId ? 'selected' : ''}>${u.abreviatura}</option>`).join('');
+}
+
+/* ─────────── AUTOCOMPLETE UNIDAD DE MEDIDA ─────────── */
+// catUnidades: array local en memoria, se puede agregar al vuelo
+let catUnidades = unidades.map(u => ({ id: u.id, texto: u.abreviatura, nombre: u.nombre ?? u.abreviatura }));
+
+
+// Configurar autocomplete para campo de Unidad de Medida
+function setupUniAC(inp, idFld, onSelect) {
+    let acList = inp.parentElement.querySelector('.uni-ac-list');
+    if (!acList) {
+        acList = document.createElement('div');
+        acList.className = 'ac-list uni-ac-list';
+        inp.parentElement.appendChild(acList);
+    }
+
+    inp.addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        const filtered = catUnidades.filter(u =>
+            u.texto.toLowerCase().includes(q) || u.nombre.toLowerCase().includes(q)
+        ).slice(0, 15);
+
+        acList.innerHTML = '';
+
+        filtered.forEach(u => {
+            const div = document.createElement('div');
+            div.className = 'ac-item';
+            div.textContent = u.texto + (u.nombre !== u.texto ? ' — ' + u.nombre : '');
+            div.onclick = () => {
+                inp.value = u.texto;
+                idFld.value = u.id;
+                acList.style.display = 'none';
+                if (onSelect) onSelect(u);
+            };
+            acList.appendChild(div);
+        });
+
+        // Opción para registrar nueva unidad
+        if (q.length >= 1) {
+            const divNew = document.createElement('div');
+            divNew.className = 'ac-item nuevo-full';
+            divNew.innerHTML = `<i class="bi bi-plus-circle-fill me-1"></i>Registrar "<strong>${escHtml(this.value)}</strong>" como nueva unidad de medida`;
+            const valCapturado = this.value.trim();
+            divNew.onclick = () => {
+                acList.style.display = 'none';
+                if (typeof abrirModal === 'function') {
+                    abrirModal('unidad', valCapturado, (u) => {
+                        inp.value = u.texto;
+                        idFld.value = u.id;
+                        if (onSelect) onSelect(u);
+                    });
+                }
+            };
+            acList.appendChild(divNew);
+        }
+
+        acList.style.display = (q.length > 0 || filtered.length > 0) ? 'block' : 'none';
+    });
+
+    inp.addEventListener('focus', function() {
+        // Mostrar todas las unidades al enfocar si el campo está vacío
+        if (!this.value.trim()) {
+            inp.dispatchEvent(new Event('input'));
+        }
+    });
+
+    document.addEventListener('click', e => {
+        if (!inp.contains(e.target) && !acList.contains(e.target)) acList.style.display = 'none';
+    });
 }
 function optsBloques() {
     return `<option value="">N/A</option>` +
@@ -372,7 +510,10 @@ function addConcepto() {
             </div>
             <div class="fld f-sm">
                 <label>Unidad</label>
-                <select class="c-uni">${optsUnidades()}</select>
+                <div class="ac-wrap" style="position:relative;">
+                    <input type="text" class="c-uni-txt" id="c_uni_txt_${ci}" placeholder="m², pza, kg…" autocomplete="off">
+                    <input type="hidden" class="c-uni" id="c_uni_id_${ci}">
+                </div>
             </div>
             <div class="fld f-sm">
                 <label>Nivel / Planta</label>
@@ -472,9 +613,27 @@ function addConcepto() {
     const card = document.getElementById(`card_c_${ci}`);
     if (nVal) card.querySelector('.c-nivel').value  = nVal;
 
-    setupAC(document.getElementById(`c_txt_${ci}`), document.getElementById(`c_id_${ci}`), document.getElementById(`c_list_${ci}`), catConceptos, true, null, card.querySelector('.c-uni'), ci);
-    setupAC(document.getElementById(`b_txt_${ci}`), document.getElementById(`b_id_${ci}`), document.getElementById(`b_list_${ci}`), catBloques, false, null, null, null);
-    setupAC(document.getElementById(`a_txt_${ci}`), document.getElementById(`a_id_${ci}`), document.getElementById(`a_list_${ci}`), catAreas, false, null, null, null);
+    setupAC(document.getElementById(`c_txt_${ci}`), document.getElementById(`c_id_${ci}`), document.getElementById(`c_list_${ci}`), catConceptos, true, null, null, ci);
+    setupUniAC(document.getElementById(`c_uni_txt_${ci}`), document.getElementById(`c_uni_id_${ci}`));
+    setupAC(document.getElementById(`b_txt_${ci}`), document.getElementById(`b_id_${ci}`), document.getElementById(`b_list_${ci}`), catBloques, false, null, null, null, null, null, 'bloque');
+    setupAC(document.getElementById(`a_txt_${ci}`), document.getElementById(`a_id_${ci}`), document.getElementById(`a_list_${ci}`), catAreas, false, null, null, null, null, null, 'area');
+
+    // Cuando se selecciona un concepto del catálogo, auto-llenar la unidad
+    const cTxtInp = document.getElementById(`c_txt_${ci}`);
+    const cIdFld  = document.getElementById(`c_id_${ci}`);
+    const cUniTxt = document.getElementById(`c_uni_txt_${ci}`);
+    const cUniId  = document.getElementById(`c_uni_id_${ci}`);
+    // La función setupAC original llena el uniFld, pero ahora usamos texto+hidden
+    // Sobreescribir onclick dentro de setupAC no es viable; en su lugar escuchamos
+    // el input oculto c_id para detectar cuando cambia el concepto
+    const origSetup = cTxtInp._acSetup;
+    cTxtInp.addEventListener('_conceptoSeleccionado', (e) => {
+        const c = e.detail;
+        if (c.uni) {
+            const u = catUnidades.find(u => u.id == c.uni);
+            if (u) { cUniTxt.value = u.texto; cUniId.value = u.id; }
+        }
+    });
 
     // Update global totals when quantities change
     card.querySelector('.c-cant').addEventListener('input', updateGlobalTotals);
@@ -505,7 +664,12 @@ function addInsumo(ci, tipo, prefill = null) {
                 <div class="ac-list" id="i_list_${ii}"></div>
             </div>
         </td>
-        <td><select class="i-uni" id="i_uni_${ii}">${optsUnidades(uniId)}</select></td>
+        <td>
+            <div class="ac-wrap" style="position:relative;">
+                <input type="text" class="i-uni-txt" id="i_uni_txt_${ii}" placeholder="Unidad…" autocomplete="off" style="width:100%;">
+                <input type="hidden" class="i-uni" id="i_uni_hid_${ii}" value="${uniId}">
+            </div>
+        </td>
         <td><input type="number" class="i-cant" value="${cant}" min="0.001" step="0.001" oninput="updateSubtotal('${ii}',${ci})"></td>
         <td><input type="number" class="i-pu" value="${puVal}" min="0" step="0.01" oninput="updateSubtotal('${ii}',${ci})"></td>
         <td><span class="i-sub" style="font-size:.82rem;font-weight:700;color:var(--mid);">$${(cant*puVal).toFixed(2)}</span></td>
@@ -514,15 +678,39 @@ function addInsumo(ci, tipo, prefill = null) {
 
     tbody.insertAdjacentHTML('beforeend', row);
 
+    // Si hay unidad preseleccionada, mostrar el texto
+    const iUniTxt = document.getElementById(`i_uni_txt_${ii}`);
+    const iUniHid = document.getElementById(`i_uni_hid_${ii}`);
+    if (iUniTxt && uniId) {
+        const u = catUnidades.find(u => u.id == uniId);
+        if (u) iUniTxt.value = u.texto;
+    }
+    setupUniAC(iUniTxt, iUniHid);
+
+    // Detectar tipo de entidad para el modal
+    const tipoInsumo = tipo;
     setupAC(
         document.getElementById(`i_txt_${ii}`),
         document.getElementById(`i_id_${ii}`),
         document.getElementById(`i_list_${ii}`),
         cat, false,
         document.getElementById(`row_${ii}`).querySelector('.i-pu'),
-        document.getElementById(`i_uni_${ii}`),
-        null, ii, ci
+        null,
+        null, ii, ci, tipoInsumo
     );
+
+    // Al seleccionar un insumo del catálogo, auto-llenar la unidad del insumo
+    const iTxtInp = document.getElementById(`i_txt_${ii}`);
+    const iIdFld  = document.getElementById(`i_id_${ii}`);
+    iTxtInp.addEventListener('input', function() {
+        // La función setupAC llena i-pu; aquí también llenamos la unidad
+        const q = this.value.toLowerCase().trim();
+        const found = cat.find(c => c.texto.toLowerCase() === q);
+        if (found && found.uni) {
+            const u = catUnidades.find(u => u.id == found.uni);
+            if (u && iUniTxt) { iUniTxt.value = u.texto; iUniHid.value = u.id; }
+        }
+    });
 }
 
 function updateSubtotal(ii, ci) {
@@ -559,11 +747,11 @@ function escHtml(str) {
     return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ─────────── AUTOCOMPLETE ─────────── */
-function setupAC(inp, idFld, list, catArray, isConcept, puFld, uniFld, ci, ii, cardCi) {
+/* ─────────── AUTOCOMPLETE GENÉRICO ─────────── */
+function setupAC(inp, idFld, list, catArray, isConcept, puFld, uniFld, ci, ii, cardCi, tipoEntidad) {
     inp.addEventListener('input', function() {
-        const q        = this.value.toLowerCase().trim();
-        const filtered = catArray.filter(c => c.texto.toLowerCase().includes(q)).slice(0, 12);
+        const q        = String(this.value).toLowerCase().trim();
+        const filtered = catArray.filter(c => String(c.texto).toLowerCase().includes(q)).slice(0, 12);
         list.innerHTML = '';
 
         filtered.forEach(c => {
@@ -574,29 +762,80 @@ function setupAC(inp, idFld, list, catArray, isConcept, puFld, uniFld, ci, ii, c
                 inp.value   = c.texto;
                 idFld.value = c.id;
                 if (puFld)  puFld.value  = c.pu ?? 0;
-                if (uniFld) uniFld.value = c.uni ?? '';
+                // uniFld ya no es select, se maneja con setupUniAC + evento
                 list.style.display = 'none';
 
                 // Si es un concepto, cargar su composición automáticamente
                 if (isConcept && ci != null) {
                     cargarComposicion(ci, c);
+                    // Propagar evento para auto-llenar unidad
+                    const evt = new CustomEvent('_conceptoSeleccionado', { detail: c });
+                    inp.dispatchEvent(evt);
+                    // Llenar directamente si el campo de unidad existe
+                    if (c.uni) {
+                        const uTxt = document.getElementById(`c_uni_txt_${ci}`);
+                        const uId  = document.getElementById(`c_uni_id_${ci}`);
+                        const uObj = catUnidades.find(u => u.id == c.uni);
+                        if (uTxt && uObj) { uTxt.value = uObj.texto; uId.value = uObj.id; }
+                    }
                 }
 
-                // Si es insumo, actualizar subtotal
+                // Si es insumo, actualizar subtotal y unidad
                 if (ii != null && cardCi != null) {
                     updateSubtotal(ii, cardCi);
+                    // Auto-llenar unidad del insumo
+                    if (c.uni) {
+                        const uTxt = document.getElementById(`i_uni_txt_${ii}`);
+                        const uHid = document.getElementById(`i_uni_hid_${ii}`);
+                        const uObj = catUnidades.find(u => u.id == c.uni);
+                        if (uTxt && uObj) { uTxt.value = uObj.texto; uHid.value = uObj.id; }
+                    }
                 }
             };
             list.appendChild(div);
         });
 
-        const divNuevo = document.createElement('div');
-        divNuevo.className   = 'ac-item nuevo';
-        divNuevo.innerHTML   = '<i class="bi bi-plus-circle me-1"></i> Registrar como nuevo';
-        divNuevo.onclick = () => { idFld.value = ''; list.style.display = 'none'; };
-        list.appendChild(divNuevo);
+        // Opción "Registrar como nuevo" solo si no hay coincidencia exacta
+                // Opcion "Registrar como nuevo" - abre modal completo si hay tipo de entidad
+        if (q.length > 0) {
+            const divNuevo = document.createElement('div');
+            if (tipoEntidad && typeof abrirModal === 'function') {
+                divNuevo.className = 'ac-item nuevo-full';
+                const _labelTipo = { unidad:'unidad de medida', area:'area', bloque:'bloque', material:'material', mano_obra:'mano de obra', maquinaria:'maquinaria/equipo' }[tipoEntidad] || tipoEntidad;
+                divNuevo.innerHTML = '<i class="bi bi-plus-circle-fill me-1"></i>Registrar "<strong>' + escHtml(q) + '</strong>" como nuevo ' + _labelTipo;
+                const _valCapturado = q;
+                divNuevo.onclick = () => {
+                    list.style.display = 'none';
+                    abrirModal(tipoEntidad, _valCapturado, (resultado) => {
+                        inp.value   = resultado.texto;
+                        idFld.value = resultado.id;
+                        if (puFld && resultado.pu != null) puFld.value = resultado.pu;
+                        if (ii != null) {
+                            const _uTxt = document.getElementById('i_uni_txt_' + ii);
+                            const _uHid = document.getElementById('i_uni_hid_' + ii);
+                            if (_uTxt && resultado.uniTxt) { _uTxt.value = resultado.uniTxt; _uHid.value = resultado.uni; }
+                            if (cardCi != null) updateSubtotal(ii, cardCi);
+                        }
+                        if (ci != null) {
+                            const _cUTxt = document.getElementById('c_uni_txt_' + ci);
+                            const _cUId  = document.getElementById('c_uni_id_' + ci);
+                            if (_cUTxt && resultado.uniTxt) { _cUTxt.value = resultado.uniTxt; _cUId.value = resultado.uni; }
+                        }
+                    });
+                };
+            } else {
+                divNuevo.className = 'ac-item nuevo';
+                divNuevo.innerHTML = '<i class="bi bi-pencil-square me-1"></i> Usar "' + escHtml(q) + '" como concepto nuevo';
+                divNuevo.onclick = () => { idFld.value = ''; list.style.display = 'none'; };
+            }
+            list.appendChild(divNuevo);
+        }
 
         list.style.display = q.length > 0 ? 'block' : 'none';
+    });
+
+    inp.addEventListener('focus', function() {
+        if (!this.value.trim()) inp.dispatchEvent(new Event('input'));
     });
 
     document.addEventListener('click', e => {
@@ -694,7 +933,7 @@ async function guardarPresupuesto() {
                 id_concepto: cId,
                 descripcion_nueva: cId ? '' : cTxt,
                 descripcion: cTxt,
-                id_unidad_medida: cUni,
+                id_unidad_medida: card.querySelector('.c-uni')?.value || null,
                 id_nivel: cNivel,
                 id_bloque: cBloque,
                 bloque_nuevo: cBloque ? '' : cBloqueTxt,
@@ -913,5 +1152,313 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(aplicarGlobalesAConceptos, 150);
     });
 });
+
+/* =====================================================
+   SISTEMA DE MODAL REGISTRO RAPIDO
+===================================================== */
+
+let modalState = { tipo: null, callback: null, valorInicial: "" };
+
+function getModalConfig() {
+    return {
+        unidad: {
+            titulo: "Nueva Unidad de Medida",
+            icono: "bi-rulers",
+            sub: "Registra la unidad de medida que necesitas usar.",
+            url: window._apiUrls.unidad,
+            campos: function() { return `
+                <div class="m-grid-2">
+                    <div class="m-field">
+                        <label class="m-label">Abreviatura <span>*</span></label>
+                        <input class="m-ctrl" id="mf_abreviatura" placeholder="Ej. m2, pza, kg" maxlength="50" required>
+                        <p class="m-hint">Simbolo corto que aparecera en los campos.</p>
+                    </div>
+                    <div class="m-field">
+                        <label class="m-label">Nombre completo <span>*</span></label>
+                        <input class="m-ctrl" id="mf_nombre" placeholder="Ej. Metro cuadrado, Pieza" maxlength="255" required>
+                    </div>
+                </div>
+                <div class="m-field">
+                    <label class="m-label">Descripcion</label>
+                    <input class="m-ctrl" id="mf_descripcion" placeholder="Detalles o especificaciones adicionales" maxlength="255">
+                </div>`; },
+            payload: function() { return {
+                abreviatura: document.getElementById("mf_abreviatura").value.trim(),
+                nombre:      document.getElementById("mf_nombre").value.trim(),
+                descripcion: (document.getElementById("mf_descripcion")||{}).value || ""
+            }; },
+            rellenar: function(d) { return { id: d.id, texto: d.abreviatura, nombre: d.texto || d.abreviatura }; }
+        },
+        area: {
+            titulo: "Nueva Area",
+            icono: "bi-grid-3x3-gap",
+            sub: "Define un area o partida para clasificar los conceptos.",
+            url: window._apiUrls.area,
+            campos: function() { return `
+                <div class="m-grid-2">
+                    <div class="m-field">
+                        <label class="m-label">Abreviatura <span>*</span></label>
+                        <input class="m-ctrl" id="mf_abreviatura" placeholder="Ej. INST, EST, ARQ" maxlength="50" required>
+                    </div>
+                    <div class="m-field">
+                        <label class="m-label">Descripcion <span>*</span></label>
+                        <input class="m-ctrl" id="mf_descripcion" placeholder="Ej. Instalaciones electricas" maxlength="255" required>
+                    </div>
+                </div>`; },
+            payload: function() { return {
+                abreviatura: document.getElementById("mf_abreviatura").value.trim(),
+                descripcion: document.getElementById("mf_descripcion").value.trim()
+            }; },
+            rellenar: function(d) { return { id: d.id, texto: d.abreviatura + " - " + d.descripcion }; }
+        },
+        bloque: {
+            titulo: "Nuevo Bloque",
+            icono: "bi-columns-gap",
+            sub: "Los bloques agrupan los conceptos dentro del presupuesto.",
+            url: window._apiUrls.bloque,
+            campos: function() { return `
+                <div class="m-field">
+                    <label class="m-label">Descripcion del Bloque <span>*</span></label>
+                    <input class="m-ctrl" id="mf_descripcion" placeholder="Ej. Preliminares, Estructura, Acabados" maxlength="255" required>
+                    <p class="m-hint">Escribe el nombre del bloque tal como aparecera en el presupuesto.</p>
+                </div>`; },
+            payload: function() { return { descripcion: document.getElementById("mf_descripcion").value.trim() }; },
+            rellenar: function(d) { return { id: d.id, texto: d.descripcion }; }
+        },
+        material: {
+            titulo: "Nuevo Material",
+            icono: "bi-box-seam",
+            sub: "Registra el material con su precio unitario.",
+            url: window._apiUrls.material,
+            campos: function() { return `
+                <div class="m-field">
+                    <label class="m-label">Nombre del material <span>*</span></label>
+                    <input class="m-ctrl" id="mf_nombre" placeholder="Ej. Varilla de acero 3/8" maxlength="255" required>
+                </div>
+                <div class="m-grid-2">
+                    <div class="m-field">
+                        <label class="m-label">Descripcion</label>
+                        <input class="m-ctrl" id="mf_descripcion" placeholder="Detalles adicionales">
+                    </div>
+                    <div class="m-field">
+                        <label class="m-label">Marca</label>
+                        <input class="m-ctrl" id="mf_marca" placeholder="Ej. AHMSA, Cemex">
+                    </div>
+                </div>
+                <div class="m-grid-2">
+                    <div class="m-field">
+                        <label class="m-label">Unidad de medida</label>
+                        <div style="position:relative;">
+                            <input class="m-ctrl" id="mf_uni_txt" placeholder="Buscar unidad..." autocomplete="off">
+                            <input type="hidden" id="mf_uni_id">
+                            <div class="ac-list" id="mf_uni_list" style="z-index:10001;"></div>
+                        </div>
+                    </div>
+                    <div class="m-field">
+                        <label class="m-label">Precio por unidad ($) <span>*</span></label>
+                        <input class="m-ctrl" id="mf_precio" type="number" min="0" step="0.01" placeholder="0.00" required>
+                    </div>
+                </div>`; },
+            payload: function() { return {
+                nombre:           document.getElementById("mf_nombre").value.trim(),
+                descripcion:      (document.getElementById("mf_descripcion")||{}).value || "",
+                marca:            (document.getElementById("mf_marca")||{}).value || "",
+                id_unidad_medida: (document.getElementById("mf_uni_id")||{}).value || null,
+                precio_x_unidad:  document.getElementById("mf_precio").value
+            }; },
+            rellenar: function(d) { return { id: d.id, texto: d.texto, pu: d.pu, uni: d.uni, uniTxt: d.uniTxt }; }
+        },
+        mano_obra: {
+            titulo: "Nueva Mano de Obra",
+            icono: "bi-person-lines-fill",
+            sub: "Registra la categoria de mano de obra con su precio por unidad.",
+            url: window._apiUrls.mano_obra,
+            campos: function() { return `
+                <div class="m-field">
+                    <label class="m-label">Nombre / Categoria <span>*</span></label>
+                    <input class="m-ctrl" id="mf_nombre" placeholder="Ej. Albanil, Peon, Oficial" maxlength="255" required>
+                </div>
+                <div class="m-grid-2">
+                    <div class="m-field">
+                        <label class="m-label">Unidad de medida</label>
+                        <div style="position:relative;">
+                            <input class="m-ctrl" id="mf_uni_txt" placeholder="Buscar unidad..." autocomplete="off">
+                            <input type="hidden" id="mf_uni_id">
+                            <div class="ac-list" id="mf_uni_list" style="z-index:10001;"></div>
+                        </div>
+                    </div>
+                    <div class="m-field">
+                        <label class="m-label">Precio por unidad ($) <span>*</span></label>
+                        <input class="m-ctrl" id="mf_precio" type="number" min="0" step="0.01" placeholder="0.00" required>
+                    </div>
+                </div>`; },
+            payload: function() { return {
+                nombre:           document.getElementById("mf_nombre").value.trim(),
+                id_unidad_medida: (document.getElementById("mf_uni_id")||{}).value || null,
+                precio_x_unidad:  document.getElementById("mf_precio").value
+            }; },
+            rellenar: function(d) { return { id: d.id, texto: d.texto, pu: d.pu, uni: d.uni, uniTxt: d.uniTxt }; }
+        },
+        maquinaria: {
+            titulo: "Nueva Maquinaria / Equipo",
+            icono: "bi-truck",
+            sub: "Registra la maquinaria o equipo con su costo por unidad.",
+            url: window._apiUrls.maquinaria,
+            campos: function() { return `
+                <div class="m-field">
+                    <label class="m-label">Nombre del equipo <span>*</span></label>
+                    <input class="m-ctrl" id="mf_nombre" placeholder="Ej. Retroexcavadora, Vibrador" maxlength="255" required>
+                </div>
+                <div class="m-field">
+                    <label class="m-label">Descripcion</label>
+                    <input class="m-ctrl" id="mf_descripcion" placeholder="Modelo, capacidad u otros datos">
+                </div>
+                <div class="m-grid-2">
+                    <div class="m-field">
+                        <label class="m-label">Unidad de medida</label>
+                        <div style="position:relative;">
+                            <input class="m-ctrl" id="mf_uni_txt" placeholder="Buscar unidad..." autocomplete="off">
+                            <input type="hidden" id="mf_uni_id">
+                            <div class="ac-list" id="mf_uni_list" style="z-index:10001;"></div>
+                        </div>
+                    </div>
+                    <div class="m-field">
+                        <label class="m-label">Precio por unidad ($) <span>*</span></label>
+                        <input class="m-ctrl" id="mf_precio" type="number" min="0" step="0.01" placeholder="0.00" required>
+                    </div>
+                </div>`; },
+            payload: function() { return {
+                nombre:           document.getElementById("mf_nombre").value.trim(),
+                descripcion:      (document.getElementById("mf_descripcion")||{}).value || "",
+                id_unidad_medida: (document.getElementById("mf_uni_id")||{}).value || null,
+                precio_x_unidad:  document.getElementById("mf_precio").value
+            }; },
+            rellenar: function(d) { return { id: d.id, texto: d.texto, pu: d.pu, uni: d.uni, uniTxt: d.uniTxt }; }
+        }
+    };
+}
+
+function abrirModal(tipo, valorInicial, callback) {
+    const modalConfig = getModalConfig();
+    const cfg = modalConfig[tipo];
+    if (!cfg) return;
+
+    modalState = { tipo: tipo, callback: callback, valorInicial: valorInicial };
+
+    document.getElementById("modalIcon").className     = "bi " + cfg.icono;
+    document.getElementById("modalTitulo").textContent = cfg.titulo;
+    document.getElementById("modalSub").textContent    = cfg.sub;
+    document.getElementById("modalBody").innerHTML     = cfg.campos();
+    document.getElementById("btnModalGuardar").disabled = false;
+    document.getElementById("btnModalGuardar").innerHTML = "<i class=\"bi bi-check-lg me-1\"></i>Guardar y usar";
+
+    const primerCampo = document.getElementById("mf_nombre") ||
+                        document.getElementById("mf_abreviatura") ||
+                        document.getElementById("mf_descripcion");
+    if (primerCampo && valorInicial) primerCampo.value = valorInicial;
+
+    const mfUniTxt = document.getElementById("mf_uni_txt");
+    const mfUniId  = document.getElementById("mf_uni_id");
+    if (mfUniTxt && mfUniId) {
+        setupUniAC(mfUniTxt, mfUniId);
+    }
+
+    document.getElementById("modalBox").onkeydown = function(e) {
+        if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
+            e.preventDefault();
+            guardarModal();
+        }
+        if (e.key === "Escape") cerrarModal();
+    };
+
+    document.getElementById("modalOverlay").classList.add("active");
+    setTimeout(function() { if (primerCampo) primerCampo.focus(); }, 150);
+}
+
+function cerrarModal() {
+    document.getElementById("modalOverlay").classList.remove("active");
+    modalState = { tipo: null, callback: null, valorInicial: "" };
+}
+
+async function guardarModal() {
+    const modalConfig = getModalConfig();
+    const cfg = modalConfig[modalState.tipo];
+    if (!cfg) return;
+
+    const btn = document.getElementById("btnModalGuardar");
+    btn.disabled = true;
+    btn.innerHTML = "<i class=\"bi bi-arrow-repeat\" style=\"animation:spin 1s linear infinite;\"></i> Guardando...";
+
+    try {
+        const payload = cfg.payload();
+        const required = document.querySelectorAll("#modalBody .m-ctrl[required]");
+        let valid = true;
+        let focusEl = null;
+        required.forEach(function(el) {
+            if (!el.value.trim()) {
+                el.style.borderColor = "#dc2626";
+                if (!focusEl) focusEl = el;
+                valid = false;
+            } else {
+                el.style.borderColor = "";
+            }
+        });
+        if (!valid) {
+            if (focusEl) focusEl.focus();
+            btn.disabled = false;
+            btn.innerHTML = "<i class=\"bi bi-check-lg me-1\"></i>Guardar y usar";
+            return;
+        }
+
+        const resp = await fetch(cfg.url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": window._csrfToken,
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await resp.json();
+        if (!resp.ok) {
+            const msg = data.errors ? Object.values(data.errors).flat().join("\n") : (data.message || "Error al guardar");
+            throw new Error(msg);
+        }
+
+        const resultado = cfg.rellenar(data);
+        const tipo = modalState.tipo;
+
+        if (tipo === "unidad" && typeof catUnidades !== "undefined") {
+            if (!catUnidades.find(function(u) { return u.id == resultado.id; }))
+                catUnidades.push({ id: resultado.id, texto: resultado.texto, nombre: resultado.nombre || resultado.texto });
+        } else if (tipo === "area" && typeof catAreas !== "undefined") {
+            if (!catAreas.find(function(a) { return a.id == resultado.id; }))
+                catAreas.push({ id: resultado.id, texto: resultado.texto });
+        } else if (tipo === "bloque" && typeof catBloques !== "undefined") {
+            if (!catBloques.find(function(b) { return b.id == resultado.id; }))
+                catBloques.push({ id: resultado.id, texto: resultado.texto });
+        } else if (tipo === "material" && typeof catMateriales !== "undefined") {
+            if (!catMateriales.find(function(m) { return m.id == resultado.id; }))
+                catMateriales.push({ id: resultado.id, texto: resultado.texto, pu: resultado.pu, uni: resultado.uni, uniTxt: resultado.uniTxt });
+        } else if (tipo === "mano_obra" && typeof catManoObra !== "undefined") {
+            if (!catManoObra.find(function(m) { return m.id == resultado.id; }))
+                catManoObra.push({ id: resultado.id, texto: resultado.texto, pu: resultado.pu, uni: resultado.uni, uniTxt: resultado.uniTxt });
+        } else if (tipo === "maquinaria" && typeof catMaquinaria !== "undefined") {
+            if (!catMaquinaria.find(function(m) { return m.id == resultado.id; }))
+                catMaquinaria.push({ id: resultado.id, texto: resultado.texto, pu: resultado.pu, uni: resultado.uni, uniTxt: resultado.uniTxt });
+        }
+
+        showToast("Registrado: " + resultado.texto, "ok");
+        const cb = modalState.callback;
+        cerrarModal();
+        if (cb) cb(resultado);
+
+    } catch(e) {
+        showToast("Error: " + e.message, "err");
+        btn.disabled = false;
+        btn.innerHTML = "<i class=\"bi bi-check-lg me-1\"></i>Guardar y usar";
+    }
+}
 </script>
 @endsection

@@ -222,7 +222,8 @@ label.fl span { color: #dc2626; margin-left: 2px; }
                 <div>
                     <label class="fl">Buscar cliente existente</label>
                     <div class="ac-wrap">
-                        <input type="text" id="cliente_txt" class="fc" placeholder="Escribir nombre del cliente…" autocomplete="off">
+                        <input type="text" id="cliente_txt" class="fc" placeholder="Escribir nombre del cliente…" autocomplete="off"
+                               value="{{ old('cliente_nuevo_nombre') ? old('cliente_nuevo_nombre') : (old('id_cliente') ? '' : '') }}">
                         <div class="ac-list" id="cliente_list"></div>
                     </div>
                     <input type="hidden" name="id_cliente" id="id_cliente_hid" value="{{ old('id_cliente') }}">
@@ -237,11 +238,11 @@ label.fl span { color: #dc2626; margin-left: 2px; }
                         <div class="fg-2" style="margin-bottom:10px;">
                             <div>
                                 <label class="fl">Nombre completo *</label>
-                                <input type="text" name="cliente_nuevo_nombre" id="clienteNuevoNombre" class="fc" placeholder="Nombre del cliente">
+                                <input type="text" name="cliente_nuevo_nombre" id="clienteNuevoNombre" class="fc" placeholder="Nombre del cliente" value="{{ old('cliente_nuevo_nombre') }}">
                             </div>
                             <div>
                                 <label class="fl">Teléfono</label>
-                                <input type="text" name="cliente_nuevo_tel" class="fc" placeholder="Ej. 55 1234 5678">
+                                <input type="text" name="cliente_nuevo_tel" class="fc" placeholder="Ej. 55 1234 5678" value="{{ old('cliente_nuevo_tel') }}">
                             </div>
                         </div>
                         <div class="fg-2">
@@ -479,8 +480,21 @@ document.addEventListener('click', e => {
     if(!e.target.closest('.ac-wrap')) clienteList.style.display='none';
 });
 
+// ── RESTAURAR PANEL CLIENTE NUEVO SI HUBO ERROR DE VALIDACIÓN ───────────────
+@if(old('cliente_nuevo_nombre'))
+// Si venía registrando un cliente nuevo, reabrir el panel
+clientePanel.style.display = 'block';
+clienteInput.value = '{{ old('cliente_nuevo_nombre') }}';
+@endif
+
 // ── NIVELES ────────────────────────────────────────────────────────────────
 let nivelIdx = 0;
+
+function nombreNivelPorIndice(i) {
+    if (i === 0) return 'Planta Baja';
+    if (i === 1) return 'Nivel 1';
+    return 'Nivel ' + i;
+}
 
 function agregarNivel(desc = '', m2 = '') {
     const cont  = document.getElementById('nivelesContainer');
@@ -506,8 +520,53 @@ function agregarNivel(desc = '', m2 = '') {
     cont.appendChild(div);
 }
 
-agregarNivel('Planta Baja');
-document.getElementById('btnAddNivel').addEventListener('click', () => agregarNivel());
+// Sincronizar filas de niveles según el número indicado
+function sincronizarNumNiveles() {
+    const numInput = document.getElementById('num_niveles');
+    const num = parseInt(numInput.value) || 1;
+    if (num < 1 || num > 50) return; // guardar rango razonable
+
+    const cont = document.getElementById('nivelesContainer');
+    const filas = cont.querySelectorAll('.nivel-row');
+    const actual = filas.length;
+
+    if (num > actual) {
+        // Agregar las que faltan
+        for (let i = actual; i < num; i++) {
+            agregarNivel(nombreNivelPorIndice(i));
+        }
+    } else if (num < actual) {
+        // Eliminar las sobrantes (desde el final)
+        const todas = cont.querySelectorAll('.nivel-row');
+        for (let i = actual - 1; i >= num; i--) {
+            todas[i].remove();
+        }
+    }
+}
+
+// Inicializar niveles al cargar la página
+@php
+$nivelesOld = old('niveles', []);
+$numNivelesOld = old('num_niveles', 1);
+@endphp
+const nivelesOld = @json(array_values($nivelesOld));
+const numNivelesInicial = {{ (int)$numNivelesOld }};
+
+if (nivelesOld.length > 0) {
+    // Restaurar los niveles que ya había llenado el usuario
+    nivelesOld.forEach(n => agregarNivel(n.descripcion || '', n.m2 || ''));
+} else {
+    // Generar niveles vacíos según el número indicado
+    for (let i = 0; i < numNivelesInicial; i++) {
+        agregarNivel(nombreNivelPorIndice(i));
+    }
+}
+
+document.getElementById('btnAddNivel').addEventListener('click', () => {
+    const cont = document.getElementById('nivelesContainer');
+    const i = cont.querySelectorAll('.nivel-row').length;
+    agregarNivel(nombreNivelPorIndice(i));
+});
 
 // ── CÁLCULO FECHA SIN DOMINGOS + DÍAS INHÁBILES ────────────────────────────
 let inhabLocales = {}; // {YYYY-MM-DD: 'descripcion'}

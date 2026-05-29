@@ -55,4 +55,23 @@ class AreaController extends Controller
         Area::findOrFail($id)->delete();
         return redirect()->route('areas.index')->with('success', 'Área eliminada.');
     }
+
+    /** POST /api/areas/rapida — crea un área rápida desde el formulario de presupuesto */
+    public function storeRapida(Request $request)
+    {
+        $request->validate([
+            'abreviatura' => 'required|string|max:50',
+            'descripcion' => 'required|string|max:255',
+        ]);
+        $area = Area::firstOrCreate(
+            ['abreviatura' => strtoupper(trim($request->abreviatura))],
+            ['descripcion' => trim($request->descripcion)]
+        );
+        return response()->json([
+            'id'          => $area->id,
+            'abreviatura' => $area->abreviatura,
+            'descripcion' => $area->descripcion,
+            'texto'       => $area->abreviatura . ' — ' . $area->descripcion,
+        ]);
+    }
 }

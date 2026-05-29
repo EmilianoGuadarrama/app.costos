@@ -69,4 +69,27 @@ class ManoObraController extends Controller
 
         return redirect()->route('mano_obra.index')->with('success', 'Mano de obra eliminada correctamente.');
     }
+
+    /** POST /api/mano_obra/rapida */
+    public function storeRapida(Request $request)
+    {
+        $request->validate([
+            'nombre'           => 'required|string|max:255',
+            'id_unidad_medida' => 'nullable|exists:unidades_medida,id',
+            'precio_x_unidad'  => 'required|numeric|min:0',
+        ]);
+        $mano = ManoObra::create([
+            'nombre'           => trim($request->nombre),
+            'id_unidad_medida' => $request->id_unidad_medida ?: null,
+            'precio_x_unidad'  => $request->precio_x_unidad,
+        ]);
+        $mano->load('unidadMedida');
+        return response()->json([
+            'id'     => $mano->id,
+            'texto'  => $mano->nombre,
+            'pu'     => (float) $mano->precio_x_unidad,
+            'uni'    => $mano->id_unidad_medida,
+            'uniTxt' => $mano->unidadMedida?->abreviatura ?? '',
+        ]);
+    }
 }

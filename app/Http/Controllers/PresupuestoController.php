@@ -478,6 +478,14 @@ class PresupuestoController extends Controller
     public function destroyMaquinaria($obraId, $id) { /* futuro */ }
     public function destroyManoObra($obraId, $id) { /* futuro */ }
 
+    /** POST /api/bloques/rapida — crea un bloque desde el formulario de presupuesto */
+    public function storeBloqueRapido(Request $request)
+    {
+        $request->validate(['descripcion' => 'required|string|max:255']);
+        $bloque = Bloque::firstOrCreate(['descripcion' => trim($request->descripcion)]);
+        return response()->json(['id' => $bloque->id, 'descripcion' => $bloque->descripcion, 'texto' => $bloque->descripcion]);
+    }
+
     // ──────────────────────────────────────────────────────────────
     // HELPERS
     // ──────────────────────────────────────────────────────────────

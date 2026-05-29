@@ -74,6 +74,8 @@ Route::prefix('obras/{obraId}/presupuesto')->group(function () {
     // Exportaciones
     Route::get('/export-excel', [PresupuestoController::class, 'exportExcel'])->name('obras.presupuesto.export_excel');
     Route::get('/export-pdf', [PresupuestoController::class, 'exportPdf'])->name('obras.presupuesto.export_pdf');
+    Route::get('/pdf-presupuesto', [PresupuestoController::class, 'generarPresupuestoPdf'])->name('obras.presupuesto.pdf_formal');
+    Route::get('/pdf-catalogo', [PresupuestoController::class, 'generarCatalogoConceptosPdf'])->name('obras.presupuesto.pdf_catalogo');
 
     // Edición en línea
     Route::post('/actualizar-todo', [PresupuestoController::class, 'updateAll'])->name('obras.presupuesto.updateAll');

@@ -27,7 +27,8 @@ class PresupuestoController extends Controller
     public function show($obraId)
     {
         $obra = ObraIniciada::with([
-            'datosDeObra', 'encargado.persona', 'niveles', 'totalObra',
+            'datosDeObra.direccion', 'encargado.persona', 'niveles', 'totalObra',
+            'cliente.direccionFiscal',
             'obraConceptos.bloque', 'obraConceptos.area', 'obraConceptos.nivel', 'obraConceptos.concepto.unidadMedida',
             'obraConceptos.materiales.material.unidadMedida',
             'obraConceptos.maquinaria.maquinaria.unidadMedida',
@@ -533,6 +534,62 @@ class PresupuestoController extends Controller
         $pdf->setPaper('A4', 'landscape');
         
         return $pdf->download('Presupuesto_' . str_replace(' ', '_', $obra->datosDeObra?->nombre ?? 'Obra') . '.pdf');
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // PDF 1: Presupuesto Formal (tipo carta/cotización)
+    // ──────────────────────────────────────────────────────────────
+    public function generarPresupuestoPdf($obraId)
+    {
+        $obra = ObraIniciada::with([
+            'datosDeObra.direccion',
+            'cliente.direccionFiscal',
+            'obraConceptos.concepto.unidadMedida',
+            'totalBloque',
+        ])->findOrFail($obraId);
+
+        $bloques          = \App\Models\Bloque::orderBy('id')->get();
+        $totalesPorBloque = $obra->totalBloque->keyBy('id_bloque');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'pdf.presupuesto',
+            compact('obra', 'bloques', 'totalesPorBloque')
+        );
+        $pdf->setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true]);
+        $pdf->setPaper('letter', 'portrait');
+
+        $nombreArchivo = 'Presupuesto_' . str_replace(' ', '_', $obra->datosDeObra?->nombre ?? 'Obra') . '.pdf';
+        return $pdf->download($nombreArchivo);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    // PDF 2: Catálogo de Conceptos (técnico, tabular, horizontal)
+    // ──────────────────────────────────────────────────────────────
+    public function generarCatalogoConceptosPdf($obraId)
+    {
+        $obra = ObraIniciada::with([
+            'datosDeObra.direccion',
+            'cliente.direccionFiscal',
+            'obraConceptos.concepto.unidadMedida',
+            'obraConceptos.area',
+            'obraConceptos.materiales.material.unidadMedida',
+            'obraConceptos.maquinaria.maquinaria.unidadMedida',
+            'obraConceptos.manoObra.manoObra.unidadMedida',
+            'totalBloque',
+        ])->findOrFail($obraId);
+
+        $bloques          = \App\Models\Bloque::orderBy('id')->get();
+        $totalesPorBloque = $obra->totalBloque->keyBy('id_bloque');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+            'pdf.catalogo-conceptos',
+            compact('obra', 'bloques', 'totalesPorBloque')
+        );
+        $pdf->setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true]);
+        $pdf->setPaper('letter', 'landscape');
+
+        $nombreArchivo = 'Catalogo_Conceptos_' . str_replace(' ', '_', $obra->datosDeObra?->nombre ?? 'Obra') . '.pdf';
+        return $pdf->download($nombreArchivo);
     }
     // =======================================================
     // 5. APROBAR PRESUPUESTO -> PASAR A OBRA EN PROCESO

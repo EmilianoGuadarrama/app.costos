@@ -5,39 +5,62 @@
 <style>
 :root {
     --dark:#111111; --mid:#374151; --soft:#6b7280; --line:#e5e7eb;
-    --bg:#f3f4f6;   --white:#fff;
+    --bg:#f0f0f0;   --white:#fff;
     --blue:#374151; --green:#059669; --red:#b91c1c; --amber:#d97706;
 }
 body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 
-/* ── HEADER ── */
+/* ══════════════════════════════
+   HEADER EMPRESA
+══════════════════════════════ */
 .pres-hdr {
     background:#111111; color:#fff;
-    padding:16px 26px; display:flex; justify-content:space-between; align-items:center;
-    position:sticky; top:0; z-index:200;
-    border-bottom:1px solid #222;
-    box-shadow:0 2px 12px rgba(0,0,0,.2);
+    padding:0; position:sticky; top:0; z-index:200;
+    border-bottom:3px solid #000;
+    box-shadow:0 2px 14px rgba(0,0,0,.35);
 }
-.pres-hdr-left h1 {
-    font-family:'Garamond','Baskerville',serif;
-    font-size:1.45rem;
-    margin:0;
-    font-weight:700;
-    letter-spacing:.3px;
+/* Franja superior: logo + nombre empresa + botones */
+.pres-hdr-top {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 24px 8px;
+    border-bottom:1px solid rgba(255,255,255,.08);
 }
-.pres-hdr-left p  { margin:3px 0 0; font-size:.78rem; color:#6b7280; letter-spacing:.2px; }
-.btn-back { background:rgba(255,255,255,.08); color:#d1d5db; border:1px solid rgba(255,255,255,.15);
-    border-radius:7px; padding:5px 13px; font-size:.8rem; text-decoration:none;
-    transition:.2s; display:inline-flex; align-items:center; gap:5px; margin-bottom:5px; }
-.btn-back:hover { background:rgba(255,255,255,.18); color:#fff; }
+.hdr-brand { display:flex; align-items:center; gap:14px; }
+.hdr-logo {
+    height:48px; width:auto; object-fit:contain;
+    border-radius:4px;
+    background:#fff;
+    padding:3px 6px;
+    flex-shrink:0;
+}
+.hdr-empresa-info {}
+.hdr-empresa-nombre {
+    font-size:1.15rem; font-weight:800; letter-spacing:.6px;
+    text-transform:uppercase; color:#fff; line-height:1.1;
+}
+.hdr-empresa-sub {
+    font-size:.65rem; color:#9ca3af; text-transform:uppercase;
+    letter-spacing:.8px; margin-top:2px;
+}
+/* Fila de back + acciones */
 .hdr-actions { display:flex; gap:8px; align-items:center; }
-.btn-hdr { border:none; border-radius:8px; padding:8px 16px; font-size:.78rem; font-weight:700;
+.btn-back {
+    background:rgba(255,255,255,.08); color:#d1d5db;
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:7px; padding:5px 13px; font-size:.8rem; text-decoration:none;
+    transition:.2s; display:inline-flex; align-items:center; gap:5px;
+}
+.btn-back:hover { background:rgba(255,255,255,.18); color:#fff; }
+.btn-hdr {
+    border:none; border-radius:8px; padding:8px 16px; font-size:.78rem; font-weight:700;
     letter-spacing:.3px; text-transform:uppercase;
-    cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition:.2s; }
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+    text-decoration:none; transition:.2s;
+}
 .btn-hdr-blue  { background:#fff; color:#111; border:1px solid rgba(255,255,255,.3); }
 .btn-hdr-blue:hover  { background:#f3f4f6; color:#111; }
 .btn-hdr-green { background:var(--green); color:#fff; }
-.btn-hdr-green:hover { background:#047857; color:#fff;}
+.btn-hdr-green:hover { background:#047857; color:#fff; }
 .btn-hdr-dark  { background:rgba(255,255,255,.08); color:#d1d5db; border:1px solid rgba(255,255,255,.15); }
 .btn-hdr-dark:hover  { background:rgba(255,255,255,.16); }
 .btn-hdr-excel { background:#107c41; color:#fff; }
@@ -45,60 +68,107 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 .btn-hdr-pdf   { background:#b91c1c; color:#fff; }
 .btn-hdr-pdf:hover   { background:#991b1b; color:#fff; }
 
-/* ── TOTALES BAR ── */
+/* Franja inferior del header: datos del proyecto */
+.pres-hdr-info {
+    display:grid;
+    grid-template-columns: minmax(0,2fr) minmax(0,2fr) minmax(0,1.2fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr);
+    gap:0;
+    border-top:1px solid rgba(255,255,255,.08);
+    background:#1a1a1a;
+}
+.hdr-info-cell {
+    padding:7px 16px;
+    border-right:1px solid rgba(255,255,255,.07);
+    display:flex; flex-direction:column; justify-content:center;
+}
+.hdr-info-cell:last-child { border-right:none; }
+.hdr-info-lbl {
+    font-size:.58rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.7px; color:#6b7280; margin-bottom:2px;
+}
+.hdr-info-val {
+    font-size:.78rem; font-weight:600; color:#e5e7eb;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    max-width:100%;
+}
+
+/* ══════════════════════════════
+   TOTALES BAR
+══════════════════════════════ */
 .totales-bar {
     display:grid; grid-template-columns:repeat(4,1fr);
-    background:#fff; border-bottom:1px solid var(--line);
-    box-shadow:0 2px 8px rgba(0,0,0,.04);
+    background:#fff;
+    border-bottom:2px solid #111;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
-.tot-cell { padding:14px 18px; text-align:center; border-right:1px solid var(--line); }
+.tot-cell {
+    padding:14px 18px; text-align:center;
+    border-right:1px solid var(--line);
+}
 .tot-cell:last-child { border-right:none; }
-.tot-lbl { font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--soft); }
-.tot-val { font-size:1.4rem; font-weight:900; color:var(--dark); margin-top:3px; }
+.tot-lbl {
+    font-size:.62rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.7px; color:var(--soft);
+}
+.tot-val {
+    font-size:1.35rem; font-weight:900; color:var(--dark); margin-top:4px;
+}
 .tot-val.highlight { color:#111111; font-weight:900; }
+.tot-cell-dark {
+    background:#111; text-align:center; padding:14px 18px;
+}
+.tot-cell-dark .tot-lbl { color:#9ca3af; }
+.tot-cell-dark .tot-val { color:#fff; }
 
-/* ── BODY ── */
+/* ══════════════════════════════
+   BODY
+══════════════════════════════ */
 .pres-body { padding:20px 26px; }
 
-/* ── TABLA ── */
-.pres-table-wrap { overflow-x:auto; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+/* ══════════════════════════════
+   TABLA PRINCIPAL
+══════════════════════════════ */
+.pres-table-wrap {
+    overflow-x:auto; border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    border:1px solid #d1d5db;
+}
 .pres-tabla {
-    width:100%; border-collapse:collapse; font-size:.8rem; min-width:860px;
-    background:#fff;
+    width:100%; border-collapse:collapse; font-size:.8rem;
+    min-width:900px; background:#fff;
 }
 .pres-tabla thead th {
-    background:var(--dark); color:#fff; padding:10px 11px;
-    font-size:.69rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
-    white-space:nowrap;
+    background:#111; color:#fff; padding:10px 11px;
+    font-size:.67rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.5px; white-space:nowrap;
+    border-right:1px solid #333;
 }
+.pres-tabla thead th:last-child { border-right:none; }
 
 /* Fila nivel */
 .row-nivel td {
-    background:#fff;
-    color:#111;
-    padding:12px 14px;
-    font-weight:900;
-    font-size:.88rem;
-    border-top:3px solid #111;
-    border-bottom:1px solid #e5e7eb;
-    text-transform:uppercase;
-    letter-spacing:.5px;
+    background:#fff; color:#111;
+    padding:12px 14px; font-weight:900; font-size:.88rem;
+    border-top:3px solid #111; border-bottom:1px solid #e5e7eb;
+    text-transform:uppercase; letter-spacing:.5px;
 }
 
 /* Fila bloque */
 .row-bloque td {
     background:#1c1c1c; color:#fff; padding:7px 11px;
     font-weight:700; font-size:.74rem; text-transform:uppercase;
-    letter-spacing:.5px;
-    text-align:right;
+    letter-spacing:.5px; text-align:right;
+    border-bottom:1px solid #333;
 }
 .row-bloque td:first-child { text-align:left; }
 
 /* Fila item */
 .row-item td {
-    padding:8px 11px; border-bottom:1px solid #f0f0f0; vertical-align:middle;
-    background:#fff; transition:background .15s;
+    padding:8px 11px; border-bottom:1px solid #f0f0f0;
+    vertical-align:middle; background:#fff; transition:background .15s;
+    border-right:1px solid #f5f5f5;
 }
+.row-item td:last-child { border-right:none; }
 .row-item:hover td { background:#fafafa; }
 
 /* Fila desglose */
@@ -114,9 +184,18 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 .cb-maq { background:#fef3c7; color:#92400e; }
 .cb-mo  { background:#d1fae5; color:#065f46; }
 
+/* Fila subtotal bloque */
+.row-bloque-sub td {
+    background:#333; color:#fff; padding:7px 11px;
+    font-weight:700; font-size:.78rem;
+    text-align:right;
+    border-bottom:1px solid #444;
+}
+.row-bloque-sub td:first-child { text-align:left; }
+
 /* Fila gran total */
 .row-gran-total td {
-    background:var(--dark); color:#fff; padding:12px 11px;
+    background:#111; color:#fff; padding:12px 11px;
     font-weight:900; font-size:.88rem; text-align:right;
 }
 .row-gran-total td:first-child { text-align:left; }
@@ -131,8 +210,8 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 }
 .btn-row-edit { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; }
 .btn-row-edit:hover { background:#374151; color:#fff; }
-.btn-row-del  { background:#fef2f2; color:#b91c1c;  border:1px solid #fecaca; }
-.btn-row-del:hover  { background:#b91c1c;  color:#fff; }
+.btn-row-del  { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; }
+.btn-row-del:hover  { background:#b91c1c; color:#fff; }
 .btn-desglose-toggle { background:transparent; border:1px solid var(--line);
     border-radius:5px; padding:2px 7px; font-size:.68rem; cursor:pointer;
     color:var(--soft); transition:.15s; margin-left:5px; }
@@ -183,35 +262,123 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
     display:none; align-items:center; gap:9px; box-shadow:0 10px 25px rgba(0,0,0,.2); }
 #toast.ok  { background:#059669; color:#fff; }
 #toast.err { background:#dc2626; color:#fff; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px) {
+    .pres-hdr-info { grid-template-columns:repeat(3,1fr); }
+    .hdr-info-cell:nth-child(3n) { border-right:none; }
+    .hdr-info-cell:nth-child(4) { border-top:1px solid rgba(255,255,255,.07); }
+}
+@media(max-width:600px) {
+    .pres-hdr-info { grid-template-columns:repeat(2,1fr); }
+    .totales-bar { grid-template-columns:repeat(2,1fr); }
+    .pres-hdr-top { flex-direction:column; align-items:flex-start; gap:10px; }
+    .hdr-actions { flex-wrap:wrap; }
+}
 </style>
 
-{{-- ── HEADER ── --}}
+{{-- ══════════════════════════════════════════
+     HEADER EMPRESA + PROYECTO
+══════════════════════════════════════════ --}}
+@php
+    $clienteHdr   = $obra->cliente;
+    $dirHdr       = $clienteHdr?->direccionFiscal ?? $obra->datosDeObra?->direccion ?? null;
+    $domHdr       = $dirHdr
+        ? trim(($dirHdr->calle_y_numero ?? '') . ', ' . ($dirHdr->colonia ?? '') . ', ' . ($dirHdr->delegacion ?? ''))
+        : '—';
+    $domHdr       = trim($domHdr, ', ') ?: '—';
+    $fechaInicioHdr  = $obra->fecha_inicio ? $obra->fecha_inicio->format('d/m/Y') : '—';
+    $duracionHdr     = $obra->duracion ? $obra->duracion . ' días' : '—';
+    $fechaEntregaHdr = '—';
+    if ($obra->fecha_inicio && $obra->duracion) {
+        $fechaEntregaHdr = $obra->fecha_inicio->copy()->addDays((int)$obra->duracion)->format('d/m/Y');
+    }
+    $diasFaltanHdr = $obra->dias_faltan;
+    $nomClienteHdr = $clienteHdr?->nombre ?? $clienteHdr?->nombre_o_razon_social ?? '—';
+@endphp
 <div class="pres-hdr">
-    <div class="pres-hdr-left">
-        <a href="{{ route('obras.show', $obra->id) }}" class="btn-back">
-            <i class="bi bi-arrow-left"></i> Datos Generales
-        </a>
-        <h1><i class="bi bi-file-earmark-text me-2" style="color:#9ca3af;"></i>Presupuesto de Obra</h1>
-        <p>{{ $obra->datosDeObra?->nombre }}</p>
+    {{-- Franja superior --}}
+    <div class="pres-hdr-top">
+        <div class="hdr-brand">
+            {{-- Logo --}}
+            @if(file_exists(public_path('img/logo_akiraka.jpeg')))
+            <img src="{{ asset('img/logo_akiraka.jpeg') }}" alt="Logo" class="hdr-logo">
+            @endif
+            <div class="hdr-empresa-info">
+                <div class="hdr-empresa-nombre">AKIRAKA</div>
+                <div class="hdr-empresa-sub">Construcción &amp; Diseño</div>
+            </div>
+            <div style="width:1px;height:36px;background:rgba(255,255,255,.15);margin:0 6px;"></div>
+            <div style="display:flex;flex-direction:column;gap:2px;">
+                <a href="{{ route('obras.show', $obra->id) }}" class="btn-back">
+                    <i class="bi bi-arrow-left"></i> Datos Generales
+                </a>
+                <span style="font-size:.68rem;color:#6b7280;padding-left:2px;">
+                    <i class="bi bi-file-earmark-text me-1"></i>Presupuesto de Obra
+                </span>
+            </div>
+        </div>
+        <div class="hdr-actions">
+            <button class="btn-hdr btn-hdr-dark" onclick="toggleTodosDesgloses()">
+                <i class="bi bi-diagram-3"></i> Desglosar
+            </button>
+            @if($obra->obraConceptos->isNotEmpty())
+            <button type="button" class="btn-hdr btn-hdr-green" onclick="abrirModalAprobar()">
+                <i class="bi bi-check-circle-fill"></i> Aprobar
+            </button>
+            @endif
+            <a href="{{ route('obras.presupuesto.export_excel', $obra->id) }}" class="btn-hdr btn-hdr-excel">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+            </a>
+            <a href="{{ route('obras.presupuesto.pdf_formal', $obra->id) }}"
+               class="btn-hdr"
+               style="background:#d97706; color:#fff;"
+               title="Genera un PDF formal tipo carta/cotización para entregar al cliente">
+                <i class="bi bi-file-earmark-pdf-fill"></i> PDF PRESUPUESTO
+            </a>
+            <a href="{{ route('obras.presupuesto.pdf_catalogo', $obra->id) }}"
+               class="btn-hdr"
+               style="background:#1d4ed8; color:#fff;"
+               title="Genera un PDF técnico con tabla completa de conceptos">
+                <i class="bi bi-table"></i> PDF CATÁLOGO
+            </a>
+            <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-hdr btn-hdr-blue">
+                <i class="bi bi-plus-lg"></i> AGREGAR
+            </a>
+        </div>
     </div>
-    <div class="hdr-actions">
-        <button class="btn-hdr btn-hdr-dark" onclick="toggleTodosDesgloses()">
-            <i class="bi bi-diagram-3"></i> Desglosar
-        </button>
-        @if($obra->obraConceptos->isNotEmpty())
-        <button type="button" class="btn-hdr btn-hdr-green" onclick="abrirModalAprobar()">
-            <i class="bi bi-check-circle-fill"></i> Aprobar Presupuesto
-        </button>
-        @endif
-        <a href="{{ route('obras.presupuesto.export_excel', $obra->id) }}" class="btn-hdr btn-hdr-excel">
-            <i class="bi bi-file-earmark-excel"></i> Excel
-        </a>
-        <a href="{{ route('obras.presupuesto.export_pdf', $obra->id) }}" class="btn-hdr btn-hdr-pdf">
-            <i class="bi bi-file-earmark-pdf"></i> PDF
-        </a>
-        <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-hdr btn-hdr-blue">
-            <i class="bi bi-layers"></i> + Agregar Renglones
-        </a>
+    {{-- Franja inferior: datos del proyecto --}}
+    <div class="pres-hdr-info">
+        <div class="hdr-info-cell">
+            <span class="hdr-info-lbl">Proyecto</span>
+            <span class="hdr-info-val" title="{{ $obra->datosDeObra?->nombre }}">{{ $obra->datosDeObra?->nombre ?? '—' }}</span>
+        </div>
+        <div class="hdr-info-cell">
+            <span class="hdr-info-lbl">Cliente</span>
+            <span class="hdr-info-val" title="{{ $nomClienteHdr }}">{{ $nomClienteHdr }}</span>
+        </div>
+        <div class="hdr-info-cell">
+            <span class="hdr-info-lbl">Domicilio</span>
+            <span class="hdr-info-val" title="{{ $domHdr }}">{{ $domHdr }}</span>
+        </div>
+        <div class="hdr-info-cell">
+            <span class="hdr-info-lbl">Fecha Inicio</span>
+            <span class="hdr-info-val">{{ $fechaInicioHdr }}</span>
+        </div>
+        <div class="hdr-info-cell">
+            <span class="hdr-info-lbl">Entrega Estimada</span>
+            <span class="hdr-info-val">{{ $fechaEntregaHdr }}</span>
+        </div>
+        <div class="hdr-info-cell">
+            <span class="hdr-info-lbl">Días Restantes</span>
+            <span class="hdr-info-val">
+                @if($diasFaltanHdr !== null)
+                    {{ $diasFaltanHdr }} días
+                @else
+                    {{ $duracionHdr }}
+                @endif
+            </span>
+        </div>
     </div>
 </div>
 
@@ -247,19 +414,19 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 
 <div class="totales-bar">
     <div class="tot-cell">
-        <div class="tot-lbl">Subtotal</div>
+        <div class="tot-lbl"><i class="bi bi-calculator me-1"></i>Subtotal</div>
         <div class="tot-val">${{ number_format($gSub, 2) }}</div>
     </div>
     <div class="tot-cell">
-        <div class="tot-lbl">IVA</div>
+        <div class="tot-lbl"><i class="bi bi-percent me-1"></i>I.V.A. (16%)</div>
         <div class="tot-val">${{ number_format($gIva, 2) }}</div>
     </div>
-    <div class="tot-cell">
-        <div class="tot-lbl">Total Final</div>
+    <div class="tot-cell tot-cell-dark">
+        <div class="tot-lbl"><i class="bi bi-check2-circle me-1"></i>Total Final</div>
         <div class="tot-val highlight">${{ number_format($gTot, 2) }}</div>
     </div>
     <div class="tot-cell">
-        <div class="tot-lbl">Renglones</div>
+        <div class="tot-lbl"><i class="bi bi-list-ul me-1"></i>Renglones</div>
         <div class="tot-val">{{ $conceptos->count() }}</div>
     </div>
 </div>
@@ -280,56 +447,53 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
         <table class="pres-tabla">
             <thead>
                 <tr>
-                    <th style="width:6%">Área</th>
-                    <th style="width:32%">Concepto / Descripción</th>
-                    <th style="width:9%">Cantidad</th>
-                    <th style="width:12%">P.U.</th>
-                    <th style="width:12%">Subtotal</th>
-                    <th style="width:9%">IVA</th>
-                    <th style="width:12%">Total</th>
-                    <th style="width:8%">Acciones</th>
+                    <th style="width:5%;text-align:center;">Área</th>
+                    <th style="width:30%;text-align:left;">Concepto / Descripción</th>
+                    <th style="width:7%;text-align:center;">Cantidad</th>
+                    <th style="width:6%;text-align:center;">Unidad</th>
+                    <th style="width:11%;text-align:right;">P.U.</th>
+                    <th style="width:11%;text-align:right;">Subtotal</th>
+                    <th style="width:8%;text-align:right;">IVA</th>
+                    <th style="width:11%;text-align:right;">Total</th>
+                    <th style="width:7%;text-align:center;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
             @foreach($porNivel as $idNivel => $nivelData)
                 {{-- NIVEL --}}
                 <tr class="row-nivel">
-                    <td colspan="5"><i class="bi bi-layers me-2"></i>{{ mb_strtoupper($nivelData['nombre']) }}</td>
-                    <td style="text-align:right;">${{ number_format($nivelData['iva'],2) }}</td>
-                    <td style="text-align:right;font-weight:800;color:#111;">${{ number_format($nivelData['total'],2) }}</td>
+                    <td colspan="6"><i class="bi bi-layers me-2"></i>{{ mb_strtoupper($nivelData['nombre']) }}</td>
+                    <td style="text-align:right;font-family:monospace;">${{ number_format($nivelData['iva'],2) }}</td>
+                    <td style="text-align:right;font-weight:800;color:#111;font-family:monospace;">${{ number_format($nivelData['total'],2) }}</td>
                     <td></td>
                 </tr>
-
                 @foreach($nivelData['bloques'] as $bloqueId => $bloqueData)
-                    {{-- BLOQUE --}}
                     <tr class="row-bloque">
-                        <td colspan="4" style="text-align:left;padding-left:28px;">
+                        <td colspan="5" style="text-align:left;padding-left:28px;">
                             <i class="bi bi-grid-3x3-gap me-1"></i> {{ strtoupper($bloqueData['nombre']) }}
                         </td>
-                        <td>${{ number_format($bloqueData['filas']->sum('subtotal'),2) }}</td>
-                        <td>${{ number_format($bloqueData['filas']->sum('iva'),2) }}</td>
-                        <td>${{ number_format($bloqueData['filas']->sum('total_final'),2) }}</td>
+                        <td style="font-family:monospace;">${{ number_format($bloqueData['filas']->sum('subtotal'),2) }}</td>
+                        <td style="font-family:monospace;">${{ number_format($bloqueData['filas']->sum('iva'),2) }}</td>
+                        <td style="font-family:monospace;">${{ number_format($bloqueData['filas']->sum('total_final'),2) }}</td>
                         <td></td>
                     </tr>
-
                     @foreach($bloqueData['filas'] as $fila)
-                        {{-- FILA CONCEPTO --}}
                         <tr class="row-item" id="row_fila_{{ $fila->id }}">
-                            <td style="font-weight:800;color:#374151;">{{ $fila->area?->abreviatura ?? '—' }}</td>
-                            <td>
-                                <span style="font-weight:600;" id="nom_{{ $fila->id }}">{{ $fila->concepto?->descripcion ?? 'Concepto sin nombre' }}</span>
+                            <td style="text-align:center;font-weight:700;color:#374151;font-size:.75rem;">{{ $fila->area?->abreviatura ?? '—' }}</td>
+                            <td style="max-width:260px;">
+                                <span style="font-weight:600;display:block;line-height:1.3;" id="nom_{{ $fila->id }}">{{ $fila->concepto?->descripcion ?? 'Concepto sin nombre' }}</span>
                                 <button class="btn-desglose-toggle" onclick="toggleDesglose({{ $fila->id }})">
-                                    <i class="bi bi-chevron-down" id="ico_{{ $fila->id }}"></i>
+                                    <i class="bi bi-chevron-down" id="ico_{{ $fila->id }}"></i> detalle
                                 </button>
                             </td>
                             <td style="text-align:center;">
-                                <span id="cant_{{ $fila->id }}">{{ $fila->cantidad }}</span>
-                                {{ $fila->concepto?->unidadMedida?->abreviatura ?? '' }}
+                                <span id="cant_{{ $fila->id }}">{{ number_format($fila->cantidad, 2) }}</span>
                             </td>
-                            <td style="text-align:right;" id="pu_{{ $fila->id }}">${{ number_format($fila->precio_unitario,2) }}</td>
-                            <td style="text-align:right;" id="sub_{{ $fila->id }}">${{ number_format($fila->subtotal,2) }}</td>
-                            <td style="text-align:right;">${{ number_format($fila->iva,2) }}</td>
-                            <td style="text-align:right;font-weight:800;" id="tot_{{ $fila->id }}">${{ number_format($fila->total_final,2) }}</td>
+                            <td style="text-align:center;font-size:.75rem;color:#6b7280;">{{ $fila->concepto?->unidadMedida?->abreviatura ?? '—' }}</td>
+                            <td style="text-align:right;font-family:monospace;" id="pu_{{ $fila->id }}">${{ number_format($fila->precio_unitario,2) }}</td>
+                            <td style="text-align:right;font-family:monospace;" id="sub_{{ $fila->id }}">${{ number_format($fila->subtotal,2) }}</td>
+                            <td style="text-align:right;font-family:monospace;color:#6b7280;">${{ number_format($fila->iva,2) }}</td>
+                            <td style="text-align:right;font-weight:800;font-family:monospace;" id="tot_{{ $fila->id }}">${{ number_format($fila->total_final,2) }}</td>
                             <td class="action-cell">
                                 <button class="btn-row-edit" title="Editar"
                                     onclick="openEditPanel({{ $fila->id }})">
@@ -403,10 +567,13 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 
             {{-- GRAN TOTAL --}}
             <tr class="row-gran-total">
-                <td colspan="4"><i class="bi bi-check2-circle me-1"></i> TOTAL GENERAL</td>
-                <td>${{ number_format($gSub,2) }}</td>
-                <td>${{ number_format($gIva,2) }}</td>
-                <td class="highlight">${{ number_format($gTot,2) }}</td>
+                <td colspan="2" style="text-align:left;"><i class="bi bi-check2-circle me-1"></i> TOTAL GENERAL DEL PRESUPUESTO</td>
+                <td></td>
+                <td></td>
+                <td style="font-family:monospace;"></td>
+                <td style="font-family:monospace;">${{ number_format($gSub,2) }}</td>
+                <td style="font-family:monospace;">${{ number_format($gIva,2) }}</td>
+                <td class="highlight" style="font-family:monospace;">${{ number_format($gTot,2) }}</td>
                 <td></td>
             </tr>
             </tbody>

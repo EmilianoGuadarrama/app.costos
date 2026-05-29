@@ -26,7 +26,7 @@
                 <select id="id_obra" name="id_obra" class="form-select" required>
                     <option value="">Seleccione una obra</option>
                     @foreach($obras as $o)
-                        <option value="{{ $o->id }}" {{ old('id_obra') == $o->id ? 'selected' : '' }}>{{ $o->datosDeObra?->nombre ?? 'Obra #'.$o->id }}</option>
+                        <option value="{{ $o->id }}" {{ old('id_obra', request('id_obra')) == $o->id ? 'selected' : '' }}>{{ $o->datosDeObra?->nombre ?? 'Obra #'.$o->id }}</option>
                     @endforeach
                 </select>
                 @error('id_obra') <span class="text-danger">{{ $message }}</span> @enderror

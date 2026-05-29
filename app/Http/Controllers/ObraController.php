@@ -29,10 +29,15 @@ class ObraController extends Controller
             'totalObra',
             'cajaGeneral',
             'niveles',
+            'obraProceso'
         ])->latest()->get();
+
+        $obrasPresupuesto = $obras->whereNull('obraProceso');
+        $obrasAprobadas = $obras->whereNotNull('obraProceso');
+
         $trashedCount = ObraIniciada::onlyTrashed()->count();
 
-        return view('obras.index', compact('obras', 'trashedCount'));
+        return view('obras.index', compact('obrasPresupuesto', 'obrasAprobadas', 'trashedCount'));
     }
 
     public function create()

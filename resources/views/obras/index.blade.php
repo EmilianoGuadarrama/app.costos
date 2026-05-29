@@ -81,7 +81,7 @@
     </div>
 @endif
 
-@if($obras->isEmpty())
+@if($obrasPresupuesto->isEmpty() && $obrasAprobadas->isEmpty())
     <div class="empty-state">
         <i class="bi bi-building"></i>
         <h3>Sin obras registradas</h3>
@@ -91,8 +91,18 @@
         </a>
     </div>
 @else
-<div class="obras-grid">
-    @foreach($obras as $obra)
+    @foreach(['Presupuestos' => $obrasPresupuesto, 'Presupuestos Aprobados' => $obrasAprobadas] as $tituloSeccion => $listaObras)
+        @if($listaObras->isNotEmpty())
+            <h2 style="font-size: 1.4rem; font-weight: 800; color: #111827; margin: 30px 0 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+                @if($tituloSeccion == 'Presupuestos')
+                    <i class="bi bi-file-earmark-text me-2" style="color:#2563eb;"></i>
+                @else
+                    <i class="bi bi-check-circle-fill me-2" style="color:#059669;"></i>
+                @endif
+                {{ $tituloSeccion }}
+            </h2>
+            <div class="obras-grid">
+                @foreach($listaObras as $obra)
     @php
         $datos       = $obra->datosDeObra;
         $encargado   = $obra->encargado?->persona;
@@ -176,22 +186,40 @@
                 <i class="bi bi-file-earmark-text me-1"></i>Presupuesto
             </button>
             @endif
-            @if($caja)
-            <a href="{{ route('caja_general.show', $caja->id) }}" class="btn-obra btn-caja" id="btn-caja-{{ $obra->id }}">
-                <i class="bi bi-wallet2 me-1"></i>Caja
-            </a>
+            @if($tituloSeccion == 'Presupuestos')
+                @if($tieneRenglones)
+                <button type="button" class="btn-obra btn-caja" onclick="abrirModalAprobarObra({{ $obra->id }})" style="cursor:pointer; border-color:#059669; color:#059669;">
+                    <i class="bi bi-check-circle-fill me-1"></i>Aprobar
+                </button>
+                @endif
+            @else
+                @if($caja)
+                <a href="{{ route('caja_general.show', $caja->id) }}" class="btn-obra btn-caja" id="btn-caja-{{ $obra->id }}">
+                    <i class="bi bi-wallet2 me-1"></i>Caja
+                </a>
+                @endif
+                <button type="button" class="btn-obra btn-eliminar" style="border-color:#dc2626; color:#dc2626; background:transparent; cursor:pointer;" onclick="if(confirm('¿Estás seguro de cancelar la aprobación de \'{{ addslashes($datos?->nombre) }}\'? La obra regresará a estado de presupuesto sin aprobar.')) { document.getElementById('form-cancelar-{{ $obra->id }}').submit(); }">
+                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                </button>
+                <form id="form-cancelar-{{ $obra->id }}" action="{{ route('obras.presupuesto.cancelar_aprobacion', $obra->id) }}" method="POST" style="display:none;">
+                    @csrf
+                </form>
             @endif
-            <button type="button" class="btn-obra btn-eliminar" style="border-color:#dc2626; color:#dc2626; background:transparent; cursor:pointer;" onclick="if(confirm('¿Estás seguro de enviar la obra \'{{ addslashes($datos?->nombre) }}\' a la papelera?')) { document.getElementById('form-delete-{{ $obra->id }}').submit(); }">
+            @if($tituloSeccion == 'Presupuestos')
+            <button type="button" class="btn-obra btn-eliminar" style="border-color:#dc2626; color:#dc2626; background:transparent; cursor:pointer;" onclick="if(confirm('¿Estás seguro de enviar la obra \'{{ addslashes($datos?->nombre) }}\' a la papelera? Se borrará definitivamente el {{ now()->addDays(30)->format('d/m/Y') }}.')) { document.getElementById('form-delete-{{ $obra->id }}').submit(); }">
                 <i class="bi bi-trash3 me-1"></i>Eliminar
             </button>
             <form id="form-delete-{{ $obra->id }}" action="{{ route('obras.destroy', $obra->id) }}" method="POST" style="display:none;">
                 @csrf
                 @method('DELETE')
             </form>
+            @endif
         </div>
     </div>
     @endforeach
-</div>
+    </div>
+    @endif
+@endforeach
 @endif
 
 <!-- Modal Presupuesto Vacío -->
@@ -214,6 +242,35 @@
     </div>
 </div>
 
+{{-- MODAL APROBAR PRESUPUESTO ──────────────────────────────────────────── --}}
+<div id="modalAprobarObraOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.65); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; width:100%; max-width: 450px; box-shadow:0 20px 40px rgba(0,0,0,.3); overflow:hidden;">
+        <div style="background:#059669; color:#fff; padding:18px 22px; display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:1rem; font-weight:700;"><i class="bi bi-check2-circle me-2"></i>Aprobar Presupuesto</h3>
+            <button onclick="cerrarModalAprobarObra()" style="background:rgba(255,255,255,.1); border:none; color:#fff; border-radius:7px; padding:4px 10px; cursor:pointer; font-size:1.1rem;">×</button>
+        </div>
+        <div style="padding:25px 22px;">
+            <p style="font-size:1rem; color:#111; font-weight:700; margin-bottom:15px; text-align:center;">¿Cómo se aplicará el presupuesto de esta obra?</p>
+            <form id="formAprobarObra" method="POST">
+                @csrf
+                <div style="margin-bottom:16px;">
+                    <label style="display:block; font-size:.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; margin-bottom:5px;">Selecciona el tipo de IVA</label>
+                    <select name="con_iva" style="width:100%; padding:10px; border-radius:8px; border:1.5px solid #e5e7eb; font-size:0.95rem; font-weight:600;" required>
+                        <option value="1">Con IVA (Presupuesto + IVA)</option>
+                        <option value="0">Sin IVA (Solo Subtotal)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div style="padding:16px 22px; background:#f9fafb; border-top:1px solid #e5e7eb; display:flex; gap:8px; justify-content:flex-end;">
+            <button type="button" onclick="cerrarModalAprobarObra()" style="background:#f3f4f6; color:#374151; border:1.5px solid #e5e7eb; border-radius:8px; padding:8px 18px; font-weight:600; cursor:pointer;">Cancelar</button>
+            <button type="button" style="background:#059669; color:#fff; border:none; border-radius:8px; padding:8px 20px; font-weight:700; cursor:pointer;" onclick="document.getElementById('formAprobarObra').submit();">
+                <i class="bi bi-check-lg me-1"></i> Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 function alertaSinPresup(obraId, nombreObra) {
     document.getElementById('modalObraNombre').textContent = nombreObra;
@@ -222,6 +279,14 @@ function alertaSinPresup(obraId, nombreObra) {
 }
 function cerrarAlertaPresup() {
     document.getElementById('modalSinPresup').style.display = 'none';
+}
+function abrirModalAprobarObra(obraId) {
+    const baseUrl = '{{ url("obras") }}';
+    document.getElementById('formAprobarObra').action = `${baseUrl}/${obraId}/presupuesto/aprobar`;
+    document.getElementById('modalAprobarObraOverlay').style.display = 'flex';
+}
+function cerrarModalAprobarObra() {
+    document.getElementById('modalAprobarObraOverlay').style.display = 'none';
 }
 </script>
 @endsection

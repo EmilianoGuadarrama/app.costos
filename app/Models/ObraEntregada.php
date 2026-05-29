@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 class ObraEntregada extends Model
 {
     protected $table = 'obras_entregadas';
-    protected $fillable = ['id_obras_proceso','fecha_entrega','ingresos_generales','egresos'];
+    protected $fillable = ['id_obra','fecha_entrega','ingresos_generales','egresos'];
     protected $casts = ['fecha_entrega' => 'date'];
 
-    public function obraProceso() { return $this->belongsTo(ObraProceso::class, 'id_obras_proceso'); }
+    public function obraProceso() { return $this->belongsTo(ObraProceso::class, 'id_obra', 'id_obra'); }
 }

@@ -40,8 +40,8 @@
 </style>
 
 @php
-    $ingresos = (float)$caja->ingresos_totales;
-    $egresos  = (float)$caja->egresos_totales;
+    $ingresos = $caja->obra && $caja->obra->ingresos ? $caja->obra->ingresos->sum('monto_dado') : 0;
+    $egresos  = $caja->obra && $caja->obra->egresos ? $caja->obra->egresos->sum('pago') : 0;
     $saldo    = $ingresos - $egresos;
 @endphp
 

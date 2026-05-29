@@ -10,14 +10,19 @@ class IngresoController extends Controller
 {
     public function index()
     {
-        $ingresos = IngresoTotal::with(['obra.datosDeObra','empleado.persona'])
-            ->latest('fecha')->paginate(30);
+        $ingresosList = IngresoTotal::with(['obra.datosDeObra','empleado.persona'])
+            ->orderBy('fecha', 'desc')->get();
+            
+        $ingresos = $ingresosList->groupBy(function($item) {
+            return \Carbon\Carbon::parse($item->fecha)->isoFormat('MMMM YYYY');
+        });
+
         return view('ingresos.index', compact('ingresos'));
     }
 
     public function create()
     {
-        $obras     = ObraIniciada::with('datosDeObra')->get();
+        $obras     = ObraIniciada::with(['datosDeObra', 'obraProceso'])->get();
         $empleados = Empleado::with('persona')->get();
         return view('ingresos.create', compact('obras','empleados'));
     }

@@ -238,9 +238,18 @@
 
                 {{-- OBRAS (principal) --}}
                 <li class="nav-item">
-                    <a href="{{ route('obras.index') }}" class="nav-link {{ request()->routeIs('obras*') ? 'active' : '' }}">
-                        <i class="fas fa-building"></i>
-                        <span>Mis Obras</span>
+                    <a href="{{ route('obras.index') }}" class="nav-link {{ request()->routeIs('obras.*') ? 'active' : '' }}">
+                        <i class="bi bi-building"></i> <span class="nav-text">Obras (Presupuesto)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('obras_proceso.index') }}" class="nav-link {{ request()->routeIs('obras_proceso.*') ? 'active' : '' }}">
+                        <i class="bi bi-cone-striped"></i> <span class="nav-text">Obras en Proceso</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('pre_proveedores.index') }}" class="nav-link {{ request()->routeIs('pre_proveedores*') ? 'active' : '' }}">
+                        <i class="bi bi-truck"></i> <span class="nav-text">Presup. Proveedores</span>
                     </a>
                 </li>
 

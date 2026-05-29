@@ -127,6 +127,9 @@
         </tr>
         <tr><td>Teléfono 1</td><td>{{ $encargado?->telefono_1 ?? '—' }}</td></tr>
         <tr><td>Email</td><td>{{ $encargado?->email ?? '—' }}</td></tr>
+        <tr class="highlight"><td>Cliente</td><td>{{ $obra->cliente?->nombre ?? '—' }}</td></tr>
+        <tr class="highlight"><td>Teléfono Cliente</td><td>{{ $obra->cliente?->telefono ?? '—' }}</td></tr>
+        <tr class="highlight"><td>Email Cliente</td><td>{{ $obra->cliente?->email ?? '—' }}</td></tr>
         <tr><td>Fecha de Inicio</td><td>{{ $obra->fecha_inicio?->format('d/m/Y') ?? '—' }}</td></tr>
         <tr><td>Fecha de Entrega est.</td><td>{{ $fechaFin?->format('d/m/Y') ?? '—' }}</td></tr>
         <tr class="highlight"><td>Duración (Días)</td><td>{{ $duracion ?: '—' }}</td></tr>

@@ -198,6 +198,11 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
         <button class="btn-hdr btn-hdr-dark" onclick="toggleTodosDesgloses()">
             <i class="bi bi-diagram-3"></i> Desglosar
         </button>
+        @if($obra->obraConceptos->isNotEmpty())
+        <button type="button" class="btn-hdr btn-hdr-green" onclick="abrirModalAprobar()">
+            <i class="bi bi-check-circle-fill"></i> Aprobar Presupuesto
+        </button>
+        @endif
         <a href="{{ route('obras.presupuesto.export_excel', $obra->id) }}" class="btn-hdr btn-hdr-excel">
             <i class="bi bi-file-earmark-excel"></i> Excel
         </a>
@@ -408,6 +413,8 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
         </table>
     </div>
 @endif
+
+
 </div>
 
 {{-- ── PANEL LATERAL DE EDICIÓN COMPLETA ── --}}
@@ -556,7 +563,43 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 
 <div id="toast"></div>
 
+{{-- MODAL APROBAR PRESUPUESTO ──────────────────────────────────────────── --}}
+<div class="modal-overlay" id="modalAprobarOverlay">
+    <div class="modal-box" style="max-width: 450px;">
+        <div class="modal-head" style="background:#059669;">
+            <h3><i class="bi bi-check2-circle me-2"></i>Aprobar Presupuesto</h3>
+            <button class="btn-close-modal" onclick="cerrarModalAprobar()">×</button>
+        </div>
+        <div class="modal-body" style="padding:25px 22px;">
+            <p style="font-size:1rem; color:#111; font-weight:700; margin-bottom:15px; text-align:center;">¿Cómo se aplicará el presupuesto de esta obra?</p>
+            <form action="{{ route('obras.presupuesto.aprobar', $obra->id) }}" method="POST" id="formAprobarPresupuesto">
+                @csrf
+                <div class="modal-field">
+                    <label>Selecciona el tipo de IVA</label>
+                    <select name="con_iva" style="width:100%; padding:10px; border-radius:8px; border:1.5px solid #e5e7eb; font-size:0.95rem; font-weight:600;" required>
+                        <option value="1">Con IVA (Presupuesto + IVA)</option>
+                        <option value="0">Sin IVA (Solo Subtotal)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" onclick="cerrarModalAprobar()">Cancelar</button>
+            <button type="submit" class="btn-modal-save" style="background:#059669;" onclick="document.getElementById('formAprobarPresupuesto').submit();">
+                <i class="bi bi-check-lg me-1"></i> Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+function abrirModalAprobar() {
+    document.getElementById('modalAprobarOverlay').classList.add('open');
+}
+function cerrarModalAprobar() {
+    document.getElementById('modalAprobarOverlay').classList.remove('open');
+}
+
 const csrfToken   = '{{ csrf_token() }}';
 const editBaseUrl = '{{ url("obra-conceptos") }}';
 

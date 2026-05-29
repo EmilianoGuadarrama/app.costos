@@ -9,7 +9,9 @@ class CajaGeneralController extends Controller
 {
     public function index()
     {
-        $cajas = CajaGeneral::with('obra.datosDeObra')->get();
+        $cajas = CajaGeneral::whereHas('obra.obraProceso')
+            ->with(['obra.datosDeObra', 'obra.ingresos', 'obra.egresos'])
+            ->get();
         return view('caja_general.index', compact('cajas'));
     }
 

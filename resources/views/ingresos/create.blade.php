@@ -22,24 +22,25 @@
         <form action="{{ route('ingresos.store') }}" method="POST">
             @csrf
             <div class="form-group">
-                <label for="proyecto_id">Proyecto *</label>
-                <select id="proyecto_id" name="proyecto_id" class="form-select" required>
-                    <option value="">Seleccione un proyecto</option>
-                    @foreach($proyectos as $p)
-                        <option value="{{ $p->id }}" {{ old('proyecto_id') == $p->id ? 'selected' : '' }}>{{ $p->nombre }}</option>
+                <label for="id_obra">Proyecto/Obra *</label>
+                <select id="id_obra" name="id_obra" class="form-select" required onchange="actualizarRestante()">
+                    <option value="" data-restante="">Seleccione un proyecto</option>
+                    @foreach($obras as $p)
+                        <option value="{{ $p->id }}" data-restante="{{ $p->obraProceso ? number_format($p->obraProceso->presupuesto_restante, 2) : 'N/A' }}" {{ old('id_obra', request('id_obra')) == $p->id ? 'selected' : '' }}>{{ $p->nombre }}</option>
                     @endforeach
                 </select>
-                @error('proyecto_id') <span class="text-danger">{{ $message }}</span> @enderror
+                <small id="restante-info" style="color:#059669; font-weight:700; margin-top:8px; display:block;"></small>
+                @error('id_obra') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
-                <label for="cliente_id">Cliente *</label>
-                <select id="cliente_id" name="cliente_id" class="form-select" required>
-                    <option value="">Seleccione un cliente</option>
-                    @foreach($clientes as $c)
-                        <option value="{{ $c->id }}" {{ old('cliente_id') == $c->id ? 'selected' : '' }}>{{ $c->nombre }}</option>
+                <label for="id_empleado">Empleado/Cliente</label>
+                <select id="id_empleado" name="id_empleado" class="form-select">
+                    <option value="">Seleccione... (opcional)</option>
+                    @foreach($empleados as $c)
+                        <option value="{{ $c->id }}" {{ old('id_empleado') == $c->id ? 'selected' : '' }}>{{ $c->persona?->nombre }} {{ $c->persona?->apellido_paterno }}</option>
                     @endforeach
                 </select>
-                @error('cliente_id') <span class="text-danger">{{ $message }}</span> @enderror
+                @error('id_empleado') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
                 <label for="concepto">Concepto *</label>
@@ -47,22 +48,39 @@
                 @error('concepto') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
-                <label for="monto">Monto *</label>
-                <input type="number" step="0.01" id="monto" name="monto" class="form-control" value="{{ old('monto', 0) }}" required>
-                @error('monto') <span class="text-danger">{{ $message }}</span> @enderror
+                <label for="monto_dado">Monto *</label>
+                <input type="number" step="0.01" id="monto_dado" name="monto_dado" class="form-control" value="{{ old('monto_dado', 0) }}" required>
+                @error('monto_dado') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
                 <label for="fecha">Fecha *</label>
                 <input type="date" id="fecha" name="fecha" class="form-control" value="{{ old('fecha', date('Y-m-d')) }}" required>
                 @error('fecha') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
-            <div class="form-group">
-                <label for="comprobante">Comprobante (Ruta/URL)</label>
-                <input type="text" id="comprobante" name="comprobante" class="form-control" value="{{ old('comprobante') }}" maxlength="255">
-                @error('comprobante') <span class="text-danger">{{ $message }}</span> @enderror
-            </div>
             <button type="submit" class="btn-submit">Guardar Ingreso</button>
         </form>
     </div>
 </div>
+<script>
+function actualizarRestante() {
+    const select = document.getElementById('id_obra');
+    const option = select.options[select.selectedIndex];
+    const restanteInfo = document.getElementById('restante-info');
+    
+    if(option.value) {
+        const restante = option.getAttribute('data-restante');
+        if(restante !== 'N/A') {
+            restanteInfo.innerHTML = '<i class="bi bi-info-circle-fill"></i> Restante por cobrar: $' + restante;
+        } else {
+            restanteInfo.innerHTML = '<i class="bi bi-info-circle-fill"></i> Sin presupuesto aprobado';
+        }
+    } else {
+        restanteInfo.innerHTML = '';
+    }
+}
+// Run on load in case old() value is selected
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarRestante();
+});
+</script>
 @endsection

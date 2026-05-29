@@ -53,40 +53,55 @@
         <div class="table-responsive">
             <table class="project-table">
                 <thead><tr><th>Concepto / Fecha</th><th>Proyecto</th><th>Categoría</th><th>Monto</th><th style="text-align:right;">Acciones</th></tr></thead>
-                <tbody>
-                @forelse($egresos as $egreso)
-                    @php $egresoId = $egreso->id; @endphp
-                    <tr class="project-row">
-                        <td><strong>{{ $egreso->concepto }}</strong><br><small class="text-muted">{{ \Carbon\Carbon::parse($egreso->fecha)->format('d/m/Y') }}</small></td>
-                        <td>{{ $egreso->proyecto->nombre ?? 'N/A' }}</td>
-                        <td>{{ $egreso->categoria->nombre ?? 'N/A' }}</td>
-                        <td class="text-danger">-${{ number_format($egreso->monto, 2) }}</td>
-                        <td class="action-cell">
-                            <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verEgresoModal{{ $egresoId }}"><i class="bi bi-eye"></i></button>
-                            <button type="button" class="btn-icon-action" title="Eliminar" data-bs-toggle="modal" data-bs-target="#eliminarEgresoModal{{ $egresoId }}"><i class="bi bi-trash3"></i></button>
-                        </td>
-                    </tr>
-                    <div class="modal fade" id="verEgresoModal{{ $egresoId }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
-                            <div class="modal-header"><h5 class="modal-title">{{ $egreso->concepto }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
-                            <div class="modal-body"><div class="detail-grid">
-                                <div class="detail-box"><h6>Detalle</h6><p><strong>Concepto:</strong> {{ $egreso->concepto }}</p><p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($egreso->fecha)->format('d/m/Y') }}</p><p><strong>Monto:</strong> ${{ number_format($egreso->monto, 2) }}</p></div>
-                                <div class="detail-box"><h6>Clasificación</h6><p><strong>Proyecto:</strong> {{ $egreso->proyecto->nombre ?? 'N/A' }}</p><p><strong>Categoría:</strong> {{ $egreso->categoria->nombre ?? 'N/A' }}</p></div>
+                @forelse($egresos as $mes => $items)
+                    @php
+                        $mesId = \Illuminate\Support\Str::slug($mes);
+                        $totalMes = $items->sum('pago');
+                    @endphp
+                    <tbody style="border-top: 2px solid #eaeaea;">
+                        <tr style="background:#f9f9f9; cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $mesId }}">
+                            <td colspan="3" style="font-size:1.05rem; font-weight:bold; text-transform:capitalize;"><i class="bi bi-calendar-check me-2"></i> {{ $mes }}</td>
+                            <td class="text-danger" style="font-weight:bold; font-size:1.05rem;">-${{ number_format($totalMes, 2) }}</td>
+                            <td class="text-end"><i class="bi bi-chevron-down text-muted"></i></td>
+                        </tr>
+                    </tbody>
+                    <tbody id="collapse-{{ $mesId }}" class="collapse show">
+                    @foreach($items as $egreso)
+                        @php $egresoId = $egreso->id; @endphp
+                        <tr class="project-row">
+                            <td><strong>{{ $egreso->concepto }}</strong><br><small class="text-muted">{{ \Carbon\Carbon::parse($egreso->fecha)->format('d/m/Y') }}</small></td>
+                            <td>{{ $egreso->obra->nombre ?? 'N/A' }}</td>
+                            <td>{{ $egreso->categoria ?? 'N/A' }}</td>
+                            <td class="text-danger">-${{ number_format($egreso->pago, 2) }}</td>
+                            <td class="action-cell">
+                                <button type="button" class="btn-icon-action" title="Ver" data-bs-toggle="modal" data-bs-target="#verEgresoModal{{ $egresoId }}"><i class="bi bi-eye"></i></button>
+                                <button type="button" class="btn-icon-action" title="Eliminar" data-bs-toggle="modal" data-bs-target="#eliminarEgresoModal{{ $egresoId }}"><i class="bi bi-trash3"></i></button>
+                            </td>
+                        </tr>
+                        <div class="modal fade" id="verEgresoModal{{ $egresoId }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
+                                <div class="modal-header"><h5 class="modal-title">{{ $egreso->concepto }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                                <div class="modal-body"><div class="detail-grid">
+                                    <div class="detail-box"><h6>Detalle</h6><p><strong>Concepto:</strong> {{ $egreso->concepto }}</p><p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($egreso->fecha)->format('d/m/Y') }}</p><p><strong>Monto:</strong> ${{ number_format($egreso->pago, 2) }}</p></div>
+                                    <div class="detail-box"><h6>Clasificación</h6><p><strong>Proyecto:</strong> {{ $egreso->obra->nombre ?? 'N/A' }}</p><p><strong>Categoría:</strong> {{ $egreso->categoria ?? 'N/A' }}</p></div>
+                                </div></div>
+                                <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button><a href="{{ route('egresos.edit', $egresoId) }}" class="btn-modal-dark">Editar</a></div>
                             </div></div>
-                            <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cerrar</button><a href="{{ route('egresos.edit', $egresoId) }}" class="btn-modal-dark">Editar</a></div>
-                        </div></div>
-                    </div>
-                    <div class="modal fade" id="eliminarEgresoModal{{ $egresoId }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
-                            <div class="modal-header"><h5 class="modal-title">Eliminar egreso</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
-                            <div class="modal-body">¿Deseas eliminar el egreso <strong>{{ $egreso->concepto }}</strong>?<br><br>Esta acción no se puede deshacer.</div>
-                            <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cancelar</button><form action="{{ route('egresos.destroy', $egresoId) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="btn-modal-danger">Eliminar</button></form></div>
-                        </div></div>
-                    </div>
+                        </div>
+                        <div class="modal fade" id="eliminarEgresoModal{{ $egresoId }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+                                <div class="modal-header"><h5 class="modal-title">Eliminar egreso</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+                                <div class="modal-body">¿Deseas eliminar el egreso <strong>{{ $egreso->concepto }}</strong>?<br><br>Esta acción no se puede deshacer.</div>
+                                <div class="modal-footer"><button type="button" class="btn-modal-light" data-bs-dismiss="modal">Cancelar</button><form action="{{ route('egresos.destroy', $egresoId) }}" method="POST">@csrf @method('DELETE')<button type="submit" class="btn-modal-danger">Eliminar</button></form></div>
+                            </div></div>
+                        </div>
+                    @endforeach
+                    </tbody>
                 @empty
-                    <tr class="project-row"><td colspan="5" class="empty-state">No hay egresos registrados por el momento.</td></tr>
+                    <tbody>
+                        <tr class="project-row"><td colspan="5" class="empty-state">No hay egresos registrados por el momento.</td></tr>
+                    </tbody>
                 @endforelse
-                </tbody>
             </table>
         </div>
     </div>

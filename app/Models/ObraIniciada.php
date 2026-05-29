@@ -27,7 +27,7 @@ class ObraIniciada extends Model
     public function encargado()      { return $this->belongsTo(Empleado::class, 'encargado_id_empleado'); }
     public function cliente()        { return $this->belongsTo(Cliente::class, 'id_cliente'); }
     public function niveles()        { return $this->hasMany(Nivel::class, 'id_obra'); }
-    public function obrasProceso()   { return $this->hasMany(ObraProceso::class, 'id_obras_iniciadas'); }
+    public function obraProceso()    { return $this->hasOne(ObraProceso::class, 'id_obra'); }
     public function obraConceptos(){ return $this->hasMany(ObraConcepto::class, 'id_obra'); }
     public function preProveedores() { return $this->hasMany(PreProveedor::class, 'id_obra'); }
     public function preMateriales()  { return $this->hasMany(PreMaterial::class, 'id_obra'); }

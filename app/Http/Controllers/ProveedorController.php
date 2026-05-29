@@ -41,6 +41,34 @@ class ProveedorController extends Controller
         }
     }
 
+    public function storeRapida(Request $request)
+    {
+        $request->validate([
+            'empresa' => 'required|string|max:255',
+            'nombre'  => 'nullable|string|max:255',
+            'email'   => 'nullable|email|unique:personas,email',
+        ]);
+        
+        DB::beginTransaction();
+        try {
+            $persona = Persona::create([
+                'nombre' => $request->nombre ?? 'N/A',
+                'email'  => $request->email,
+            ]);
+            $proveedor = Proveedor::create(['id_persona' => $persona->id, 'empresa' => $request->empresa]);
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'id' => $proveedor->id,
+                'text' => $proveedor->empresa . ' - ' . $persona->nombre
+            ]);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
     public function show($id)
     {
         $proveedor = Proveedor::with('persona')->findOrFail($id);

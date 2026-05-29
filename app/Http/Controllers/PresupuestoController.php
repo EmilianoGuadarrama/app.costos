@@ -534,4 +534,56 @@ class PresupuestoController extends Controller
         
         return $pdf->download('Presupuesto_' . str_replace(' ', '_', $obra->datosDeObra?->nombre ?? 'Obra') . '.pdf');
     }
+    // =======================================================
+    // 5. APROBAR PRESUPUESTO -> PASAR A OBRA EN PROCESO
+    // =======================================================
+    public function aprobar(Request $request, $obraId)
+    {
+        $obra = \App\Models\ObraIniciada::findOrFail($obraId);
+        
+        if (\App\Models\ObraProceso::where('id_obra', $obraId)->exists()) {
+            return redirect()->back()->with('error', 'El presupuesto ya fue aprobado.');
+        }
+
+        $conIva = $request->input('con_iva') ? true : false;
+        
+        $totalPresupuesto = $obra->total_presupuestado ?? 0;
+        
+        // Al aprobar, la fecha de inicio es HOY
+        $obra->fecha_inicio = now();
+        $obra->save();
+        
+        $duracion = (int) ($obra->duracion ?? 30);
+        $estimacion = $obra->fecha_inicio->copy()->addDays($duracion);
+
+        \App\Models\ObraProceso::create([
+            'id_obra' => $obraId,
+            'estado' => 'en_curso',
+            'con_iva' => $conIva,
+            'dias_transcurridos' => 0,
+            'porcentaje_avanzado' => 0,
+            'presupuesto_cubierto' => 0,
+            'presupuesto_restante' => $totalPresupuesto,
+            'porcentaje_restante' => 100,
+            'estimacion_de_entrega' => $estimacion,
+            'nivel_actual' => 'Inicio',
+        ]);
+        return redirect()->route('obras_proceso.fechas', $obraId)->with('success', 'Presupuesto aprobado. Por favor confirma la fecha de inicio y los días inhábiles.');
+    }
+
+    // =======================================================
+    // 6. CANCELAR APROBACIÓN DE PRESUPUESTO
+    // =======================================================
+    public function cancelarAprobacion(Request $request, $obraId)
+    {
+        $obra = \App\Models\ObraIniciada::findOrFail($obraId);
+        
+        $proceso = \App\Models\ObraProceso::where('id_obra', $obraId)->first();
+        if ($proceso) {
+            $proceso->delete();
+            return redirect()->route('obras.index')->with('success', 'Aprobación del presupuesto cancelada.');
+        }
+
+        return redirect()->route('obras.index')->with('error', 'El presupuesto no estaba aprobado.');
+    }
 }

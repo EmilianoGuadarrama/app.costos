@@ -15,6 +15,7 @@ use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\ManoObraController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\EgresoController;
+use App\Http\Controllers\ObraProcesoController;
 use App\Http\Controllers\CajaGeneralController;
 
 // ── Inicio ───────────────────────────────────────────────────────────────────
@@ -27,6 +28,21 @@ Route::get('obras/papelera', [ObraController::class, 'papelera'])->name('obras.p
 Route::post('obras/{id}/restaurar', [ObraController::class, 'restaurar'])->name('obras.restaurar');
 Route::delete('obras/{id}/force', [ObraController::class, 'forceDelete'])->name('obras.forceDelete');
 Route::resource('obras', ObraController::class);
+
+// ==========================================
+// 1.5 OBRAS EN PROCESO Y ENTREGADAS
+// ==========================================
+Route::get('obras_proceso', [ObraProcesoController::class, 'index'])->name('obras_proceso.index');
+Route::get('obras_proceso/{id}', [ObraProcesoController::class, 'show'])->name('obras_proceso.show');
+Route::get('obras_proceso/{id}/fechas', [ObraProcesoController::class, 'editFechas'])->name('obras_proceso.fechas');
+Route::post('obras_proceso/{id}/fechas', [ObraProcesoController::class, 'updateFechas'])->name('obras_proceso.fechas.update');
+Route::post('obras_proceso/{id}/pausar', [ObraProcesoController::class, 'pausar'])->name('obras_proceso.pausar');
+Route::post('obras_proceso/{id}/finalizar', [ObraProcesoController::class, 'finalizar'])->name('obras_proceso.finalizar');
+
+Route::get('obras_entregadas/reporte/{id}', function($id) {
+    $entregada = \App\Models\ObraEntregada::with('obraProceso.obraIniciada.datosDeObra')->findOrFail($id);
+    return view('obras_entregadas.reporte', compact('entregada'));
+})->name('obras_entregadas.reporte');
 
 // ==========================================
 // 2. PRESUPUESTO (asigna_conceptos + asigna_materiales + asigna_maquinaria)
@@ -50,6 +66,10 @@ Route::prefix('obras/{obraId}/presupuesto')->group(function () {
     // *** FORMULARIO UNIFICADO (Conceptos + Materiales + Maquinaria) ***
     Route::get('/agregar-todo', [PresupuestoController::class, 'createUnificado'])->name('obras.presupuesto.unificado.create');
     Route::post('/agregar-todo', [PresupuestoController::class, 'storeUnificado'])->name('obras.presupuesto.unificado.store');
+
+    // Aprobar Presupuesto
+    Route::post('/aprobar', [PresupuestoController::class, 'aprobar'])->name('obras.presupuesto.aprobar');
+    Route::post('/cancelar-aprobacion', [PresupuestoController::class, 'cancelarAprobacion'])->name('obras.presupuesto.cancelar_aprobacion');
 
     // Exportaciones
     Route::get('/export-excel', [PresupuestoController::class, 'exportExcel'])->name('obras.presupuesto.export_excel');
@@ -78,6 +98,17 @@ Route::resource('unidad_medida', UnidadMedidaController::class)
 // 4. ENTIDADES
 // ==========================================
 Route::resource('clientes', ClienteController::class);
+// ==========================================
+// Presupuestos de Proveedores
+// ==========================================
+Route::get('proveedores/presupuestos', [\App\Http\Controllers\PreProveedorController::class, 'index'])->name('pre_proveedores.index');
+Route::post('proveedores/presupuestos', [\App\Http\Controllers\PreProveedorController::class, 'store'])->name('pre_proveedores.store');
+Route::post('proveedores/presupuestos/{id}/aprobar', [\App\Http\Controllers\PreProveedorController::class, 'aprobar'])->name('pre_proveedores.aprobar');
+Route::post('proveedores/presupuestos/{id}/pago', [\App\Http\Controllers\PreProveedorController::class, 'registrarPago'])->name('pre_proveedores.pago');
+Route::post('proveedores/presupuestos/{id}/extras', [\App\Http\Controllers\PreProveedorController::class, 'updateExtras'])->name('pre_proveedores.updateExtras');
+Route::delete('proveedores/presupuestos/{id}', [\App\Http\Controllers\PreProveedorController::class, 'destroy'])->name('pre_proveedores.destroy');
+Route::post('proveedores/presupuestos/{id}/restore', [\App\Http\Controllers\PreProveedorController::class, 'restore'])->name('pre_proveedores.restore');
+
 Route::resource('proveedores', ProveedorController::class);
 Route::resource('empleados', EmpleadoController::class);
 
@@ -89,6 +120,7 @@ Route::resource('egresos', EgresoController::class);
 // Caja general — solo index y show (no hay CRUD completo)
 Route::get('caja_general', [CajaGeneralController::class, 'index'])->name('caja_general.index');
 Route::get('caja_general/{id}', [CajaGeneralController::class, 'show'])->name('caja_general.show');
+
 
 // ==========================================
 // 6. API — Autocompletado y helpers
@@ -107,3 +139,4 @@ Route::post('/api/bloques/rapida',    [PresupuestoController::class,'storeBloque
 Route::post('/api/materiales/rapida', [MaterialController::class,   'storeRapida'])->name('api.materiales.storeRapida');
 Route::post('/api/mano_obra/rapida',  [ManoObraController::class,   'storeRapida'])->name('api.mano_obra.storeRapida');
 Route::post('/api/maquinaria/rapida', [MaquinariaController::class, 'storeRapida'])->name('api.maquinaria.storeRapida');
+Route::post('/api/proveedores/rapida',[ProveedorController::class,  'storeRapida'])->name('api.proveedores.storeRapida');

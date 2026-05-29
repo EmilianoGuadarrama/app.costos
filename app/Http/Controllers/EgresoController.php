@@ -11,8 +11,13 @@ class EgresoController extends Controller
 {
     public function index()
     {
-        $egresos = EgresoTotal::with(['obra.datosDeObra','area','persona'])
-            ->latest('fecha')->paginate(30);
+        $egresosList = EgresoTotal::with(['obra.datosDeObra','area','persona'])
+            ->orderBy('fecha', 'desc')->get();
+            
+        $egresos = $egresosList->groupBy(function($item) {
+            return \Carbon\Carbon::parse($item->fecha)->isoFormat('MMMM YYYY');
+        });
+
         return view('egresos.index', compact('egresos'));
     }
 

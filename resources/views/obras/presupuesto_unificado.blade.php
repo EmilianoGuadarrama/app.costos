@@ -268,6 +268,13 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
             <h4 id="tot_final" style="margin:0; font-size:1.5rem; color:#111; font-weight:800;">$0.00</h4>
         </div>
     </div>
+
+    {{-- BOTON APROBAR PRESUPUESTO --}}
+    <div style="display:flex; justify-content:flex-end; margin-top:15px;">
+        <button type="button" onclick="abrirModalAprobar()" class="btn-save" style="background:#059669; padding: 0.5rem 1.2rem; font-size: 0.9rem; border: none; border-radius: 9px; color: #fff; cursor: pointer; transition: 0.2s;">
+            <i class="bi bi-check-circle-fill me-1"></i> Aprobar Presupuesto
+        </button>
+    </div>
 </div>
 
 {{-- MODAL REGISTRO RÁPIDO ──────────────────────────────────────────── --}}
@@ -290,6 +297,43 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
 </div>
 
 <div id="toast"></div>
+
+{{-- MODAL APROBAR PRESUPUESTO ──────────────────────────────────────────── --}}
+<div id="modalAprobarOverlay" onclick="if(event.target===this)cerrarModalAprobar()" style="position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:18px;width:100%;max-width:400px;padding:28px 32px;box-shadow:0 25px 60px rgba(0,0,0,.3);animation:modalIn .2s ease;">
+        <p class="modal-title">
+            <i class="bi bi-check2-circle text-success"></i>
+            <span>Aprobar Presupuesto</span>
+            <button class="modal-close ms-auto" onclick="cerrarModalAprobar()">&times;</button>
+        </p>
+        <p class="modal-sub">¿Cómo se aplicará el presupuesto para la obra en proceso?</p>
+        
+        <form action="{{ route('obras.presupuesto.aprobar', $obra->id) }}" method="POST" id="formAprobarPresupuesto">
+            @csrf
+            <div class="m-field">
+                <label class="m-label">Selecciona el tipo de IVA</label>
+                <select name="con_iva" class="m-ctrl" required>
+                    <option value="1">Con IVA (Presupuesto + IVA)</option>
+                    <option value="0">Sin IVA (Solo Subtotal)</option>
+                </select>
+            </div>
+            
+            <div class="modal-actions" style="margin-top:15px; border-top:none;">
+                <button type="button" class="btn-modal-cancel" onclick="cerrarModalAprobar()">Cancelar</button>
+                <button type="submit" class="btn-modal-save" style="background:#059669;"><i class="bi bi-check-lg"></i> Confirmar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function abrirModalAprobar() {
+    document.getElementById("modalAprobarOverlay").style.display = "flex";
+}
+function cerrarModalAprobar() {
+    document.getElementById("modalAprobarOverlay").style.display = "none";
+}
+</script>
 
 <script>
 /* ─────────── DATOS DEL SERVIDOR ─────────── */

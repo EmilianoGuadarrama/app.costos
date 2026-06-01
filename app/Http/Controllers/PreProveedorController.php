@@ -38,7 +38,7 @@ class PreProveedorController extends Controller
         $extras = $request->extras ?? 0;
         $total = $presupuesto + $extras;
 
-        PreProveedor::create([
+        $preProveedor = PreProveedor::create([
             'id_proveedor' => $request->id_proveedor,
             'id_area'      => $request->id_area,
             'id_obra'      => $request->id_obra,
@@ -49,6 +49,29 @@ class PreProveedorController extends Controller
             'pagado'       => 0,
             'estado'       => 'pendiente',
         ]);
+
+        if ($request->opcion_materiales === 'si' && $request->has('materiales_incluidos')) {
+            $proveedorObj = Proveedor::find($request->id_proveedor);
+            $proveedorNombre = $proveedorObj->empresa ?? 'S/N';
+            $idPersonaProv = $proveedorObj->id_persona ?? null;
+
+            foreach ($request->materiales_incluidos as $id_mat => $cantidad) {
+                if ($cantidad > 0) {
+                    EgresoTotal::create([
+                        'id_obra'           => $request->id_obra,
+                        'id_persona'        => $idPersonaProv,
+                        'id_material'       => $id_mat,
+                        'cantidad_material' => $cantidad,
+                        'pago'              => 0,
+                        'monto_material'    => 0,
+                        'fecha'             => now(),
+                        'id_pre_proveedor'  => $preProveedor->id,
+                        'categoria'         => 'Materiales',
+                        'concepto'          => 'Material cubierto en conjunto con el presupuesto de proveedor: ' . $proveedorNombre,
+                    ]);
+                }
+            }
+        }
 
         return redirect()->to(route('pre_proveedores.index') . '#pendientes')->with('success', 'Presupuesto de proveedor registrado correctamente.');
     }

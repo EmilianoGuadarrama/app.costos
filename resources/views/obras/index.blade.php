@@ -50,6 +50,8 @@
 .btn-presup:hover { background:#2563eb; color:#fff; }
 .btn-caja   { border-color:#059669; color:#059669; }
 .btn-caja:hover   { background:#059669; color:#fff; }
+.btn-materiales { border-color:#9333ea; color:#9333ea; }
+.btn-materiales:hover { background:#9333ea; color:#fff; }
 
 .empty-state { text-align:center; padding:80px 40px; color:#9ca3af; }
 .empty-state i { font-size:4rem; color:#d1d5db; display:block; margin-bottom:20px; }
@@ -198,6 +200,9 @@
                     <i class="bi bi-wallet2 me-1"></i>Caja
                 </a>
                 @endif
+                <a href="{{ route('obras.materiales', $obra->id) }}" class="btn-obra btn-materiales" id="btn-materiales-{{ $obra->id }}">
+                    <i class="bi bi-bricks me-1"></i>Materiales
+                </a>
                 <button type="button" class="btn-obra btn-eliminar" style="border-color:#dc2626; color:#dc2626; background:transparent; cursor:pointer;" onclick="if(confirm('¿Estás seguro de cancelar la aprobación de \'{{ addslashes($datos?->nombre) }}\'? La obra regresará a estado de presupuesto sin aprobar.')) { document.getElementById('form-cancelar-{{ $obra->id }}').submit(); }">
                     <i class="bi bi-x-circle me-1"></i>Cancelar
                 </button>

@@ -475,6 +475,144 @@ class PresupuestoExport implements WithTitle, WithEvents
         ]);
 
         // ════════════════════════════════════════════════════════════════
+        // LISTA DE MATERIALES
+        // ════════════════════════════════════════════════════════════════
+        $currentRow += 3;
+        
+        $materialesPorNivelArea = [];
+        $obra->load('obraConceptos.materiales.material.unidadMedida', 'obraConceptos.nivel', 'obraConceptos.area');
+        foreach ($obra->obraConceptos as $oc) {
+            if ($oc->materiales->isEmpty()) continue;
+            $nivelId = $oc->id_nivel ?: 0;
+            $areaId = $oc->id_area ?: 0;
+
+            if (!isset($materialesPorNivelArea[$nivelId])) {
+                $materialesPorNivelArea[$nivelId] = ['nombre' => $oc->nivel ? $oc->nivel->descripcion : 'GENERAL / SIN NIVEL', 'areas' => []];
+            }
+            if (!isset($materialesPorNivelArea[$nivelId]['areas'][$areaId])) {
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId] = ['nombre' => $oc->area ? $oc->area->descripcion : 'Sin Área', 'materiales' => []];
+            }
+
+            foreach ($oc->materiales as $mat) {
+                if (!$mat->material) continue;
+                $matId = $mat->id_material;
+                if (!isset($materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId])) {
+                    $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId] = ['material' => $mat->material, 'cantidad_total' => 0, 'costo_total' => 0];
+                }
+                $cant_req = $mat->cantidad * $oc->cantidad;
+                $costo    = $mat->precio_unitario * $cant_req;
+
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId]['cantidad_total'] += $cant_req;
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId]['costo_total']    += $costo;
+            }
+        }
+
+        if (!empty($materialesPorNivelArea)) {
+            $sheet->getRowDimension($currentRow)->setRowHeight(20);
+            $sheet->mergeCells("A{$currentRow}:I{$currentRow}");
+            $sheet->setCellValue("A{$currentRow}", 'LISTA DE MATERIALES A UTILIZAR POR NIVEL Y ÁREA');
+            $this->applyStyle($sheet, "A{$currentRow}:I{$currentRow}", [
+                'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => self::COLOR_TEXTO_NEGRO]],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ]);
+            $currentRow++;
+
+            // Encabezado de tabla de materiales
+            $sheet->getRowDimension($currentRow)->setRowHeight(18);
+            $sheet->mergeCells("A{$currentRow}:C{$currentRow}");
+            $sheet->setCellValue("A{$currentRow}", 'MATERIAL');
+            $sheet->mergeCells("D{$currentRow}:F{$currentRow}");
+            $sheet->setCellValue("D{$currentRow}", 'CANTIDAD TOTAL');
+            $sheet->mergeCells("G{$currentRow}:I{$currentRow}");
+            $sheet->setCellValue("G{$currentRow}", 'COSTO ESTIMADO');
+
+            $this->applyStyle($sheet, "A{$currentRow}:I{$currentRow}", [
+                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => self::COLOR_TEXTO_BLANCO]],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => self::COLOR_NEGRO]],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '333333']]],
+            ]);
+            $currentRow++;
+
+            $granTotalMateriales = 0;
+
+            foreach ($materialesPorNivelArea as $nivelId => $nivelData) {
+                // Fila de nivel
+                $sheet->getRowDimension($currentRow)->setRowHeight(18);
+                $sheet->mergeCells("A{$currentRow}:I{$currentRow}");
+                $sheet->setCellValue("A{$currentRow}", mb_strtoupper($nivelData['nombre']));
+                $this->applyStyle($sheet, "A{$currentRow}:I{$currentRow}", [
+                    'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => self::COLOR_TEXTO_NEGRO]],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => self::COLOR_BLANCO]],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]],
+                ]);
+                $currentRow++;
+
+                foreach ($nivelData['areas'] as $areaId => $areaData) {
+                    if (empty($areaData['materiales'])) continue;
+
+                    // Fila de area
+                    $sheet->getRowDimension($currentRow)->setRowHeight(16);
+                    $sheet->mergeCells("A{$currentRow}:I{$currentRow}");
+                    $sheet->setCellValue("A{$currentRow}", '   ' . strtoupper($areaData['nombre']));
+                    $this->applyStyle($sheet, "A{$currentRow}:I{$currentRow}", [
+                        'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => self::COLOR_TEXTO_NEGRO]],
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => 'F0F0F0']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+                        'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]],
+                    ]);
+                    $currentRow++;
+
+                    foreach ($areaData['materiales'] as $matId => $data) {
+                        $granTotalMateriales += $data['costo_total'];
+                        
+                        $sheet->getRowDimension($currentRow)->setRowHeight(15);
+                        $sheet->mergeCells("A{$currentRow}:C{$currentRow}");
+                        $sheet->setCellValue("A{$currentRow}", '      ' . mb_strtoupper($data['material']->nombre));
+                        
+                        $sheet->mergeCells("D{$currentRow}:F{$currentRow}");
+                        $sheet->setCellValue("D{$currentRow}", number_format($data['cantidad_total'], 2) . ' ' . ($data['material']->unidadMedida?->abreviatura ?? ''));
+
+                        $sheet->mergeCells("G{$currentRow}:I{$currentRow}");
+                        $sheet->setCellValue("G{$currentRow}", $data['costo_total']);
+
+                        $this->applyStyle($sheet, "A{$currentRow}:I{$currentRow}", [
+                            'font' => ['bold' => false, 'size' => 11, 'color' => ['rgb' => self::COLOR_TEXTO_NEGRO]],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => self::COLOR_BLANCO]],
+                            'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
+                            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'EEEEEE']]],
+                        ]);
+                        
+                        $sheet->getStyle("D{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                        $sheet->getStyle("G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                        $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('"$"#,##0.00');
+
+                        $currentRow++;
+                    }
+                }
+            }
+
+            // Total de materiales
+            $sheet->getRowDimension($currentRow)->setRowHeight(20);
+            $sheet->mergeCells("A{$currentRow}:F{$currentRow}");
+            $sheet->setCellValue("A{$currentRow}", 'TOTAL ESTIMADO EN MATERIALES:');
+            $sheet->mergeCells("G{$currentRow}:I{$currentRow}");
+            $sheet->setCellValue("G{$currentRow}", $granTotalMateriales);
+
+            $this->applyStyle($sheet, "A{$currentRow}:I{$currentRow}", [
+                'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => self::COLOR_TEXTO_NEGRO]],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => self::COLOR_GRIS_CLARO]],
+                'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'AAAAAA']]],
+            ]);
+            $sheet->getStyle("A{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->getStyle("G{$currentRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->getStyle("G{$currentRow}")->getNumberFormat()->setFormatCode('"$"#,##0.00');
+            $currentRow++;
+        }
+
+        // ════════════════════════════════════════════════════════════════
         // LOGO DE LA EMPRESA
         // ════════════════════════════════════════════════════════════════
         $logoPath = public_path('img/logo_akiraka.jpeg');

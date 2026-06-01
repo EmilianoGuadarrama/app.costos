@@ -322,7 +322,7 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
             <button class="btn-hdr btn-hdr-dark" onclick="toggleTodosDesgloses()">
                 <i class="bi bi-diagram-3"></i> Desglosar
             </button>
-            @if($obra->obraConceptos->isNotEmpty())
+            @if($obra->obraConceptos->isNotEmpty() && !$obra->obraProceso)
             <button type="button" class="btn-hdr btn-hdr-green" onclick="abrirModalAprobar()">
                 <i class="bi bi-check-circle-fill"></i> Aprobar
             </button>
@@ -581,6 +581,65 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
     </div>
 @endif
 
+@if(!empty($materialesPorNivelArea))
+    <div style="margin-top:40px;">
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: #111; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+            <i class="bi bi-box-seam me-2"></i>Lista de Materiales a Utilizar por Nivel y Área
+        </h3>
+        <div class="pres-table-wrap" style="border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <table class="pres-tabla" style="min-width: 100%;">
+                <thead style="background: #111; color: #fff;">
+                    <tr>
+                        <th style="padding: 10px 14px; text-align: left; font-size: 0.75rem;">Material</th>
+                        <th style="padding: 10px 14px; text-align: center; font-size: 0.75rem;">Cantidad Total</th>
+                        <th style="padding: 10px 14px; text-align: right; font-size: 0.75rem;">Costo Estimado</th>
+                    </tr>
+                </thead>
+                <tbody style="background: #fff;">
+                    @php $granTotalMateriales = 0; @endphp
+                    
+                    @foreach($materialesPorNivelArea as $nivelId => $nivelData)
+                        <tr class="row-nivel">
+                            <td colspan="3" style="padding: 12px 14px; background: #fff; color: #111; font-weight: 900; font-size: 0.88rem; border-top: 3px solid #111; border-bottom: 1px solid #e5e7eb; text-transform: uppercase;">
+                                <i class="bi bi-layers me-2"></i>{{ mb_strtoupper($nivelData['nombre']) }}
+                            </td>
+                        </tr>
+                        @foreach($nivelData['areas'] as $areaId => $areaData)
+                            @if(!empty($areaData['materiales']))
+                                <tr class="row-bloque">
+                                    <td colspan="3" style="text-align:left; padding: 7px 11px; padding-left: 28px; background: #1c1c1c; color: #fff; font-weight: 700; font-size: 0.74rem; text-transform: uppercase;">
+                                        <i class="bi bi-geo-alt me-1"></i> {{ strtoupper($areaData['nombre']) }}
+                                    </td>
+                                </tr>
+                                @foreach($areaData['materiales'] as $matId => $data)
+                                    @php $granTotalMateriales += $data['costo_total']; @endphp
+                                    <tr style="border-bottom: 1px solid #f3f4f6;">
+                                        <td style="padding: 12px 14px; color: #1f2937; font-weight: 600; padding-left: 40px;">
+                                            {{ $data['material']->nombre }}
+                                        </td>
+                                        <td style="padding: 12px 14px; text-align: center; color: #4b5563;">
+                                            {{ number_format($data['cantidad_total'], 2) }} {{ $data['material']->unidadMedida?->abreviatura ?? '' }}
+                                        </td>
+                                        <td style="padding: 12px 14px; text-align: right; color: #111; font-family: monospace; font-weight: 700;">
+                                            ${{ number_format($data['costo_total'], 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
+                        @endforeach
+                    @endforeach
+                    
+                    <tr style="background: #f9fafb; border-top: 2px solid #e5e7eb;">
+                        <td colspan="2" style="padding: 12px 14px; text-align: right; font-weight: 800; color: #111; text-transform: uppercase;">Total Gastos en Materiales:</td>
+                        <td style="padding: 12px 14px; text-align: right; font-weight: 900; color: #b91c1c; font-family: monospace; font-size: 1.05rem;">
+                            ${{ number_format($granTotalMateriales, 2) }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+@endif
 
 </div>
 

@@ -52,6 +52,38 @@
                 @error('id_persona') <span class="text-danger">{{ $message }}</span> @enderror
             </div>
             <div class="form-group">
+                <label for="id_material">Material Comprado (Opcional - Para control de obra)</label>
+                <select id="id_material" name="id_material" class="form-select">
+                    <option value="">-- No es material o no especificar --</option>
+                    @foreach($materiales as $m)
+                        <option value="{{ $m->id }}" {{ old('id_material') == $m->id ? 'selected' : '' }}>{{ $m->nombre }} - {{ $m->marca }} ({{ $m->unidadMedida?->abreviatura }})</option>
+                    @endforeach
+                </select>
+                @error('id_material') <span class="text-danger">{{ $message }}</span> @enderror
+            </div>
+            <div class="form-group" id="group_cantidad_material" style="display: none;">
+                <label for="cantidad_material">Cantidad Comprada</label>
+                <input type="number" step="0.01" id="cantidad_material" name="cantidad_material" class="form-control" value="{{ old('cantidad_material') }}">
+                <small class="text-muted">Cantidad de material (solo aplica si selecciona un material arriba).</small>
+                @error('cantidad_material') <span class="text-danger">{{ $message }}</span> @enderror
+            </div>
+            
+            <script>
+                document.getElementById('id_material').addEventListener('change', function() {
+                    const group = document.getElementById('group_cantidad_material');
+                    if(this.value) {
+                        group.style.display = 'block';
+                    } else {
+                        group.style.display = 'none';
+                        document.getElementById('cantidad_material').value = '';
+                    }
+                });
+                // run once on load in case there's old input
+                if(document.getElementById('id_material').value) {
+                    document.getElementById('group_cantidad_material').style.display = 'block';
+                }
+            </script>
+            <div class="form-group">
                 <label for="concepto">Concepto (Descripción)</label>
                 <input type="text" id="concepto" name="concepto" class="form-control" value="{{ old('concepto') }}" maxlength="255">
                 @error('concepto') <span class="text-danger">{{ $message }}</span> @enderror

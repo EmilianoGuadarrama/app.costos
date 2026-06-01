@@ -5,6 +5,7 @@ use App\Models\IngresoTotal;
 use App\Models\ObraIniciada;
 use App\Models\Empleado;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class IngresoController extends Controller
 {
@@ -47,5 +48,28 @@ class IngresoController extends Controller
     {
         IngresoTotal::findOrFail($id)->delete();
         return redirect()->route('ingresos.index')->with('success', 'Ingreso eliminado.');
+    }
+
+    /**
+     * Genera PDF de ingresos del mes indicado.
+     * Ruta: GET /ingresos/pdf/{anio}/{mes}
+     */
+    public function pdfMes(int $anio, int $mes)
+    {
+        $ingresos = IngresoTotal::with(['obra.datosDeObra', 'empleado.persona'])
+            ->whereYear('fecha', $anio)
+            ->whereMonth('fecha', $mes)
+            ->orderBy('fecha', 'asc')
+            ->get();
+
+        $mesNombre = \Carbon\Carbon::createFromDate($anio, $mes, 1)
+            ->isoFormat('MMMM [de] YYYY');
+
+        $pdf = Pdf::loadView('ingresos.pdf_mes', compact('ingresos', 'mesNombre'))
+            ->setPaper('letter', 'landscape');
+
+        $nombreArchivo = 'ingresos_' . $anio . '_' . str_pad($mes, 2, '0', STR_PAD_LEFT) . '.pdf';
+
+        return $pdf->download($nombreArchivo);
     }
 }

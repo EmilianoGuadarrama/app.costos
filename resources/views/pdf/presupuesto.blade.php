@@ -5,21 +5,19 @@
 <title>Presupuesto — {{ $obra->datosDeObra?->nombre ?? 'Obra' }}</title>
 <style>
 /* ── RESET & BASE ── */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* { box-sizing: border-box; }
 body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 11pt;
     color: #1a1a1a;
     background: #ffffff;
     line-height: 1.5;
-    margin: 0;
-    padding: 0;
 }
 
 /* ── PÁGINA ── */
 @page {
     size: letter portrait;
-    margin: 3.5cm 2.5cm 3cm 2.5cm; /* Márgenes amplios como en la referencia */
+    margin: 2cm 1.5cm 2cm 1.5cm; /* Márgenes amplios como en la referencia */
 }
 
 /* ── PORTADA ── */
@@ -134,19 +132,7 @@ body {
     $logoExists = file_exists($logoPath);
 @endphp
 
-{{-- ── PORTADA ── --}}
-<div class="portada-wrap">
-    @if($logoExists)
-        <img src="{{ $logoPath }}" class="portada-logo" alt="Logo Akiraka">
-    @else
-        <div style="font-size:30pt; font-weight:bold; margin-bottom:25pt; letter-spacing:2pt;">AKIRAKA</div>
-    @endif
-    <div class="portada-proyecto">{{ mb_strtoupper($nombreObra) }}</div>
-    <div class="portada-asunto">PRESUPUESTO: {{ mb_strtoupper($nombreObra) }}</div>
-    <div class="portada-fecha">{{ mb_strtoupper($mesAnio) }}</div>
-</div>
 
-<div class="page-break"></div>
 
 {{-- ── CARTA FORMAL ── --}}
 <div class="fecha-derecha">
@@ -199,16 +185,20 @@ body {
         <div class="bloque-item">
             <div class="bloque-titulo">{{ $letra }}) {{ mb_strtoupper($b->descripcion) }}</div>
             
+            <table style="width: 100%; border-collapse: collapse;">
             @php $num = 1; @endphp
             @foreach($conceptos as $oc)
-                <div class="concepto-item">
-                    {{ $num }}. {{ $oc->concepto?->descripcion ?? '' }}
-                </div>
-                <div class="concepto-precio">
-                    ${{ number_format($oc->total_final ?? $oc->subtotal, 2) }} más IVA.
-                </div>
+                <tr>
+                    <td style="width: 82%; vertical-align: top; padding-left: 20pt; padding-bottom: 12pt; text-align: justify;">
+                        {{ $num }}. {{ $oc->concepto?->descripcion ?? '' }}
+                    </td>
+                    <td style="width: 18%; vertical-align: bottom; padding-bottom: 12pt; text-align: right; font-weight: bold; white-space: nowrap;">
+                        ${{ number_format($oc->total_final ?? $oc->subtotal, 2) }} más IVA.
+                    </td>
+                </tr>
                 @php $num++; @endphp
             @endforeach
+            </table>
         </div>
     @endforeach
 </div>
@@ -223,6 +213,57 @@ body {
     <div class="firma-texto">ATENTAMENTE:</div>
     <div class="firma-nombre">ARQ. ALBERTO AKIRA KAMETA MIYAMOTO</div>
 </div>
+
+@if(!empty($materialesPorNivelArea))
+<div class="page-break"></div>
+<div style="font-size: 12pt; font-weight: bold; margin-bottom: 15pt; text-align: center; border-bottom: 2px solid #111; padding-bottom: 5pt;">
+    LISTA DE MATERIALES A UTILIZAR POR NIVEL Y ÁREA
+</div>
+<table style="width: 100%; border-collapse: collapse; font-size: 10pt;">
+    <thead>
+        <tr>
+            <th style="background: #111; color: #fff; padding: 6pt; text-align: left;">MATERIAL</th>
+            <th style="background: #111; color: #fff; padding: 6pt; text-align: center;">CANTIDAD TOTAL</th>
+            <th style="background: #111; color: #fff; padding: 6pt; text-align: right;">COSTO ESTIMADO</th>
+        </tr>
+    </thead>
+    <tbody>
+        @php $granTotalMateriales = 0; @endphp
+        @foreach($materialesPorNivelArea as $nivelId => $nivelData)
+            <tr>
+                <td colspan="3" style="padding: 8pt 6pt; background: #fff; font-weight: bold; font-size: 11pt; border-top: 2px solid #111; border-bottom: 1px solid #ccc;">
+                    {{ mb_strtoupper($nivelData['nombre']) }}
+                </td>
+            </tr>
+            @foreach($nivelData['areas'] as $areaId => $areaData)
+                @if(!empty($areaData['materiales']))
+                    <tr>
+                        <td colspan="3" style="padding: 5pt 6pt 5pt 20pt; background: #f0f0f0; font-weight: bold; font-size: 9pt;">
+                            {{ strtoupper($areaData['nombre']) }}
+                        </td>
+                    </tr>
+                    @foreach($areaData['materiales'] as $matId => $data)
+                        @php $granTotalMateriales += $data['costo_total']; @endphp
+                        <tr>
+                            <td style="padding: 5pt 6pt 5pt 30pt; border-bottom: 1px solid #eee;">{{ mb_strtoupper($data['material']->nombre) }}</td>
+                            <td style="padding: 5pt 6pt; text-align: center; border-bottom: 1px solid #eee;">
+                                {{ number_format($data['cantidad_total'], 2) }} {{ $data['material']->unidadMedida?->abreviatura ?? '' }}
+                            </td>
+                            <td style="padding: 5pt 6pt; text-align: right; border-bottom: 1px solid #eee;">
+                                ${{ number_format($data['costo_total'], 2) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                @endif
+            @endforeach
+        @endforeach
+        <tr>
+            <td colspan="2" style="padding: 8pt 6pt; text-align: right; font-weight: bold;">TOTAL ESTIMADO EN MATERIALES:</td>
+            <td style="padding: 8pt 6pt; text-align: right; font-weight: bold; font-size: 11pt;">${{ number_format($granTotalMateriales, 2) }}</td>
+        </tr>
+    </tbody>
+</table>
+@endif
 
 </body>
 </html>

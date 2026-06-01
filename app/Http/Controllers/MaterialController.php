@@ -10,7 +10,12 @@ class MaterialController extends Controller
     public function index()
     {
         $materiales = Material::with('unidadMedida')->orderBy('nombre')->paginate(50);
-        return view('materiales.index', compact('materiales'));
+        $compras = \App\Models\EgresoTotal::with('material.unidadMedida', 'obra.datosDeObra', 'preProveedor.proveedor')
+            ->whereNotNull('id_material')
+            ->orderBy('fecha', 'desc')
+            ->get();
+            
+        return view('materiales.index', compact('materiales', 'compras'));
     }
 
     public function create()

@@ -205,8 +205,9 @@
                         <div class="col-md-6">
                             <label class="form-label">Proveedor Responsable *</label>
                             <div class="input-group">
-                                <select name="id_proveedor" id="id_proveedor" class="form-select" required>
+                                <select name="id_proveedor" id="id_proveedor" class="form-select" required onchange="checkNuevoSelect(this, '#modalCrearProveedor')">
                                     <option value="">Selecciona un proveedor...</option>
+                                    <option value="nuevo" class="fw-bold text-primary">+ Añadir nuevo proveedor...</option>
                                     @foreach($proveedores as $prov)
                                         <option value="{{ $prov->id }}">{{ $prov->empresa }} - {{ $prov->persona->nombre ?? '' }}</option>
                                     @endforeach
@@ -217,8 +218,9 @@
                         <div class="col-md-6">
                             <label class="form-label">Área *</label>
                             <div class="input-group">
-                                <select name="id_area" id="id_area" class="form-select" required>
+                                <select name="id_area" id="id_area" class="form-select" required onchange="checkNuevoSelect(this, '#modalCrearArea')">
                                     <option value="">Selecciona un área...</option>
+                                    <option value="nuevo" class="fw-bold text-primary">+ Añadir nueva área...</option>
                                     @foreach($areas as $area)
                                         <option value="{{ $area->id }}">{{ $area->abreviatura }} - {{ $area->descripcion }}</option>
                                     @endforeach
@@ -231,13 +233,23 @@
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label class="form-label">Asignar a Obra (Opcional)</label>
-                            <select name="id_obra" class="form-select">
+                            <select name="id_obra" id="id_obra_presupuesto" class="form-select">
                                 <option value="">-- EGRESOS GENERALES (Sin obra) --</option>
                                 @foreach($obras as $obra)
                                     <option value="{{ $obra->id }}">{{ $obra->datosDeObra->nombre }}</option>
                                 @endforeach
                             </select>
                             <small class="text-muted">Si lo dejas en blanco, los pagos se reflejarán como un Egreso General. Solo se muestran obras en proceso.</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3" id="materiales_pendientes_row" style="display: none;">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Materiales Pendientes de la Obra</label>
+                            <div class="p-3 border rounded" style="background: #fafafa; max-height: 200px; overflow-y: auto;" id="materiales_pendientes_container">
+                                <!-- Checkboxes will be injected here via JS -->
+                            </div>
+                            <small class="text-muted d-block mt-1">Selecciona los materiales que están incluidos en el presupuesto de este proveedor. Sus costos se registrarán como cubiertos por el proveedor.</small>
                         </div>
                     </div>
 
@@ -366,6 +378,115 @@
                 alert("Error al crear área");
             }
         });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const obraSelect = document.getElementById('id_obra_presupuesto');
+        const matRow = document.getElementById('materiales_pendientes_row');
+        const matContainer = document.getElementById('materiales_pendientes_container');
+
+        obraSelect.addEventListener('change', function() {
+            let id_obra = this.value;
+            if(!id_obra) {
+                matRow.style.display = 'none';
+                matContainer.innerHTML = '';
+                return;
+            }
+
+            matRow.style.display = 'block';
+            matContainer.innerHTML = '<div class="text-center text-muted"><i class="bi bi-arrow-repeat spin"></i> Cargando materiales pendientes...</div>';
+
+            fetch(`/api/obras/${id_obra}/materiales-pendientes`)
+                .then(r => r.json())
+                .then(data => {
+                    if(data.success && data.materiales.length > 0) {
+                        let html = '';
+                        // Opcion de sin material (no hace falta checkbox, simplemente no seleccionar nada, pero lo ponemos visual para claridad)
+                        html += `
+                        <div class="form-check mb-2" style="border-bottom: 1px solid #ddd; padding-bottom: 8px;">
+                            <input class="form-check-input" type="radio" name="opcion_materiales" id="sin_materiales" value="no" checked onchange="toggleCheckboxes(false)">
+                            <label class="form-check-label fw-bold" for="sin_materiales">
+                                Sin materiales (o no seleccionar ninguno)
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="opcion_materiales" id="con_materiales" value="si" onchange="toggleCheckboxes(true)">
+                            <label class="form-check-label fw-bold" for="con_materiales">
+                                Incluir los siguientes materiales:
+                            </label>
+                        </div>
+                        <div id="materiales_checkboxes" style="padding-left: 20px; opacity: 0.5; pointer-events: none;">
+                        `;
+
+                        data.materiales.forEach(mat => {
+                            html += `
+                            <div class="d-flex align-items-center mb-2 form-check">
+                                <input class="form-check-input mat-cb me-2" type="checkbox" id="mat_chk_${mat.id_material}" onchange="toggleMatInput(this, ${mat.id_material})">
+                                <label class="form-check-label flex-grow-1" for="mat_chk_${mat.id_material}">
+                                    ${mat.nombre} <span class="badge bg-secondary ms-1">Faltan: ${mat.faltante} ${mat.unidad}</span>
+                                </label>
+                                <div style="width: 140px;" class="ms-2">
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" step="0.01" min="0.01" max="${mat.faltante}" class="form-control" name="materiales_incluidos[${mat.id_material}]" id="mat_qty_${mat.id_material}" value="${mat.faltante}" disabled>
+                                        <span class="input-group-text">${mat.unidad}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            `;
+                        });
+                        html += '</div>';
+                        matContainer.innerHTML = html;
+                    } else {
+                        matContainer.innerHTML = '<div class="text-muted"><i class="bi bi-info-circle"></i> No hay materiales pendientes para esta obra.</div>';
+                    }
+                })
+                .catch(err => {
+                    matContainer.innerHTML = '<div class="text-danger">Error al cargar materiales.</div>';
+                });
+        });
+    });
+
+    function toggleCheckboxes(enable) {
+        let container = document.getElementById('materiales_checkboxes');
+        let checkboxes = document.querySelectorAll('.mat-cb');
+        if(enable) {
+            container.style.opacity = '1';
+            container.style.pointerEvents = 'auto';
+        } else {
+            container.style.opacity = '0.5';
+            container.style.pointerEvents = 'none';
+            checkboxes.forEach(cb => {
+                if(cb.checked) {
+                    cb.checked = false;
+                    toggleMatInput(cb, cb.id.replace('mat_chk_', ''));
+                }
+            });
+        }
+    }
+
+    function toggleMatInput(checkbox, matId) {
+        let input = document.getElementById('mat_qty_' + matId);
+        if (checkbox.checked) {
+            input.disabled = false;
+        } else {
+            input.disabled = true;
+        }
+    }
+
+    function checkNuevoSelect(selectEl, modalSelector) {
+        if (selectEl.value === 'nuevo') {
+            selectEl.value = ''; // Reset select
+            var mainModal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoPresupuesto'));
+            if(mainModal) mainModal.hide();
+            
+            var newModal = new bootstrap.Modal(document.querySelector(modalSelector));
+            newModal.show();
+        }
+    }
+    
+    // Carga inicial en caso de que el navegador recupere el valor preseleccionado
+    if (document.getElementById('id_obra_presupuesto') && document.getElementById('id_obra_presupuesto').value) {
+        document.getElementById('id_obra_presupuesto').dispatchEvent(new Event('change'));
     }
 </script>
 <script>

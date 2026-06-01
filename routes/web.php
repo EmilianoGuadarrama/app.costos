@@ -16,6 +16,7 @@ use App\Http\Controllers\ManoObraController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\EgresoController;
 use App\Http\Controllers\ObraProcesoController;
+use App\Http\Controllers\ObraMaterialController;
 use App\Http\Controllers\CajaGeneralController;
 
 // ── Inicio ───────────────────────────────────────────────────────────────────
@@ -38,6 +39,11 @@ Route::get('obras_proceso/{id}/fechas', [ObraProcesoController::class, 'editFech
 Route::post('obras_proceso/{id}/fechas', [ObraProcesoController::class, 'updateFechas'])->name('obras_proceso.fechas.update');
 Route::post('obras_proceso/{id}/pausar', [ObraProcesoController::class, 'pausar'])->name('obras_proceso.pausar');
 Route::post('obras_proceso/{id}/finalizar', [ObraProcesoController::class, 'finalizar'])->name('obras_proceso.finalizar');
+
+Route::get('obras/{id}/materiales', [ObraMaterialController::class, 'index'])->name('obras.materiales');
+Route::post('obras/{id}/materiales/comprar', [ObraMaterialController::class, 'storeCompra'])->name('obras.materiales.storeCompra');
+Route::delete('obras/materiales/comprar/{id_egreso}', [ObraMaterialController::class, 'destroyCompra'])->name('obras.materiales.destroyCompra');
+Route::get('api/obras/{id}/materiales-pendientes', [ObraMaterialController::class, 'apiPendientes'])->name('api.obras.materiales.pendientes');
 
 Route::get('obras_entregadas/reporte/{id}', function($id) {
     $entregada = \App\Models\ObraEntregada::with('obraProceso.obraIniciada.datosDeObra')->findOrFail($id);
@@ -117,7 +123,9 @@ Route::resource('empleados', EmpleadoController::class);
 // ==========================================
 // 5. FINANZAS
 // ==========================================
+Route::get('ingresos/pdf/{anio}/{mes}', [IngresoController::class, 'pdfMes'])->name('ingresos.pdf_mes');
 Route::resource('ingresos', IngresoController::class);
+Route::get('egresos/pdf/{anio}/{mes}', [EgresoController::class, 'pdfMes'])->name('egresos.pdf_mes');
 Route::resource('egresos', EgresoController::class);
 // Caja general — solo index y show (no hay CRUD completo)
 Route::get('caja_general', [CajaGeneralController::class, 'index'])->name('caja_general.index');

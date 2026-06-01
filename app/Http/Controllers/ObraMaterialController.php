@@ -2,99 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ObraIniciada;
-use App\Models\ObraProceso;
-use App\Models\ObraEntregada;
-use App\Models\IngresoTotal;
-use App\Models\EgresoTotal;
 use Illuminate\Http\Request;
+use App\Models\ObraIniciada;
+use App\Models\EgresoTotal;
+use App\Models\Material;
+use App\Models\Area;
+use App\Models\Persona;
 
-class ObraProcesoController extends Controller
+class ObraMaterialController extends Controller
 {
-    public function editFechas($id)
+    public function index($id_obra)
     {
-        $obra = ObraIniciada::findOrFail($id);
-        $diasInhabile = \App\Models\DiaInhabil::orderBy('fecha')->get();
-        return view('obras_proceso.fechas', compact('obra', 'diasInhabile'));
-    }
+        $obra = ObraIniciada::with([
+            'datosDeObra', 
+            'obraConceptos.materiales.material.unidadMedida',
+            'preProveedores.proveedor',
+        ])->findOrFail($id_obra);
 
-    public function updateFechas(Request $request, $id)
-    {
-        $obra = ObraIniciada::findOrFail($id);
-        $request->validate([
-            'fecha_inicio' => 'required|date',
-            'duracion' => 'required|integer|min:1',
-            'estimacion_de_entrega_ymd' => 'required|date'
-        ]);
-
-        $obra->fecha_inicio = $request->fecha_inicio;
-        $obra->duracion = $request->duracion;
-        $obra->save();
-
-        $proceso = ObraProceso::where('id_obra', $id)->first();
-        if ($proceso) {
-            $proceso->estimacion_de_entrega = $request->estimacion_de_entrega_ymd;
-            $proceso->save();
-        }
-
-        if ($request->filled('dias_inhabiles_json')) {
-            $inhabiles = json_decode($request->dias_inhabiles_json, true);
-            if (is_array($inhabiles)) {
-                foreach ($inhabiles as $fecha => $desc) {
-                    \App\Models\DiaInhabil::firstOrCreate(
-                        ['fecha' => $fecha],
-                        ['descripcion' => $desc]
-                    );
-                }
-            }
-        }
-
-        return redirect()->route('obras_proceso.index')->with('success', 'Fechas y días inhábiles confirmados.');
-    }
-
-    public function index()
-    {
-        $obrasProceso = ObraProceso::with('obraIniciada.datosDeObra')->get();
-        return view('obras_proceso.index', compact('obrasProceso'));
-    }
-
-    public function show($id)
-    {
-        $proceso = ObraProceso::with([
-            'obraIniciada.datosDeObra', 
-            'obraIniciada.ingresos', 
-            'obraIniciada.egresos',
-            'obraIniciada.preProveedores.proveedor',
-            'obraIniciada.obraConceptos.nivel',
-            'obraIniciada.obraConceptos.area',
-            'obraIniciada.obraConceptos.materiales.material.unidadMedida'
-        ])->findOrFail($id);
-
-        $obra = $proceso->obraIniciada;
-
-        // Calculate physical progress
-        if ($proceso->estado !== 'pausada') {
-            $dias = $obra->fecha_inicio ? $obra->fecha_inicio->diffInDays(now()) : 0;
-            $proceso->dias_transcurridos = min($dias, $obra->duracion);
-            $proceso->porcentaje_avanzado = $obra->duracion > 0 ? round(($proceso->dias_transcurridos / $obra->duracion) * 100, 2) : 0;
-        }
-
-        // Calculate financial progress
-        $totalIngresos = $obra->ingresos()->sum('monto_dado') ?? 0;
-        $totalEgresos = $obra->egresos()->sum('pago') ?? 0;
-
-        $proceso->presupuesto_cubierto = $totalIngresos;
-        $presupuestoIntegrado = $proceso->con_iva ? ($obra->total_presupuestado * 1.16) : $obra->total_presupuestado;
-        
-        $proceso->presupuesto_restante = $presupuestoIntegrado - $totalIngresos;
-        $proceso->porcentaje_restante = $presupuestoIntegrado > 0 ? round(($proceso->presupuesto_restante / $presupuestoIntegrado) * 100, 2) : 0;
-        
-        $proceso->save();
-
-        $diasFaltantes = $proceso->estimacion_de_entrega ? now()->diffInDays($proceso->estimacion_de_entrega, false) : 0;
-
-        // Fetch material purchases for this obra to allocate them
-        $egresosMateriales = \App\Models\EgresoTotal::with('material.unidadMedida', 'area', 'preProveedor.proveedor')
+        // Fetch material purchases for this obra
+        $egresosMateriales = EgresoTotal::with('material.unidadMedida', 'area', 'preProveedor.proveedor')
             ->where('id_obra', $obra->id)
             ->whereNotNull('id_material')
             ->orderBy('fecha', 'desc')
@@ -110,7 +36,7 @@ class ObraProcesoController extends Controller
             $compradas[$matId]['gastado'] += $eg->monto_material;
         }
 
-        // Compute budgeted materials grouped by Nivel and Area
+        // Compute budgeted materials grouped
         $materialesPorNivelArea = [];
         foreach ($obra->obraConceptos as $oc) {
             if ($oc->materiales->isEmpty()) continue;
@@ -203,7 +129,7 @@ class ObraProcesoController extends Controller
                 ]
             ];
         }
-
+        
         // Separate pending and completed materials
         $materialesPendientes = [];
         $materialesCompletados = [];
@@ -234,40 +160,122 @@ class ObraProcesoController extends Controller
             }
         }
 
+        $areas = Area::orderBy('abreviatura')->get();
+        $personas = Persona::orderBy('nombre')->get();
+        
         // Proveedores con presupuesto en esta obra
         $proveedoresAprobados = $obra->preProveedores->where('estado', 'aprobado');
 
-        return view('obras_proceso.show', compact('proceso', 'obra', 'totalIngresos', 'totalEgresos', 'presupuestoIntegrado', 'diasFaltantes', 'materialesPendientes', 'materialesCompletados', 'egresosMateriales', 'proveedoresAprobados'));
+        return view('obras_materiales.index', compact('obra', 'materialesPendientes', 'materialesCompletados', 'egresosMateriales', 'areas', 'personas', 'proveedoresAprobados'));
     }
 
-    public function pausar(Request $request, $id)
+    public function storeCompra(Request $request, $id_obra)
     {
-        $proceso = ObraProceso::findOrFail($id);
-        $proceso->estado = $proceso->estado === 'pausada' ? 'en_curso' : 'pausada';
-        $proceso->save();
+        $obra = ObraIniciada::findOrFail($id_obra);
 
-        $msg = $proceso->estado === 'pausada' ? 'Obra pausada.' : 'Obra reanudada.';
-        return redirect()->back()->with('success', $msg);
-    }
-
-    public function finalizar(Request $request, $id)
-    {
-        $proceso = ObraProceso::findOrFail($id);
-        $obra = $proceso->obraIniciada;
-
-        $totalIngresos = $obra->ingresos()->sum('monto_dado') ?? 0;
-        $totalEgresos = $obra->egresos()->sum('pago') ?? 0;
-
-        $entregada = ObraEntregada::create([
-            'id_obra' => $proceso->id_obra,
-            'fecha_entrega' => now(),
-            'ingresos_generales' => $totalIngresos,
-            'egresos' => $totalEgresos,
+        $request->validate([
+            'id_material'       => 'required', 
+            'cantidad_material' => 'required|numeric|min:0.01',
+            'pago'              => 'required|numeric|min:0',
+            'fecha'             => 'required|date',
+            'id_pre_proveedor'  => 'nullable|exists:pre_proveedores,id',
+            'id_persona'        => 'required_without:id_pre_proveedor|nullable|exists:personas,id',
         ]);
 
-        $proceso->estado = 'finalizada';
-        $proceso->save();
+        $es_por_proveedor = !empty($request->id_pre_proveedor);
+        $pago_financiero = $es_por_proveedor ? 0 : $request->pago;
+        
+        $idPersona = $request->id_persona;
+        if ($es_por_proveedor) {
+            $provObj = \App\Models\PreProveedor::with('proveedor')->find($request->id_pre_proveedor);
+            $idPersona = $provObj->proveedor->id_persona ?? null;
+        }
 
-        return redirect()->route('obras_entregadas.reporte', $entregada->id)->with('success', 'Obra finalizada correctamente.');
+        $materialObj = Material::findOrFail($request->id_material);
+        $concepto_compra = 'Compra de material: ' . $materialObj->nombre;
+
+        EgresoTotal::create([
+            'id_obra'           => $obra->id,
+            'id_persona'        => $idPersona,
+            'id_material'       => $request->id_material,
+            'cantidad_material' => $request->cantidad_material,
+            'pago'              => $pago_financiero,
+            'monto_material'    => $request->pago,
+            'fecha'             => $request->fecha,
+            'id_pre_proveedor'  => $request->id_pre_proveedor,
+            'categoria'         => 'Materiales',
+            'concepto'          => $concepto_compra,
+        ]);
+
+        // Redirect back to the previous page so it works from both views
+        return redirect()->back()->with('success', 'Compra de material registrada correctamente.');
+    }
+
+    public function destroyCompra($id_egreso)
+    {
+        $egreso = EgresoTotal::findOrFail($id_egreso);
+        $id_obra = $egreso->id_obra;
+        $egreso->delete();
+
+        return redirect()->back()->with('success', 'Registro de compra eliminado.');
+    }
+
+    public function apiPendientes($id_obra)
+    {
+        $obra = ObraIniciada::with([
+            'obraConceptos.materiales.material.unidadMedida',
+        ])->find($id_obra);
+
+        if (!$obra) {
+            return response()->json(['success' => false, 'message' => 'Obra no encontrada']);
+        }
+
+        $egresosMateriales = EgresoTotal::where('id_obra', $obra->id)
+            ->whereNotNull('id_material')
+            ->get();
+            
+        $compradas = [];
+        foreach($egresosMateriales as $eg) {
+            $matId = $eg->id_material;
+            if(!isset($compradas[$matId])) {
+                $compradas[$matId] = 0;
+            }
+            $compradas[$matId] += $eg->cantidad_material;
+        }
+
+        $materiales = [];
+        foreach ($obra->obraConceptos as $oc) {
+            if ($oc->materiales->isEmpty()) continue;
+            foreach ($oc->materiales as $mat) {
+                if (!$mat->material) continue;
+                $matId = $mat->id_material;
+                if (!isset($materiales[$matId])) {
+                    $materiales[$matId] = [
+                        'id_material' => $matId,
+                        'nombre' => $mat->material->nombre . ($mat->material->marca ? ' ('.$mat->material->marca.')' : ''),
+                        'unidad' => $mat->material->unidadMedida?->abreviatura ?? '',
+                        'cantidad_total' => 0,
+                    ];
+                }
+                $materiales[$matId]['cantidad_total'] += ($mat->cantidad * $oc->cantidad);
+            }
+        }
+        
+        $pendientes = [];
+        foreach($materiales as $matId => $data) {
+            $comprada = $compradas[$matId] ?? 0;
+            $faltante = max(0, $data['cantidad_total'] - $comprada);
+            if ($faltante > 0) {
+                $data['faltante'] = round($faltante, 2);
+                $pendientes[] = $data;
+            }
+        }
+        
+        // Sort alphabetically
+        usort($pendientes, function($a, $b) {
+            return strcmp($a['nombre'], $b['nombre']);
+        });
+
+        return response()->json(['success' => true, 'materiales' => $pendientes]);
     }
 }

@@ -41,7 +41,7 @@
 <div class="dash-header">
     <div>
         <h1 class="dash-title"><i class="bi bi-trash3" style="color:#dc2626; margin-right:8px;"></i>Papelera de Reciclaje</h1>
-        <p class="dash-subtitle">Obras eliminadas recientemente. Se borrarán definitivamente después de 30 días.</p>
+        <p class="dash-subtitle">Obras archivadas. Permanecerán aquí hasta que decidas destruirlas permanentemente.</p>
     </div>
     <a href="{{ route('obras.index') }}" class="btn-back">
         <i class="bi bi-arrow-left"></i> Volver a mis Obras
@@ -80,8 +80,7 @@
                     </div>
 
                     <div class="obra-info">
-                        <p><i class="bi bi-calendar-x"></i> <strong>Fecha de eliminación:</strong> {{ $obra->deleted_at->format('d/m/Y') }}</p>
-                        <p><i class="bi bi-exclamation-triangle"></i> <strong>Se borrará el:</strong> {{ $obra->deleted_at->addDays(30)->format('d/m/Y') }}</p>
+                        <p><i class="bi bi-calendar-x"></i> <strong>Fecha de archivado:</strong> {{ $obra->deleted_at->format('d/m/Y') }}</p>
                     </div>
                 </div>
 

@@ -102,6 +102,59 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="header-section mt-5 border-top pt-4">
+            <div>
+                <h1>Historial Global de Compras</h1>
+                <p>Registro de todos los materiales comprados, ya sea directamente para una obra o cubiertos por el presupuesto de un proveedor.</p>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="project-table">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Obra</th>
+                        <th>Material</th>
+                        <th>Cantidad</th>
+                        <th>Concepto / Proveedor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse(($compras ?? []) as $compra)
+                    <tr class="project-row" style="background: {{ $compra->pago == 0 && $compra->id_pre_proveedor ? '#f8fafc' : '#fff' }}">
+                        <td style="font-size: 0.85rem; color: #555;">{{ \Carbon\Carbon::parse($compra->fecha)->format('d/m/Y') }}</td>
+                        <td>
+                            <div class="fw-bold">{{ $compra->obra->datosDeObra->nombre ?? 'Egreso General' }}</div>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ $compra->material->nombre ?? 'N/D' }}</div>
+                            @if($compra->material?->marca)
+                                <small class="text-muted">{{ $compra->material->marca }}</small>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.8rem; padding: 5px 10px;">
+                                {{ number_format($compra->cantidad_material, 2) }} {{ $compra->material->unidadMedida?->abreviatura ?? '' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.85rem; line-height: 1.4;">
+                                {{ $compra->concepto }}
+                                @if($compra->id_pre_proveedor)
+                                    <div class="badge bg-primary text-white mt-1" style="font-size: 0.7rem;"><i class="bi bi-shield-check"></i> Cubierto por Proveedor</div>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="empty-state">No hay historial de compras de materiales aún.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 @endsection

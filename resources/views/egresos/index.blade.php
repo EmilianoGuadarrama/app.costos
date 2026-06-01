@@ -55,14 +55,25 @@
                 <thead><tr><th>Concepto / Fecha</th><th>Proyecto</th><th>Categoría</th><th>Monto</th><th style="text-align:right;">Acciones</th></tr></thead>
                 @forelse($egresos as $mes => $items)
                     @php
-                        $mesId = \Illuminate\Support\Str::slug($mes);
+                        $mesId    = \Illuminate\Support\Str::slug($mes);
                         $totalMes = $items->sum('pago');
+                        $primerItem = $items->first();
+                        $fechaRef   = \Carbon\Carbon::parse($primerItem->fecha);
+                        $anioRef    = $fechaRef->year;
+                        $mesRef     = $fechaRef->month;
                     @endphp
                     <tbody style="border-top: 2px solid #eaeaea;">
                         <tr style="background:#f9f9f9; cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $mesId }}">
                             <td colspan="3" style="font-size:1.05rem; font-weight:bold; text-transform:capitalize;"><i class="bi bi-calendar-check me-2"></i> {{ $mes }}</td>
                             <td class="text-danger" style="font-weight:bold; font-size:1.05rem;">-${{ number_format($totalMes, 2) }}</td>
-                            <td class="text-end"><i class="bi bi-chevron-down text-muted"></i></td>
+                            <td class="text-end" style="white-space:nowrap;">
+                                <a href="{{ route('egresos.pdf_mes', [$anioRef, $mesRef]) }}"
+                                   class="btn-icon-action" title="Descargar PDF del mes"
+                                   onclick="event.stopPropagation()">
+                                    <i class="bi bi-file-earmark-pdf" style="color:#dc3545;"></i>
+                                </a>
+                                <i class="bi bi-chevron-down text-muted ms-1"></i>
+                            </td>
                         </tr>
                     </tbody>
                     <tbody id="collapse-{{ $mesId }}" class="collapse show">

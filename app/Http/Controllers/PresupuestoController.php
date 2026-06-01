@@ -40,7 +40,45 @@ class PresupuestoController extends Controller
 
         $bloques = Bloque::orderBy('id')->get();
 
-        return view('obras.presupuesto', compact('obra', 'totalesPorBloque', 'bloques'));
+        $materialesPorNivelArea = [];
+        foreach ($obra->obraConceptos as $oc) {
+            if ($oc->materiales->isEmpty()) continue;
+
+            $nivelId = $oc->id_nivel ?: 0;
+            $areaId = $oc->id_area ?: 0;
+
+            if (!isset($materialesPorNivelArea[$nivelId])) {
+                $materialesPorNivelArea[$nivelId] = [
+                    'nombre' => $oc->nivel ? $oc->nivel->descripcion : 'GENERAL / SIN NIVEL',
+                    'areas' => []
+                ];
+            }
+            if (!isset($materialesPorNivelArea[$nivelId]['areas'][$areaId])) {
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId] = [
+                    'nombre' => $oc->area ? $oc->area->descripcion : 'Sin Área',
+                    'materiales' => []
+                ];
+            }
+
+            foreach ($oc->materiales as $mat) {
+                if (!$mat->material) continue;
+                $matId = $mat->id_material;
+                if (!isset($materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId])) {
+                    $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId] = [
+                        'material'       => $mat->material,
+                        'cantidad_total' => 0,
+                        'costo_total'    => 0,
+                    ];
+                }
+                $cant_req = $mat->cantidad * $oc->cantidad;
+                $costo    = $mat->precio_unitario * $cant_req;
+
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId]['cantidad_total'] += $cant_req;
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId]['costo_total']    += $costo;
+            }
+        }
+
+        return view('obras.presupuesto', compact('obra', 'totalesPorBloque', 'bloques', 'materialesPorNivelArea'));
     }
 
     public function create($obraId)
@@ -551,9 +589,38 @@ class PresupuestoController extends Controller
         $bloques          = \App\Models\Bloque::orderBy('id')->get();
         $totalesPorBloque = $obra->totalBloque->keyBy('id_bloque');
 
+        $materialesPorNivelArea = [];
+        // Cargar materiales si no venían
+        $obra->load('obraConceptos.materiales.material.unidadMedida', 'obraConceptos.nivel', 'obraConceptos.area');
+        foreach ($obra->obraConceptos as $oc) {
+            if ($oc->materiales->isEmpty()) continue;
+            $nivelId = $oc->id_nivel ?: 0;
+            $areaId = $oc->id_area ?: 0;
+
+            if (!isset($materialesPorNivelArea[$nivelId])) {
+                $materialesPorNivelArea[$nivelId] = ['nombre' => $oc->nivel ? $oc->nivel->descripcion : 'GENERAL / SIN NIVEL', 'areas' => []];
+            }
+            if (!isset($materialesPorNivelArea[$nivelId]['areas'][$areaId])) {
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId] = ['nombre' => $oc->area ? $oc->area->descripcion : 'Sin Área', 'materiales' => []];
+            }
+
+            foreach ($oc->materiales as $mat) {
+                if (!$mat->material) continue;
+                $matId = $mat->id_material;
+                if (!isset($materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId])) {
+                    $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId] = ['material' => $mat->material, 'cantidad_total' => 0, 'costo_total' => 0];
+                }
+                $cant_req = $mat->cantidad * $oc->cantidad;
+                $costo    = $mat->precio_unitario * $cant_req;
+
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId]['cantidad_total'] += $cant_req;
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId]['costo_total']    += $costo;
+            }
+        }
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
             'pdf.presupuesto',
-            compact('obra', 'bloques', 'totalesPorBloque')
+            compact('obra', 'bloques', 'totalesPorBloque', 'materialesPorNivelArea')
         );
         $pdf->setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true]);
         $pdf->setPaper('letter', 'portrait');
@@ -581,9 +648,37 @@ class PresupuestoController extends Controller
         $bloques          = \App\Models\Bloque::orderBy('id')->get();
         $totalesPorBloque = $obra->totalBloque->keyBy('id_bloque');
 
+        $materialesPorNivelArea = [];
+        $obra->load('obraConceptos.nivel'); // Area and materials are already loaded
+        foreach ($obra->obraConceptos as $oc) {
+            if ($oc->materiales->isEmpty()) continue;
+            $nivelId = $oc->id_nivel ?: 0;
+            $areaId = $oc->id_area ?: 0;
+
+            if (!isset($materialesPorNivelArea[$nivelId])) {
+                $materialesPorNivelArea[$nivelId] = ['nombre' => $oc->nivel ? $oc->nivel->descripcion : 'GENERAL / SIN NIVEL', 'areas' => []];
+            }
+            if (!isset($materialesPorNivelArea[$nivelId]['areas'][$areaId])) {
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId] = ['nombre' => $oc->area ? $oc->area->descripcion : 'Sin Área', 'materiales' => []];
+            }
+
+            foreach ($oc->materiales as $mat) {
+                if (!$mat->material) continue;
+                $matId = $mat->id_material;
+                if (!isset($materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId])) {
+                    $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId] = ['material' => $mat->material, 'cantidad_total' => 0, 'costo_total' => 0];
+                }
+                $cant_req = $mat->cantidad * $oc->cantidad;
+                $costo    = $mat->precio_unitario * $cant_req;
+
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId]['cantidad_total'] += $cant_req;
+                $materialesPorNivelArea[$nivelId]['areas'][$areaId]['materiales'][$matId]['costo_total']    += $costo;
+            }
+        }
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
             'pdf.catalogo-conceptos',
-            compact('obra', 'bloques', 'totalesPorBloque')
+            compact('obra', 'bloques', 'totalesPorBloque', 'materialesPorNivelArea')
         );
         $pdf->setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true]);
         $pdf->setPaper('letter', 'landscape');

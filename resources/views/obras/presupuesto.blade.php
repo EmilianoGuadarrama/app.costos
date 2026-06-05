@@ -298,54 +298,86 @@ body { background:var(--bg); font-family:'Inter','Segoe UI',sans-serif; }
 @endphp
 <div class="pres-hdr">
     {{-- Franja superior --}}
-    <div class="pres-hdr-top">
-        <div class="hdr-brand">
-            {{-- Logo --}}
-            @if(file_exists(public_path('img/logo_akiraka.jpeg')))
-            <img src="{{ asset('img/logo_akiraka.jpeg') }}" alt="Logo" class="hdr-logo">
-            @endif
-            <div class="hdr-empresa-info">
-                <div class="hdr-empresa-nombre">AKIRAKA</div>
-                <div class="hdr-empresa-sub">Construcción &amp; Diseño</div>
+    <div class="pres-hdr-top" style="display:flex; justify-content:space-between; align-items:center; padding:15px 25px; background:#111; gap:15px; flex-wrap:wrap;">
+        
+        {{-- LADO IZQUIERDO: BRAND + ACCIONES DE EDICIÓN --}}
+        <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+            
+            {{-- 1. BRAND & INFO --}}
+            <div class="hdr-brand" style="display:flex; align-items:center; gap:10px;">
+                @if(file_exists(public_path('img/logo_akiraka.jpeg')))
+                <img src="{{ asset('img/logo_akiraka.jpeg') }}" alt="Logo" class="hdr-logo">
+                @endif
+                <div class="hdr-empresa-info">
+                    <div class="hdr-empresa-nombre">AKIRAKA</div>
+                    <div class="hdr-empresa-sub" style="font-size:0.65rem;">Construcción &amp; Diseño</div>
+                </div>
+                <div style="width:1px;height:36px;background:rgba(255,255,255,.15);margin:0 5px;"></div>
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                    <a href="{{ route('obras.show', $obra->id) }}" class="btn-back" style="margin-bottom:0;">
+                        <i class="bi bi-arrow-left"></i> Datos Generales
+                    </a>
+                    <span style="font-size:.65rem;color:#6b7280;padding-left:2px;">
+                        <i class="bi bi-file-earmark-text me-1"></i>Presupuesto de Obra
+                    </span>
+                </div>
             </div>
-            <div style="width:1px;height:36px;background:rgba(255,255,255,.15);margin:0 6px;"></div>
-            <div style="display:flex;flex-direction:column;gap:2px;">
-                <a href="{{ route('obras.show', $obra->id) }}" class="btn-back">
-                    <i class="bi bi-arrow-left"></i> Datos Generales
+
+            {{-- 2. ACCIONES DE EDICIÓN & VERSIONADO --}}
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                {{-- Selector de Versión --}}
+                <select class="form-select" style="background:#1f2937; color:#fff; border-color:#374151; padding: 0.25rem 1.8rem 0.25rem 0.5rem; font-size: 0.8rem; height:32px; width:auto;" onchange="window.location.href='?version='+this.value">
+                    <option value="1" {{ $versionConsulta == 1 ? 'selected' : '' }}>V1 (Original)</option>
+                    @if(isset($obra->versionesPresupuesto))
+                        @foreach($obra->versionesPresupuesto as $vp)
+                            @if($vp->numero_version > 1)
+                            <option value="{{ $vp->numero_version }}" {{ $versionConsulta == $vp->numero_version ? 'selected' : '' }}>
+                                V{{ $vp->numero_version }} {{ $vp->es_activa ? '(Activa)' : '' }}
+                            </option>
+                            @endif
+                        @endforeach
+                    @endif
+                </select>
+
+                {{-- Botón Nueva Versión --}}
+                <form action="{{ route('obras.presupuesto.version.crear', $obra->id) }}" method="POST" style="margin:0;" onsubmit="return confirm('¿Estás seguro de crear una nueva versión? Esto congelará la actual.')">
+                    @csrf
+                    <button type="submit" class="btn-hdr btn-hdr-dark" title="Congelar esta versión y crear una nueva">
+                        <i class="bi bi-files"></i> Nueva V.
+                    </button>
+                </form>
+
+                <button class="btn-hdr btn-hdr-dark" onclick="toggleTodosDesgloses()">
+                    <i class="bi bi-diagram-3"></i> Desglosar
+                </button>
+
+                @if($obra->obraConceptos->isNotEmpty() && !\App\Models\ObraProceso::where('id_obra', $obra->id)->exists())
+                <button type="button" class="btn-hdr btn-hdr-green" onclick="abrirModalAprobar()">
+                    <i class="bi bi-check-circle-fill"></i> Aprobar
+                </button>
+                @endif
+
+                <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-hdr btn-hdr-blue">
+                    <i class="bi bi-plus-lg"></i> AGREGAR
                 </a>
-                <span style="font-size:.68rem;color:#6b7280;padding-left:2px;">
-                    <i class="bi bi-file-earmark-text me-1"></i>Presupuesto de Obra
-                </span>
             </div>
         </div>
-        <div class="hdr-actions">
-            <button class="btn-hdr btn-hdr-dark" onclick="toggleTodosDesgloses()">
-                <i class="bi bi-diagram-3"></i> Desglosar
-            </button>
-            @if($obra->obraConceptos->isNotEmpty() && !$obra->obraProceso)
-            <button type="button" class="btn-hdr btn-hdr-green" onclick="abrirModalAprobar()">
-                <i class="bi bi-check-circle-fill"></i> Aprobar
-            </button>
-            @endif
+
+        {{-- LADO DERECHO: ACCIONES DE EXPORTACIÓN --}}
+        <div class="hdr-actions" style="display:flex; align-items:center; gap:8px;">
             <a href="{{ route('obras.presupuesto.export_excel', $obra->id) }}" class="btn-hdr btn-hdr-excel">
                 <i class="bi bi-file-earmark-excel"></i> Excel
             </a>
             <a href="{{ route('obras.presupuesto.pdf_formal', $obra->id) }}"
-               class="btn-hdr"
-               style="background:#d97706; color:#fff;"
-               title="Genera un PDF formal tipo carta/cotización para entregar al cliente">
+               class="btn-hdr" style="background:#d97706; color:#fff;" title="Carta/cotización">
                 <i class="bi bi-file-earmark-pdf-fill"></i> PDF PRESUPUESTO
             </a>
             <a href="{{ route('obras.presupuesto.pdf_catalogo', $obra->id) }}"
-               class="btn-hdr"
-               style="background:#1d4ed8; color:#fff;"
-               title="Genera un PDF técnico con tabla completa de conceptos">
+               class="btn-hdr" style="background:#1d4ed8; color:#fff;" title="Tabla completa de conceptos">
                 <i class="bi bi-table"></i> PDF CATÁLOGO
             </a>
-            <a href="{{ route('obras.presupuesto.unificado.create', $obra->id) }}" class="btn-hdr btn-hdr-blue">
-                <i class="bi bi-plus-lg"></i> AGREGAR
-            </a>
         </div>
+
     </div>
     {{-- Franja inferior: datos del proyecto --}}
     <div class="pres-hdr-info">

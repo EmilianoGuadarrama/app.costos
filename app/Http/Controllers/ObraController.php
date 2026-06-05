@@ -296,8 +296,11 @@ class ObraController extends Controller
      */
     public static function recalcularTotales(int $obraId): void
     {
-        $sub = \App\Models\ObraConcepto::where('id_obra', $obraId)->sum('subtotal');
-        $iva = \App\Models\ObraConcepto::where('id_obra', $obraId)->sum('iva');
+        $versionActiva = \App\Models\VersionPresupuesto::where('id_obra', $obraId)->where('es_activa', true)->first();
+        $ver = $versionActiva ? $versionActiva->numero_version : 1;
+
+        $sub = \App\Models\ObraConcepto::where('id_obra', $obraId)->where('version', $ver)->sum('subtotal');
+        $iva = \App\Models\ObraConcepto::where('id_obra', $obraId)->where('version', $ver)->sum('iva');
         $fin = $sub + $iva;
 
         TotalObra::updateOrCreate(

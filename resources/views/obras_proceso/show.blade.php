@@ -208,17 +208,93 @@
     </div>
 </div>
 
-<div class="dash-grid" style="margin-top: 25px;">
+    <!-- Modificaciones al Presupuesto -->
+    <div class="metric-card" style="margin-top: 25px;">
+        <div class="m-title" data-bs-toggle="collapse" data-bs-target="#collapseModificaciones" style="cursor:pointer; display:flex; justify-content:space-between;">
+            <span><i class="bi bi-clock-history text-warning me-2"></i> Modificaciones al Presupuesto Original</span>
+            <i class="bi bi-chevron-down"></i>
+        </div>
+        <div id="collapseModificaciones" class="collapse show">
+            @php
+                $modificaciones = $obra->versionesPresupuesto()->where('numero_version', '>', 1)->orderBy('numero_version')->get();
+            @endphp
+            @if($modificaciones->isEmpty())
+                <p style="color:#6b7280; font-size:0.9rem; margin-top:10px;">
+                    No se han realizado modificaciones al presupuesto original.
+                    <!-- DEBUG: Obra ID {{ $obra->id }}. Total versiones: {{ $obra->versionesPresupuesto()->count() }} -->
+                </p>
+            @else
+                <div style="overflow-x: auto; margin-top:10px;">
+                    <table class="table table-sm" style="font-size:0.85rem;">
+                        <thead>
+                            <tr>
+                                <th>Versión</th>
+                                <th>Fecha de Modificación</th>
+                                <th>Motivo / Descripción del Cambio</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($modificaciones as $mod)
+                            <tr>
+                                <td><span class="badge bg-secondary">V{{ $mod->numero_version }}</span></td>
+                                <td>{{ $mod->created_at ? $mod->created_at->format('d/m/Y H:i') : 'N/A' }}</td>
+                                <td>
+                                    <div style="font-weight: 500; margin-bottom: 5px;">
+                                        @if(empty($mod->motivo_cambio) || strtolower(trim($mod->motivo_cambio)) === 'nueva versión')
+                                            Versión {{ $mod->numero_version }}
+                                        @else
+                                            {{ $mod->motivo_cambio }}
+                                        @endif
+                                    </div>
+                                    @php
+                                        $cambios = $mod->getDiffConAnterior();
+                                    @endphp
+                                    @if(count($cambios) > 0)
+                                        <div style="margin-top: 5px;">
+                                            <a data-bs-toggle="collapse" href="#cambios-v{{ $mod->numero_version }}" role="button" aria-expanded="false" aria-controls="cambios-v{{ $mod->numero_version }}" style="font-size: 0.8rem; text-decoration: none;">
+                                                <i class="bi bi-list-ul"></i> Ver detalles de modificaciones
+                                            </a>
+                                            <div class="collapse" id="cambios-v{{ $mod->numero_version }}" style="margin-top: 5px;">
+                                                <ul style="padding-left: 20px; font-size: 0.8rem; margin-bottom: 0; color: #4b5563;">
+                                                    @foreach($cambios as $cambio)
+                                                        <li>{!! $cambio !!}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($mod->es_activa)
+                                        <span class="badge bg-success">Activa</span>
+                                    @else
+                                        <span class="badge bg-light text-dark border">Histórico</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+
     <!-- Presupuestos a Proveedores Aprobados -->
-    <div class="metric-card" style="grid-column: 1 / -1;">
-        <div class="m-title"><i class="bi bi-person-lines-fill text-primary me-2"></i> Presupuestos a Proveedores Pendientes</div>
-        @php
-            $proveedoresAprobados = $obra->preProveedores ? $obra->preProveedores->where('estado', 'aprobado')->where('saldo', '>', 0) : collect();
-        @endphp
-        @if($proveedoresAprobados->isEmpty())
-            <p style="color:#6b7280; font-size:0.9rem;">No hay presupuestos de proveedores pendientes para esta obra.</p>
-        @else
-            <div style="overflow-x: auto;">
+    <div class="metric-card" style="margin-top: 25px;">
+        <div class="m-title" data-bs-toggle="collapse" data-bs-target="#collapseProveedores" style="cursor:pointer; display:flex; justify-content:space-between;">
+            <span><i class="bi bi-person-lines-fill text-primary me-2"></i> Presupuestos a Proveedores Pendientes</span>
+            <i class="bi bi-chevron-down"></i>
+        </div>
+        <div id="collapseProveedores" class="collapse show">
+            @php
+                $proveedoresAprobados = $obra->preProveedores ? $obra->preProveedores->where('estado', 'aprobado')->where('saldo', '>', 0) : collect();
+            @endphp
+            @if($proveedoresAprobados->isEmpty())
+                <p style="color:#6b7280; font-size:0.9rem; margin-top:10px;">No hay presupuestos de proveedores pendientes para esta obra.</p>
+            @else
+                <div style="overflow-x: auto; margin-top:10px;">
                 <table class="table table-sm" style="font-size:0.85rem;">
                     <thead>
                         <tr>
@@ -312,142 +388,144 @@
             </div>
         @endif
     </div>
-</div>
 
 @if((isset($materialesPendientes) && count($materialesPendientes) > 0) || (isset($materialesCompletados) && count($materialesCompletados) > 0))
-<div class="dash-grid" style="margin-top: 25px;">
-    <div class="metric-card" style="grid-column: 1 / -1;">
-        <div class="m-title"><i class="bi bi-box-seam text-info me-2"></i> Materiales Pendientes de Compra</div>
-        <div style="overflow-x: auto;">
-            <table class="table table-sm" style="font-size:0.85rem;">
-                <thead style="background: #f9fafb; color: #374151;">
-                    <tr>
-                        <th style="padding: 10px;">Material</th>
-                        <th class="text-center" style="padding: 10px;">Cant. Presupuestada</th>
-                        <th class="text-center" style="padding: 10px;">Cant. Comprada</th>
-                        <th class="text-center" style="padding: 10px;">Cant. Faltante</th>
-                        <th class="text-end" style="padding: 10px;">Costo Presupuestado</th>
-                        <th class="text-end" style="padding: 10px;">Monto Gastado</th>
-                        <th class="text-end" style="padding: 10px;">Presupuesto Disp.</th>
-                        <th class="text-center" style="padding: 10px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @php 
-                        $totalCosto = 0; 
-                        $totalGastado = 0; 
-                    @endphp
-                    @foreach($materialesPendientes as $nivelId => $nivel)
-                        <tr style="background: #e5e7eb;">
-                            <td colspan="8" style="padding: 10px; font-weight: bold; font-size: 0.95rem;">
-                                <i class="bi bi-layers me-1"></i> NIVEL: {{ mb_strtoupper($nivel['nombre']) }}
-                            </td>
+    <div class="metric-card" style="margin-top: 25px;">
+        <div class="m-title" data-bs-toggle="collapse" data-bs-target="#collapseMateriales" style="cursor:pointer; display:flex; justify-content:space-between;">
+            <span><i class="bi bi-box-seam text-info me-2"></i> Materiales Pendientes de Compra</span>
+            <i class="bi bi-chevron-down"></i>
+        </div>
+        <div id="collapseMateriales" class="collapse show">
+            <div style="overflow-x: auto;">
+                <table class="table table-sm" style="font-size:0.85rem;">
+                    <thead style="background: #f9fafb; color: #374151;">
+                        <tr>
+                            <th style="padding: 10px;">Material</th>
+                            <th class="text-center" style="padding: 10px;">Cant. Presupuestada</th>
+                            <th class="text-center" style="padding: 10px;">Cant. Comprada</th>
+                            <th class="text-center" style="padding: 10px;">Cant. Faltante</th>
+                            <th class="text-end" style="padding: 10px;">Costo Presupuestado</th>
+                            <th class="text-end" style="padding: 10px;">Monto Gastado</th>
+                            <th class="text-end" style="padding: 10px;">Presupuesto Disp.</th>
+                            <th class="text-center" style="padding: 10px;">Acciones</th>
                         </tr>
-                        @foreach($nivel['areas'] as $areaId => $area)
-                            <tr style="background: #f3f4f6;">
-                                <td colspan="8" style="padding: 8px 10px 8px 25px; font-weight: 600; font-size: 0.85rem; color: #4b5563;">
-                                    <i class="bi bi-geo-alt me-1"></i> ÁREA: {{ mb_strtoupper($area['nombre']) }}
+                    </thead>
+                    <tbody>
+                        @php 
+                            $totalCosto = 0; 
+                            $totalGastado = 0; 
+                        @endphp
+                        @foreach($materialesPendientes as $nivelId => $nivel)
+                            <tr style="background: #e5e7eb;">
+                                <td colspan="8" style="padding: 10px; font-weight: bold; font-size: 0.95rem;">
+                                    <i class="bi bi-layers me-1"></i> NIVEL: {{ mb_strtoupper($nivel['nombre']) }}
                                 </td>
                             </tr>
-                            @foreach($area['materiales'] as $matId => $data)
-                                @php
-                                    $faltante = max(0, $data['cantidad_total'] - $data['cantidad_comprada']);
-                                    $disponible = $data['costo_total'] - $data['gastado'];
-                                    $totalCosto += $data['costo_total'];
-                                    $totalGastado += $data['gastado'];
-                                    $isExcedido = $disponible < 0;
-                                    $isCompradoCompleto = $faltante <= 0 && $data['cantidad_total'] > 0;
-                                @endphp
-                                <tr>
-                                    <td style="padding: 10px 10px 10px 35px; font-weight: 600;">
-                                        {{ $data['material']->nombre }}
-                                        @if($data['material']->marca)
-                                            <br><small class="text-muted">{{ $data['material']->marca }}</small>
-                                        @endif
-                                    </td>
-                                    <td class="text-center" style="padding: 10px;">{{ number_format($data['cantidad_total'], 2) }} {{ $data['material']->unidadMedida?->abreviatura }}</td>
-                                    <td class="text-center {{ $data['cantidad_comprada'] > 0 ? 'text-success fw-bold' : 'text-muted' }}" style="padding: 10px;">
-                                        {{ number_format($data['cantidad_comprada'], 2) }} {{ $data['material']->unidadMedida?->abreviatura }}
-                                    </td>
-                                    <td class="text-center fw-bold" style="padding: 10px; color: {{ $isCompradoCompleto ? '#059669' : '#dc2626' }}">
-                                        {{ number_format($faltante, 2) }} {{ $data['material']->unidadMedida?->abreviatura }}
-                                    </td>
-                                    <td class="text-end text-secondary" style="padding: 10px;">${{ number_format($data['costo_total'], 2) }}</td>
-                                    <td class="text-end {{ $data['gastado'] > 0 ? 'text-danger fw-bold' : 'text-muted' }}" style="padding: 10px;">
-                                        ${{ number_format($data['gastado'], 2) }}
-                                    </td>
-                                    <td class="text-end fw-bold" style="padding: 10px; color: {{ $isExcedido ? '#dc2626' : '#059669' }}">
-                                        ${{ number_format($disponible, 2) }}
-                                    </td>
-                                    <td class="text-center" style="padding: 10px;">
-                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalComprar-{{ $nivelId }}-{{ $areaId }}-{{ $matId }}" style="font-weight: 600; padding: 4px 10px; border-radius: 8px;">
-                                            <i class="bi bi-cart-plus me-1"></i> Comprar
-                                        </button>
+                            @foreach($nivel['areas'] as $areaId => $area)
+                                <tr style="background: #f3f4f6;">
+                                    <td colspan="8" style="padding: 8px 10px 8px 25px; font-weight: 600; font-size: 0.85rem; color: #4b5563;">
+                                        <i class="bi bi-geo-alt me-1"></i> ÁREA: {{ mb_strtoupper($area['nombre']) }}
                                     </td>
                                 </tr>
+                                @foreach($area['materiales'] as $matId => $data)
+                                    @php
+                                        $faltante = max(0, $data['cantidad_total'] - $data['cantidad_comprada']);
+                                        $disponible = $data['costo_total'] - $data['gastado'];
+                                        $totalCosto += $data['costo_total'];
+                                        $totalGastado += $data['gastado'];
+                                        $isExcedido = $disponible < 0;
+                                        $isCompradoCompleto = $faltante <= 0 && $data['cantidad_total'] > 0;
+                                    @endphp
+                                    <tr>
+                                        <td style="padding: 10px 10px 10px 35px; font-weight: 600;">
+                                            {{ $data['material']->nombre }}
+                                            @if($data['material']->marca)
+                                                <br><small class="text-muted">{{ $data['material']->marca }}</small>
+                                            @endif
+                                        </td>
+                                        <td class="text-center" style="padding: 10px;">{{ number_format($data['cantidad_total'], 2) }} {{ $data['material']->unidadMedida?->abreviatura }}</td>
+                                        <td class="text-center {{ $data['cantidad_comprada'] > 0 ? 'text-success fw-bold' : 'text-muted' }}" style="padding: 10px;">
+                                            {{ number_format($data['cantidad_comprada'], 2) }} {{ $data['material']->unidadMedida?->abreviatura }}
+                                        </td>
+                                        <td class="text-center fw-bold" style="padding: 10px; color: {{ $isCompradoCompleto ? '#059669' : '#dc2626' }}">
+                                            {{ number_format($faltante, 2) }} {{ $data['material']->unidadMedida?->abreviatura }}
+                                        </td>
+                                        <td class="text-end text-secondary" style="padding: 10px;">${{ number_format($data['costo_total'], 2) }}</td>
+                                        <td class="text-end {{ $data['gastado'] > 0 ? 'text-danger fw-bold' : 'text-muted' }}" style="padding: 10px;">
+                                            ${{ number_format($data['gastado'], 2) }}
+                                        </td>
+                                        <td class="text-end fw-bold" style="padding: 10px; color: {{ $isExcedido ? '#dc2626' : '#059669' }}">
+                                            ${{ number_format($disponible, 2) }}
+                                        </td>
+                                        <td class="text-center" style="padding: 10px;">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalComprar-{{ $nivelId }}-{{ $areaId }}-{{ $matId }}" style="font-weight: 600; padding: 4px 10px; border-radius: 8px;">
+                                                <i class="bi bi-cart-plus me-1"></i> Comprar
+                                            </button>
+                                        </td>
+                                    </tr>
 
-                                <!-- Modal Comprar -->
-                                <div class="modal fade" id="modalComprar-{{ $nivelId }}-{{ $areaId }}-{{ $matId }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Registrar Compra: {{ $data['material']->nombre }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    <!-- Modal Comprar -->
+                                    <div class="modal fade" id="modalComprar-{{ $nivelId }}-{{ $areaId }}-{{ $matId }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Registrar Compra: {{ $data['material']->nombre }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form action="{{ route('obras.materiales.storeCompra', $obra->id) }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="id_material" value="{{ $matId }}">
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">Fecha de Compra</label>
+                                                            <input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">Forma de Pago</label>
+                                                            <select name="id_pre_proveedor" class="form-select">
+                                                                <option value="">Directo (Afecta Egresos de la Obra)</option>
+                                                                @foreach($proveedoresAprobados as $preProv)
+                                                                    <option value="{{ $preProv->id }}">Incluido en Presupuesto: {{ $preProv->proveedor->empresa ?? 'Proveedor S/N' }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            <small class="text-muted">Selecciona un proveedor si esta compra ya fue pagada dentro de su presupuesto, para no duplicar el gasto en la obra.</small>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">Cantidad Comprada ({{ $data['material']->unidadMedida?->abreviatura }})</label>
+                                                            <input type="number" step="0.01" name="cantidad_material" class="form-control" value="{{ $faltante > 0 ? $faltante : '' }}" required min="0.01">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label class="form-label fw-bold">Valor del Material ($)</label>
+                                                            <input type="number" step="0.01" name="pago" class="form-control" required min="0">
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary">Registrar Compra</button>
+                                                    </div>
+                                                </form>
                                             </div>
-                                            <form action="{{ route('obras.materiales.storeCompra', $obra->id) }}" method="POST">
-                                                @csrf
-                                                <input type="hidden" name="id_material" value="{{ $matId }}">
-                                                <div class="modal-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Fecha de Compra</label>
-                                                        <input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Forma de Pago</label>
-                                                        <select name="id_pre_proveedor" class="form-select">
-                                                            <option value="">Directo (Afecta Egresos de la Obra)</option>
-                                                            @foreach($proveedoresAprobados as $preProv)
-                                                                <option value="{{ $preProv->id }}">Incluido en Presupuesto: {{ $preProv->proveedor->empresa ?? 'Proveedor S/N' }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        <small class="text-muted">Selecciona un proveedor si esta compra ya fue pagada dentro de su presupuesto, para no duplicar el gasto en la obra.</small>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Cantidad Comprada ({{ $data['material']->unidadMedida?->abreviatura }})</label>
-                                                        <input type="number" step="0.01" name="cantidad_material" class="form-control" value="{{ $faltante > 0 ? $faltante : '' }}" required min="0.01">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label fw-bold">Valor del Material ($)</label>
-                                                        <input type="number" step="0.01" name="pago" class="form-control" required min="0">
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="submit" class="btn btn-primary">Registrar Compra</button>
-                                                </div>
-                                            </form>
                                         </div>
                                     </div>
-                                </div>
+                                @endforeach
                             @endforeach
                         @endforeach
-                    @endforeach
-                </tbody>
-                <tfoot>
-                    <tr style="background: #f3f4f6;">
-                        <th colspan="4" class="text-end" style="padding: 10px;">Totales:</th>
-                        <th class="text-end" style="padding: 10px;">${{ number_format($totalCosto, 2) }}</th>
-                        <th class="text-end text-danger" style="padding: 10px;">${{ number_format($totalGastado, 2) }}</th>
-                        <th class="text-end" style="padding: 10px; color: {{ ($totalCosto - $totalGastado) < 0 ? '#dc2626' : '#059669' }}">
-                            ${{ number_format($totalCosto - $totalGastado, 2) }}
-                        </th>
-                        <th></th>
-                    </tr>
-                </tfoot>
-            </table>
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f3f4f6;">
+                            <th colspan="4" class="text-end" style="padding: 10px;">Totales:</th>
+                            <th class="text-end" style="padding: 10px;">${{ number_format($totalCosto, 2) }}</th>
+                            <th class="text-end text-danger" style="padding: 10px;">${{ number_format($totalGastado, 2) }}</th>
+                            <th class="text-end" style="padding: 10px; color: {{ ($totalCosto - $totalGastado) < 0 ? '#dc2626' : '#059669' }}">
+                                ${{ number_format($totalCosto - $totalGastado, 2) }}
+                            </th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
 @endif
 

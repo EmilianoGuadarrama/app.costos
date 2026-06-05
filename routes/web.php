@@ -51,16 +51,15 @@ Route::get('obras_entregadas/reporte/{id}', function($id) {
 })->name('obras_entregadas.reporte');
 
 // ==========================================
-// 2. PRESUPUESTO (asigna_conceptos + asigna_materiales + asigna_maquinaria)
+// 4. PRESUPUESTO DE OBRA
 // ==========================================
 Route::prefix('obras/{obraId}/presupuesto')->group(function () {
 
-    // Ver presupuesto completo por bloques
+    // ── NUEVO FLUJO UNIFICADO (Padre-Hijo) ──
     Route::get('/', [PresupuestoController::class, 'show'])->name('obras.presupuesto');
-
-    // Formulario agregar conceptos
-    Route::get('/agregar', [PresupuestoController::class, 'create'])->name('obras.presupuesto.create');
-    Route::post('/conceptos', [PresupuestoController::class, 'storeConceptos'])->name('obras.presupuesto.conceptos.store');
+    Route::get('/agregar', [PresupuestoController::class, 'createUnificado'])->name('obras.presupuesto.unificado.create');
+    Route::post('/agregar', [PresupuestoController::class, 'storeUnificado'])->name('obras.presupuesto.unificado.store');
+    Route::post('/version/crear', [PresupuestoController::class, 'crearNuevaVersion'])->name('obras.presupuesto.version.crear');
     Route::delete('/conceptos/{id}', [PresupuestoController::class, 'destroyConcepto'])->name('obras.presupuesto.conceptos.destroy');
     Route::patch('/conceptos/{id}', [PresupuestoController::class, 'updateConcepto'])->name('obras.presupuesto.conceptos.update');
 

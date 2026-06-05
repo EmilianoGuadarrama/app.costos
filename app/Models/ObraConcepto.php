@@ -7,6 +7,7 @@ class ObraConcepto extends Model
     protected $table = 'obra_conceptos';
     protected $fillable = [
         'id_obra',
+        'version',
         'id_concepto',
         'id_nivel',
         'id_bloque',

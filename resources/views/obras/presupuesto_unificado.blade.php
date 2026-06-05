@@ -210,9 +210,27 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
         <h1><i class="bi bi-layers me-2" style="color:#9ca3af;"></i>Agregar Renglones al Presupuesto</h1>
         <p>Obra: <strong style="color:#fff;">{{ $obra->datosDeObra?->nombre }}</strong></p>
     </div>
-    <button class="btn-save" onclick="guardarPresupuesto()" id="btnGuardar">
-        <i class="bi bi-cloud-arrow-up-fill"></i> Agregar Conceptos
-    </button>
+    <div class="pu-hdr-right" style="display:flex; align-items:center; gap:10px;">
+        {{-- Selector de Versión --}}
+        <div style="display:flex; align-items:center;">
+            <select class="form-select" style="background:#1f2937; color:#fff; border-color:#374151; padding: 0.25rem 2rem 0.25rem 0.5rem; font-size: 0.85rem; height:32px; border-radius:6px;" onchange="window.location.href='?version='+this.value">
+                <option value="1" {{ $versionConsulta == 1 ? 'selected' : '' }}>V1 (Original)</option>
+                @if(isset($obra->versionesPresupuesto))
+                    @foreach($obra->versionesPresupuesto as $vp)
+                        @if($vp->numero_version > 1)
+                        <option value="{{ $vp->numero_version }}" {{ $versionConsulta == $vp->numero_version ? 'selected' : '' }}>
+                            V{{ $vp->numero_version }} {{ $vp->es_activa ? '(Activa)' : '' }}
+                        </option>
+                        @endif
+                    @endforeach
+                @endif
+            </select>
+        </div>
+
+        <button class="btn-save" onclick="guardarPresupuesto()" id="btnGuardar">
+            <i class="bi bi-cloud-arrow-up-fill"></i> Agregar Conceptos
+        </button>
+    </div>
 </div>
 
 {{-- AJUSTES GLOBALES --}}
@@ -271,9 +289,15 @@ body{background:var(--bg);font-family:'Inter','Segoe UI',sans-serif;}
 
     {{-- BOTON APROBAR PRESUPUESTO --}}
     <div style="display:flex; justify-content:flex-end; margin-top:15px;">
-        <button type="button" onclick="abrirModalAprobar()" class="btn-save" style="background:#059669; padding: 0.5rem 1.2rem; font-size: 0.9rem; border: none; border-radius: 9px; color: #fff; cursor: pointer; transition: 0.2s;">
-            <i class="bi bi-check-circle-fill me-1"></i> Aprobar Presupuesto
-        </button>
+        @if(!\App\Models\ObraProceso::where('id_obra', $obra->id)->exists())
+            <button type="button" onclick="abrirModalAprobar()" class="btn-save" style="background:#059669; padding: 0.5rem 1.2rem; font-size: 0.9rem; border: none; border-radius: 9px; color: #fff; cursor: pointer; transition: 0.2s;">
+                <i class="bi bi-check-circle-fill me-1"></i> Aprobar Presupuesto
+            </button>
+        @else
+            <span style="background:#e5e7eb; color:#6b7280; padding: 0.5rem 1.2rem; font-size: 0.9rem; border-radius: 9px; font-weight:700;">
+                <i class="bi bi-lock-fill me-1"></i> Presupuesto Aprobado
+            </span>
+        @endif
     </div>
 </div>
 
@@ -511,10 +535,12 @@ function recalcPU(ci) {
         });
     });
 
-    const display = document.getElementById(`pu_display_${ci}`);
     const hidden  = document.getElementById(`pu_hidden_${ci}`);
-    if (display) display.textContent = '$' + total.toFixed(2);
-    if (hidden)  hidden.value = total.toFixed(4);
+    // Si hay insumos agregados (total > 0), el PU del concepto se sobreescribe con el total calculado.
+    // Si no hay insumos (total == 0), dejamos que el usuario escriba su propio PU manual.
+    if (hidden && total > 0) {
+        hidden.value = total.toFixed(2);
+    }
     
     updateGlobalTotals();
 }
@@ -584,9 +610,8 @@ function addConcepto() {
                 <input type="number" class="c-cant" value="1" min="0.01" step="0.01">
             </div>
             <div class="fld f-pu">
-                <label>P.U. Calculado</label>
-                <span class="pu-display" id="pu_display_${ci}">$0.00</span>
-                <input type="hidden" class="c-pu" id="pu_hidden_${ci}" value="0">
+                <label>P.U. (Base/Manual)</label>
+                <input type="number" class="c-pu" id="pu_hidden_${ci}" value="0" min="0" step="0.01">
             </div>
         </div>
 
@@ -681,6 +706,7 @@ function addConcepto() {
 
     // Update global totals when quantities change
     card.querySelector('.c-cant').addEventListener('input', updateGlobalTotals);
+    card.querySelector('.c-pu').addEventListener('input', updateGlobalTotals);
 }
 
 /* ─────────── AGREGAR INSUMO ─────────── */
@@ -919,12 +945,13 @@ function updateSubtotalAll(ci) {
             total += sub;
         });
     });
-    const display = document.getElementById(`pu_display_${ci}`);
     const hidden  = document.getElementById(`pu_hidden_${ci}`);
     const label   = document.getElementById(`pu_label_${ci}`);
-    if (display) display.textContent = '$' + total.toFixed(2);
-    if (hidden)  hidden.value = total.toFixed(4);
-    if (label)   label.textContent  = '$' + total.toFixed(2);
+    // Si hay insumos agregados (total > 0), sobreescribimos el P.U. del concepto.
+    if (hidden && total > 0) {
+        hidden.value = total.toFixed(2);
+    }
+    if (label) label.textContent = '$' + total.toFixed(2);
     
     updateGlobalTotals();
 }
@@ -975,14 +1002,14 @@ async function guardarPresupuesto() {
 
             const conceptoData = {
                 id_concepto: cId,
-                descripcion_nueva: cId ? '' : cTxt,
+                nombre_nuevo: cId ? '' : cTxt,
                 descripcion: cTxt,
                 id_unidad_medida: card.querySelector('.c-uni')?.value || null,
                 id_nivel: cNivel,
                 id_bloque: cBloque,
                 bloque_nuevo: cBloque ? '' : cBloqueTxt,
                 id_area: cArea,
-                area_nueva: cArea ? '' : cAreaTxt,
+                area_nuevo: cArea ? '' : cAreaTxt,
                 cantidad: parseFloat(card.querySelector('.c-cant')?.value) || 1,
                 precio_unitario: parseFloat(card.querySelector('.c-pu')?.value) || 0,
                 materiales: [],
@@ -1028,7 +1055,9 @@ async function guardarPresupuesto() {
         btn.disabled = true;
         btn.innerHTML = '<i class="bi bi-arrow-repeat" style="animation:spin 1s linear infinite;"></i> Guardando…';
 
-        const res = await fetch(storeUrl, {
+        const storeUrlConVersion = storeUrl + '?version={{ $versionConsulta }}';
+
+        const res = await fetch(storeUrlConVersion, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -29,6 +29,7 @@ class ObraIniciada extends Model
     public function niveles()        { return $this->hasMany(Nivel::class, 'id_obra'); }
     public function obraProceso()    { return $this->hasOne(ObraProceso::class, 'id_obra'); }
     public function obraConceptos(){ return $this->hasMany(ObraConcepto::class, 'id_obra'); }
+    public function versionesPresupuesto() { return $this->hasMany(VersionPresupuesto::class, 'id_obra'); }
     public function preProveedores() { return $this->hasMany(PreProveedor::class, 'id_obra'); }
     public function preMateriales()  { return $this->hasMany(PreMaterial::class, 'id_obra'); }
     public function totalBloque()    { return $this->hasMany(TotalBloque::class, 'id_obra'); }

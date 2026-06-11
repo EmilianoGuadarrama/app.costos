@@ -861,7 +861,7 @@ function cerrarModalAprobar() {
 const csrfToken   = '{{ csrf_token() }}';
 const editBaseUrl = '{{ url("obra-conceptos") }}';
 
-// Catálogos para autocomplete
+// Catálogos para autocomplete y selects
 @php
     $catConceptosArr  = \App\Models\Concepto::orderBy('descripcion')->get()
         ->map(fn($c) => ['id'=>$c->id,'texto'=>$c->descripcion,'pu'=>$c->p_u,'uni'=>$c->id_unidad_medida])->values()->toJson();
@@ -873,12 +873,24 @@ const editBaseUrl = '{{ url("obra-conceptos") }}';
         ->map(fn($m) => ['id'=>$m->id,'texto'=>$m->nombre,'pu'=>$m->precio_x_unidad,'uni'=>$m->id_unidad_medida])->values()->toJson();
     $unidadesArr      = \App\Models\UnidadMedida::orderBy('abreviatura')->get()
         ->map(fn($u) => ['id'=>$u->id,'txt'=>$u->abreviatura])->values()->toJson();
+    $bloquesArr       = \App\Models\Bloque::orderBy('id')->get()
+        ->map(fn($b) => ['id'=>$b->id,'txt'=>$b->descripcion])->values()->toJson();
+    $areasArr         = \App\Models\Area::orderBy('abreviatura')->get()
+        ->map(fn($a) => ['id'=>$a->id,'txt'=>$a->abreviatura . ' — ' . $a->descripcion])->values()->toJson();
+    $nivelesArr       = $obra->niveles
+        ->map(fn($n) => ['id'=>$n->id,'txt'=>$n->descripcion])->values()->toJson();
 @endphp
 const catConceptos  = {!! $catConceptosArr !!};
 const catMateriales = {!! $catMaterialesArr !!};
 const catMaquinaria = {!! $catMaquinariaArr !!};
 const catManoObra   = {!! $catManoObraArr !!};
 const unidades      = {!! $unidadesArr !!};
+const catBloques    = {!! $bloquesArr !!};
+const catAreas      = {!! $areasArr !!};
+const catNiveles    = {!! $nivelesArr !!};
+
+const editRouteTemplate   = '{{ route("obra_conceptos.edit", ["id" => ":id"]) }}';
+const updateRouteTemplate = '{{ route("obra_conceptos.update", ["id" => ":id"]) }}';
 
 function optsUni(selId = '') {
     return '<option value="">N/A</option>' +
@@ -905,18 +917,31 @@ function toggleTodosDesgloses() {
 let currentEditId = null;
 
 async function openEditPanel(id) {
+    if (!id) {
+        console.error("openEditPanel: El ID del renglón no es válido o está vacío:", id);
+        return;
+    }
     currentEditId = id;
     document.getElementById('epOverlay').classList.add('open');
     document.getElementById('editPanel').classList.add('open');
     document.getElementById('epBody').innerHTML = '<div class="ep-loading"><i class="bi bi-arrow-repeat spin-icon"></i> Cargando datos…</div>';
     document.getElementById('btnEpSave').disabled = true;
 
+    const targetUrl = editRouteTemplate.replace(':id', id);
+    console.log("openEditPanel: Cargando datos desde la URL:", targetUrl);
+
     try {
-        const res  = await fetch(`${editBaseUrl}/${id}/edit`);
+        const res  = await fetch(targetUrl);
+        console.log("openEditPanel: Código de respuesta HTTP:", res.status);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const data = await res.json();
+        console.log("openEditPanel: Datos cargados exitosamente:", data);
         renderEditPanel(data);
         document.getElementById('btnEpSave').disabled = false;
     } catch(e) {
+        console.error("openEditPanel: Error al cargar/procesar datos:", e);
         document.getElementById('epBody').innerHTML = '<div class="ep-loading" style="color:#dc2626;"><i class="bi bi-x-circle"></i> Error al cargar datos</div>';
     }
 }
@@ -934,6 +959,19 @@ function renderEditPanel(d) {
     const moRows  = d.mano_obra.map((m,i) => insRow(insIdx+100+i, 'mano_obra', m)).join('');
     const maqRows = d.maquinaria.map((m,i) => insRow(insIdx+200+i, 'maquinaria', m)).join('');
 
+    const optUnidades = unidades.map(u => 
+        `<option value="${u.id}" ${u.id == d.id_unidad_medida ? 'selected' : ''}>${u.txt}</option>`
+    ).join('');
+    const optBloques = catBloques.map(b => 
+        `<option value="${b.id}" ${b.id == d.id_bloque ? 'selected' : ''}>${b.txt}</option>`
+    ).join('');
+    const optAreas = catAreas.map(a => 
+        `<option value="${a.id}" ${a.id == d.id_area ? 'selected' : ''}>${a.txt}</option>`
+    ).join('');
+    const optNiveles = '<option value="">— Sin Nivel —</option>' + catNiveles.map(n => 
+        `<option value="${n.id}" ${n.id == d.id_nivel ? 'selected' : ''}>${n.txt}</option>`
+    ).join('');
+
     document.getElementById('epBody').innerHTML = `
     <div class="ep-section">
         <div class="ep-section-title">Concepto</div>
@@ -946,6 +984,26 @@ function renderEditPanel(d) {
             </div>
         </div>
         <div class="ep-row">
+            <div class="ep-field">
+                <label>Unidad de Medida</label>
+                <select id="ep_uni_cpt">${optUnidades}</select>
+            </div>
+            <div class="ep-field">
+                <label>Nivel / Planta</label>
+                <select id="ep_nivel_cpt">${optNiveles}</select>
+            </div>
+        </div>
+        <div class="ep-row" style="margin-top: 10px;">
+            <div class="ep-field">
+                <label>Bloque</label>
+                <select id="ep_bloque_cpt">${optBloques}</select>
+            </div>
+            <div class="ep-field">
+                <label>Área</label>
+                <select id="ep_area_cpt">${optAreas}</select>
+            </div>
+        </div>
+        <div class="ep-row" style="margin-top: 10px;">
             <div class="ep-field">
                 <label>Cantidad</label>
                 <input type="number" id="ep_cant" value="${d.cantidad}" min="0.001" step="0.001" oninput="recalcEp()">
@@ -1116,6 +1174,11 @@ async function guardarEdicionCompleta() {
     const txtCpt = document.getElementById('ep_txt_cpt').value.trim();
     const cant   = parseFloat(document.getElementById('ep_cant').value) || 1;
     const pIva   = parseFloat(document.getElementById('ep_iva').value)  || 0;
+    
+    const idNivel  = document.getElementById('ep_nivel_cpt').value;
+    const idBloque = document.getElementById('ep_bloque_cpt').value;
+    const idArea   = document.getElementById('ep_area_cpt').value;
+    const idUni    = document.getElementById('ep_uni_cpt').value;
 
     // Calcular PU total de insumos
     let totalPU = 0;
@@ -1150,37 +1213,39 @@ async function guardarEdicionCompleta() {
     const payload = {
         id_concepto: idCpt || null,
         nombre_nuevo: idCpt ? '' : txtCpt,
+        id_nivel: idNivel || null,
+        id_bloque: idBloque || null,
+        id_area: idArea || null,
+        id_unidad_medida: idUni || null,
         cantidad: cant,
         precio_unitario: totalPU,
         porcentaje_iva: pIva,
         materiales, maquinaria, mano_obra,
     };
 
+    const targetUrl = updateRouteTemplate.replace(':id', currentEditId);
+    console.log("guardarEdicionCompleta: Enviando PATCH a:", targetUrl, "Payload:", payload);
+
     try {
-        const res  = await fetch(`${editBaseUrl}/${currentEditId}`, {
+        const res  = await fetch(targetUrl, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
             body: JSON.stringify(payload),
         });
+        console.log("guardarEdicionCompleta: HTTP Status:", res.status);
         const json = await res.json();
         if (res.ok && json.success) {
             showToast('✓ Renglón guardado', 'ok');
             closeEditPanel();
-            // Refrescar la fila en la tabla
-            const sub = cant * totalPU;
-            const iv  = sub * (pIva/100);
-            const tot = sub + iv;
-            document.getElementById('cant_' + currentEditId).textContent = cant;
-            document.getElementById('pu_'   + currentEditId).textContent = '$' + totalPU.toFixed(2);
-            document.getElementById('sub_'  + currentEditId).textContent = '$' + sub.toFixed(2);
-            document.getElementById('tot_'  + currentEditId).textContent = '$' + tot.toFixed(2);
-            // Actualizar nombre concepto
-            const nomEl = document.getElementById('nom_' + currentEditId);
-            if (nomEl) nomEl.textContent = txtCpt;
+            
+            // Recargar la página para reflejar todos los cambios de bloque, nivel, área y totales
+            setTimeout(() => { window.location.reload(); }, 600);
         } else {
+            console.error("guardarEdicionCompleta: Error devuelto por servidor:", json);
             showToast('Error: ' + (json.message || 'No se pudo guardar'), 'err');
         }
     } catch(e) {
+        console.error("guardarEdicionCompleta: Error de conexión:", e);
         showToast('Error de conexión', 'err');
     }
     btn.disabled = false;

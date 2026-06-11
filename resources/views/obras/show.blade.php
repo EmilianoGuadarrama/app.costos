@@ -26,10 +26,12 @@
 .dg-actions { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; }
 .btn-back-link { text-decoration:none; color:#6b7280; font-size:.88rem; display:flex; align-items:center; gap:5px; }
 .btn-back-link:hover { color:#111; }
-.btn-editar { background:#111827; color:#fff; border:none; border-radius:10px; padding:.6rem 1.2rem; font-size:.82rem; font-weight:700; text-decoration:none; }
+.btn-editar { background:#111827; color:#fff; border:none; border-radius:10px; padding:.6rem 1.2rem; font-size:.82rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .2s; cursor:pointer; }
 .btn-editar:hover { background:#374151; color:#fff; }
-.btn-presupuesto { background:#2563eb; color:#fff; border:none; border-radius:10px; padding:.6rem 1.2rem; font-size:.82rem; font-weight:700; text-decoration:none; }
+.btn-presupuesto { background:#2563eb; color:#fff; border:none; border-radius:10px; padding:.6rem 1.2rem; font-size:.82rem; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:background .2s; cursor:pointer; appearance:none; -webkit-appearance:none; font-family:inherit; }
 .btn-presupuesto:hover { background:#1d4ed8; color:#fff; }
+.btn-agregar { background:#059669; }
+.btn-agregar:hover { background:#047857; color:#fff; }
 
 /* Niveles */
 .niveles-lista { margin-top:8px; display:flex; flex-wrap:wrap; gap:8px; }
@@ -70,12 +72,12 @@
             <i class="bi bi-file-earmark-text me-1"></i> Ver Presupuesto
         </a>
         @else
-        <button type="button" class="btn-presupuesto" id="btn-ver-presupuesto" style="cursor:pointer;"
+        <button type="button" class="btn-presupuesto" id="btn-ver-presupuesto"
                 onclick="alertaSinPresup({{ $obra->id }}, '{{ addslashes($datos?->nombre ?? 'Obra #'.$obra->id) }}')">
             <i class="bi bi-file-earmark-text me-1"></i> Ver Presupuesto
         </button>
         @endif
-        <a href="{{ route('obras.presupuesto.create', $obra->id) }}" class="btn-presupuesto" style="background:#059669;" id="btn-agregar-presupuesto">
+        <a href="{{ route('obras.presupuesto.create', $obra->id) }}" class="btn-presupuesto btn-agregar" id="btn-agregar-presupuesto">
             <i class="bi bi-plus-lg me-1"></i> Agregar Conceptos
         </a>
     </div>

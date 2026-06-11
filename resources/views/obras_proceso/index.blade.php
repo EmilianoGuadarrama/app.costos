@@ -37,7 +37,8 @@
     border-top: 1px solid #f3f4f6; margin-top: 15px;
 }
 .btn-view a {
-    display: inline-block; width: 100%; background: #111; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; background: #111; color: #fff;
     padding: 8px; border-radius: 8px; font-size: 0.9rem; font-weight: 700;
     text-decoration: none; transition: 0.2s;
 }
@@ -91,10 +92,13 @@
             </div>
         </div>
     @empty
-        <div class="col-12 text-center py-5">
-            <i class="bi bi-inboxes text-muted" style="font-size: 3rem;"></i>
-            <p class="mt-3 text-muted">No hay obras en proceso actualmente.</p>
-            <a href="{{ route('obras.index') }}" class="btn btn-outline-primary btn-sm mt-2">Ir a Presupuestos</a>
+        <div style="text-align:center; padding:60px 40px; color:#9ca3af;">
+            <i class="bi bi-inboxes" style="font-size:3.5rem; color:#d1d5db; display:block; margin-bottom:16px;"></i>
+            <h3 style="font-size:1.3rem; font-weight:700; color:#374151; margin-bottom:8px;">No hay obras en proceso</h3>
+            <p style="font-size:.9rem; margin-bottom:20px;">Aprueba un presupuesto para iniciar una obra en proceso.</p>
+            <a href="{{ route('obras.index') }}" style="display:inline-flex; align-items:center; gap:6px; background:#111; color:#fff; padding:10px 20px; border-radius:10px; font-size:.85rem; font-weight:700; text-decoration:none; transition:background .2s;">
+                <i class="bi bi-arrow-left"></i> Ir a Presupuestos
+            </a>
         </div>
     @endforelse
 </div>

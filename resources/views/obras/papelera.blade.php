@@ -7,7 +7,7 @@
 <style>
 /* Estilos similares al index pero adaptados a papelera */
 .dash-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px; border-bottom:1px solid #e5e7eb; padding-bottom:15px; }
-.dash-title { font-family:"Garamond", serif; font-size:2rem; font-weight:700; margin:0; color:#111827; }
+.dash-title { font-size:2rem; font-weight:800; margin:0; color:#111827; }
 .dash-subtitle { margin:5px 0 0; color:#6b7280; font-size:.9rem; }
 .btn-back { background:#f3f4f6; color:#374151; text-decoration:none; padding:8px 16px; border-radius:8px; font-weight:600; font-size:.85rem; border:1px solid #e5e7eb; transition:all .2s; }
 .btn-back:hover { background:#e5e7eb; color:#111827; }
@@ -27,7 +27,7 @@
 .obra-info i { color:#9ca3af; }
 
 .obra-acciones { display:flex; gap:8px; flex-wrap:wrap; }
-.btn-obra { flex:1; min-width:80px; text-align:center; border-radius:10px; padding:.5rem .8rem; font-size:.78rem; font-weight:700; text-decoration:none; transition:all .2s; border:1.5px solid; background:transparent; cursor:pointer; }
+.btn-obra { flex:1; min-width:80px; text-align:center; border-radius:10px; padding:.5rem .8rem; font-size:.78rem; font-weight:700; text-decoration:none; transition:all .2s; border:1.5px solid; background:transparent; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px; appearance:none; -webkit-appearance:none; font-family:inherit; line-height:1.4; }
 .btn-restaurar { border-color:#059669; color:#059669; }
 .btn-restaurar:hover { background:#059669; color:#fff; }
 .btn-eliminar { border-color:#dc2626; color:#dc2626; }
@@ -87,7 +87,7 @@
                 <div class="obra-acciones">
                     <form action="{{ route('obras.restaurar', $obra->id) }}" method="POST" style="flex:1;">
                         @csrf
-                        <button type="submit" class="btn-obra btn-restaurar" style="width:100%;">
+                        <button type="submit" class="btn-obra btn-restaurar">
                             <i class="bi bi-arrow-counterclockwise"></i> Restaurar
                         </button>
                     </form>

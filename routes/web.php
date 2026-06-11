@@ -56,7 +56,10 @@ Route::get('obras_entregadas/reporte/{id}', function($id) {
 Route::prefix('obras/{obraId}/presupuesto')->group(function () {
 
     // ── NUEVO FLUJO UNIFICADO (Padre-Hijo) ──
-    Route::get('/', [PresupuestoController::class, 'show'])->name('obras.presupuesto');
+    Route::get('/', [PresupuestoController::class, 'show'])->name('obras.presupuesto.show');
+    Route::get('/ver', [PresupuestoController::class, 'show'])->name('obras.presupuesto'); // Alias para evitar romper vistas existentes
+    Route::get('/crear', [PresupuestoController::class, 'create'])->name('obras.presupuesto.create');
+    Route::post('/guardar', [PresupuestoController::class, 'store'])->name('obras.presupuesto.store');
     Route::get('/agregar', [PresupuestoController::class, 'createUnificado'])->name('obras.presupuesto.unificado.create');
     Route::post('/agregar', [PresupuestoController::class, 'storeUnificado'])->name('obras.presupuesto.unificado.store');
     Route::post('/version/crear', [PresupuestoController::class, 'crearNuevaVersion'])->name('obras.presupuesto.version.crear');

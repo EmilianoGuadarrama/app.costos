@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('versiones_presupuesto', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_obra');
+            $table->foreign('id_obra')->references('id')->on('obras_iniciadas')->onDelete('cascade')->onUpdate('cascade');
             $table->integer('numero_version')->default(1);
             $table->boolean('es_activa')->default(true);
             $table->string('motivo_cambio', 255)->nullable();

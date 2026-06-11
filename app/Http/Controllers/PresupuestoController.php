@@ -94,7 +94,83 @@ class PresupuestoController extends Controller
 
     public function create($obraId)
     {
-        return redirect()->route('obras.presupuesto.unificado.create', $obraId);
+        $obra = ObraIniciada::with(['datosDeObra', 'niveles'])->findOrFail($obraId);
+        $bloques = Bloque::orderBy('id')->get();
+        $areas = Area::orderBy('abreviatura')->get();
+        $conceptos = Concepto::orderBy('descripcion')->get();
+        return view('presupuestos.create', compact('obra', 'bloques', 'areas', 'conceptos'));
+    }
+
+    public function store(Request $request, $obraId)
+    {
+        $obra = ObraIniciada::findOrFail($obraId);
+
+        $request->validate([
+            'filas' => 'required|array',
+            'filas.*.id_concepto' => 'nullable|integer',
+            'filas.*.descripcion_nueva' => 'required_without:filas.*.id_concepto|nullable|string|max:255',
+            'filas.*.id_bloque' => 'required|integer',
+            'filas.*.id_area' => 'required|integer',
+            'filas.*.id_nivel' => 'nullable|integer',
+            'filas.*.precio_unitario' => 'required|numeric|min:0',
+            'filas.*.cantidad' => 'required|numeric|min:0',
+            'filas.*.porcentaje_iva' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $versionActiva = \App\Models\VersionPresupuesto::where('id_obra', $obraId)->where('es_activa', true)->first();
+        $version = $versionActiva ? $versionActiva->numero_version : 1;
+
+        DB::beginTransaction();
+        try {
+            foreach ($request->input('filas', []) as $row) {
+                $idConcepto = $row['id_concepto'] ?? null;
+                if (empty($idConcepto) && !empty($row['descripcion_nueva'])) {
+                    $c = Concepto::firstOrCreate(
+                        ['descripcion' => trim($row['descripcion_nueva'])],
+                        [
+                            'id_area' => $row['id_area'] ?? null,
+                            'p_u' => $row['precio_unitario'] ?? 0,
+                        ]
+                    );
+                    $idConcepto = $c->id;
+                }
+
+                if (empty($idConcepto)) {
+                    continue;
+                }
+
+                $cantidad = floatval($row['cantidad'] ?? 1);
+                $pu = floatval($row['precio_unitario'] ?? 0);
+                $porcentajeIva = floatval($row['porcentaje_iva'] ?? 16);
+                $subtotal = round($cantidad * $pu, 4);
+                $iva = round($subtotal * ($porcentajeIva / 100), 4);
+                $totalFinal = $subtotal + $iva;
+
+                ObraConcepto::create([
+                    'id_obra' => $obraId,
+                    'version' => $version,
+                    'id_concepto' => $idConcepto,
+                    'id_nivel' => $row['id_nivel'] ?: null,
+                    'id_bloque' => $row['id_bloque'] ?: null,
+                    'id_area' => $row['id_area'] ?: null,
+                    'cantidad' => $cantidad,
+                    'precio_unitario' => $pu,
+                    'subtotal' => $subtotal,
+                    'porcentaje_iva' => $porcentajeIva,
+                    'iva' => $iva,
+                    'total_final' => $totalFinal,
+                ]);
+            }
+
+            $this->recalcularTotalesBloque($obraId);
+            \App\Http\Controllers\ObraController::recalcularTotales($obraId);
+
+            DB::commit();
+            return redirect()->route('obras.presupuesto.show', $obraId)->with('success', 'Conceptos agregados exitosamente.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['general' => 'Error al guardar conceptos: ' . $e->getMessage()]);
+        }
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -429,50 +505,61 @@ class PresupuestoController extends Controller
     // ──────────────────────────────────────────────────────────────
     public function editConcepto($id)
     {
-        $oc = ObraConcepto::with([
-            'concepto.unidadMedida',
-            'materiales.material.unidadMedida',
-            'maquinaria.maquinaria.unidadMedida',
-            'manoObra.manoObra.unidadMedida',
-        ])->findOrFail($id);
+        \Log::info("editConcepto solicitado para ID: " . $id);
 
-        return response()->json([
-            'id'               => $oc->id,
-            'id_concepto'      => $oc->id_concepto,
-            'descripcion'      => $oc->concepto?->descripcion ?? '',
-            'cantidad'         => $oc->cantidad,
-            'precio_unitario'  => $oc->precio_unitario,
-            'porcentaje_iva'   => $oc->porcentaje_iva ?? 16,
-            'subtotal'         => $oc->subtotal,
-            'total_final'      => $oc->total_final,
-            'materiales' => $oc->materiales->map(fn($m) => [
-                'id'          => $m->id,
-                'id_material' => $m->id_material,
-                'nombre'      => $m->material?->nombre ?? '',
-                'cantidad'    => $m->cantidad,
-                'precio_unitario' => $m->precio_unitario,
-                'id_unidad_medida'=> $m->id_unidad_medida,
-                'uni_txt'     => $m->material?->unidadMedida?->abreviatura ?? '',
-            ])->values(),
-            'maquinaria' => $oc->maquinaria->map(fn($m) => [
-                'id'             => $m->id,
-                'id_maquinaria'  => $m->id_maquinaria,
-                'nombre'         => $m->maquinaria?->nombre ?? '',
-                'cantidad'       => $m->cantidad,
-                'precio_unitario'=> $m->precio_unitario,
-                'id_unidad_medida'=> $m->id_unidad_medida,
-                'uni_txt'        => $m->maquinaria?->unidadMedida?->abreviatura ?? '',
-            ])->values(),
-            'mano_obra' => $oc->manoObra->map(fn($m) => [
-                'id'          => $m->id,
-                'id_mano_obra'=> $m->id_mano_obra,
-                'nombre'      => $m->manoObra?->nombre ?? '',
-                'cantidad'    => $m->cantidad,
-                'precio_unitario'=> $m->precio_unitario,
-                'id_unidad_medida'=> $m->id_unidad_medida,
-                'uni_txt'     => $m->manoObra?->unidadMedida?->abreviatura ?? '',
-            ])->values(),
-        ]);
+        try {
+            $oc = ObraConcepto::with([
+                'concepto.unidadMedida',
+                'materiales.material.unidadMedida',
+                'maquinaria.maquinaria.unidadMedida',
+                'manoObra.manoObra.unidadMedida',
+            ])->findOrFail($id);
+
+            return response()->json([
+                'id'               => $oc->id,
+                'id_concepto'      => $oc->id_concepto,
+                'id_nivel'         => $oc->id_nivel,
+                'id_bloque'        => $oc->id_bloque,
+                'id_area'          => $oc->id_area,
+                'id_unidad_medida' => $oc->concepto?->id_unidad_medida,
+                'descripcion'      => $oc->concepto?->descripcion ?? '',
+                'cantidad'         => $oc->cantidad,
+                'precio_unitario'  => $oc->precio_unitario,
+                'porcentaje_iva'   => $oc->porcentaje_iva ?? 16,
+                'subtotal'         => $oc->subtotal,
+                'total_final'      => $oc->total_final,
+                'materiales' => $oc->materiales->map(fn($m) => [
+                    'id'          => $m->id,
+                    'id_material' => $m->id_material,
+                    'nombre'      => $m->material?->nombre ?? '',
+                    'cantidad'    => $m->cantidad,
+                    'precio_unitario' => $m->precio_unitario,
+                    'id_unidad_medida'=> $m->id_unidad_medida,
+                    'uni_txt'     => $m->material?->unidadMedida?->abreviatura ?? '',
+                ])->values(),
+                'maquinaria' => $oc->maquinaria->map(fn($m) => [
+                    'id'             => $m->id,
+                    'id_maquinaria'  => $m->id_maquinaria,
+                    'nombre'         => $m->maquinaria?->nombre ?? '',
+                    'cantidad'       => $m->cantidad,
+                    'precio_unitario'=> $m->precio_unitario,
+                    'id_unidad_medida'=> $m->id_unidad_medida,
+                    'uni_txt'        => $m->maquinaria?->unidadMedida?->abreviatura ?? '',
+                ])->values(),
+                'mano_obra' => $oc->manoObra->map(fn($m) => [
+                    'id'          => $m->id,
+                    'id_mano_obra'=> $m->id_mano_obra,
+                    'nombre'      => $m->manoObra?->nombre ?? '',
+                    'cantidad'    => $m->cantidad,
+                    'precio_unitario'=> $m->precio_unitario,
+                    'id_unidad_medida'=> $m->id_unidad_medida,
+                    'uni_txt'     => $m->manoObra?->unidadMedida?->abreviatura ?? '',
+                ])->values(),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error("Error en editConcepto para ID {$id}: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     // ──────────────────────────────────────────────────────────────
@@ -483,6 +570,8 @@ class PresupuestoController extends Controller
         $oc = ObraConcepto::findOrFail($id);
         $data = $request->json()->all();
 
+        \Log::info("updateConcepto llamado para ID: " . $id, $data);
+
         DB::beginTransaction();
         try {
             // 1. Actualizar o crear concepto si vino nombre nuevo
@@ -490,9 +579,17 @@ class PresupuestoController extends Controller
             if (empty($idConcepto) && !empty($data['nombre_nuevo'])) {
                 $c = Concepto::firstOrCreate(
                     ['descripcion' => trim($data['nombre_nuevo'])],
-                    ['p_u' => $data['precio_unitario'] ?? 0]
+                    [
+                        'p_u' => $data['precio_unitario'] ?? 0,
+                        'id_unidad_medida' => $data['id_unidad_medida'] ?? null
+                    ]
                 );
                 $idConcepto = $c->id;
+            } elseif (!empty($idConcepto) && !empty($data['id_unidad_medida'])) {
+                $c = Concepto::find($idConcepto);
+                if ($c) {
+                    $c->update(['id_unidad_medida' => $data['id_unidad_medida']]);
+                }
             }
 
             // 2. Calcular totales del concepto
@@ -505,6 +602,9 @@ class PresupuestoController extends Controller
 
             $oc->update([
                 'id_concepto'     => $idConcepto,
+                'id_nivel'        => $data['id_nivel'] ?? null,
+                'id_bloque'       => $data['id_bloque'] ?? null,
+                'id_area'         => $data['id_area'] ?? null,
                 'cantidad'        => $cant,
                 'precio_unitario' => $pu,
                 'porcentaje_iva'  => $pIva,

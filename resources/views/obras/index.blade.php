@@ -38,20 +38,48 @@
 .obra-barra { background:#f3f4f6; border-radius:100px; height:6px; overflow:hidden; }
 .obra-barra-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,#2563eb,#7c3aed); }
 
-.obra-acciones { display:flex; gap:8px; flex-wrap:wrap; }
-.btn-obra {
-    flex:1; min-width:80px; text-align:center; border-radius:10px;
-    padding:.5rem .8rem; font-size:.78rem; font-weight:700;
-    text-decoration:none; transition:all .2s; border:1.5px solid;
+.obra-acciones {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%;
 }
-.btn-ver    { border-color:#111827; color:#111827; }
-.btn-ver:hover    { background:#111827; color:#fff; }
-.btn-presup { border-color:#2563eb; color:#2563eb; }
+.btn-obra {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+    border-radius: 12px;
+    padding: .6rem .8rem;
+    font-size: .8rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .2s;
+    border: 1.5px solid;
+    box-sizing: border-box;
+    width: 100%;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    font-family: inherit;
+    line-height: 1.4;
+}
+.btn-ver       { border-color:#111827; color:#111827; background:transparent; }
+.btn-ver:hover { background:#111827; color:#fff; }
+.btn-presup       { border-color:#2563eb; color:#2563eb; background:transparent; }
 .btn-presup:hover { background:#2563eb; color:#fff; }
-.btn-caja   { border-color:#059669; color:#059669; }
-.btn-caja:hover   { background:#059669; color:#fff; }
-.btn-materiales { border-color:#9333ea; color:#9333ea; }
-.btn-materiales:hover { background:#9333ea; color:#fff; }
+.btn-caja       { border-color:#059669; color:#059669; background:transparent; }
+.btn-caja:hover { background:#059669; color:#fff; }
+.btn-materiales       { border-color:#7c3aed; color:#7c3aed; background:transparent; }
+.btn-materiales:hover { background:#7c3aed; color:#fff; }
+.btn-eliminar       { border-color:#dc2626; color:#dc2626; background:transparent; }
+.btn-eliminar:hover { background:#dc2626; color:#fff; }
+
+.btn-full {
+    grid-column: span 2;
+}
 
 .empty-state { text-align:center; padding:80px 40px; color:#9ca3af; }
 .empty-state i { font-size:4rem; color:#d1d5db; display:block; margin-bottom:20px; }
@@ -175,22 +203,21 @@
                 <i class="bi bi-eye me-1"></i>Ver
             </a>
             @php
-            $tieneRenglones = $obra->obraConceptos()->exists();
-        @endphp
+                $tieneRenglones = $obra->obraConceptos()->exists();
+            @endphp
             @if($tieneRenglones)
             <a href="{{ route('obras.presupuesto', $obra->id) }}" class="btn-obra btn-presup" id="btn-presup-{{ $obra->id }}">
                 <i class="bi bi-file-earmark-text me-1"></i>Presupuesto
             </a>
             @else
             <button type="button" class="btn-obra btn-presup" id="btn-presup-{{ $obra->id }}"
-                    onclick="alertaSinPresup({{ $obra->id }}, '{{ addslashes($datos?->nombre ?? 'Obra #'.$obra->id) }}')"
-                    style="cursor:pointer;border:none;text-align:center;">
+                    onclick="alertaSinPresup({{ $obra->id }}, '{{ addslashes($datos?->nombre ?? 'Obra #'.$obra->id) }}')">
                 <i class="bi bi-file-earmark-text me-1"></i>Presupuesto
             </button>
             @endif
             @if($tituloSeccion == 'Presupuestos')
                 @if($tieneRenglones)
-                <button type="button" class="btn-obra btn-caja" onclick="abrirModalAprobarObra({{ $obra->id }})" style="cursor:pointer; border-color:#059669; color:#059669;">
+                <button type="button" class="btn-obra btn-caja" onclick="abrirModalAprobarObra({{ $obra->id }})">
                     <i class="bi bi-check-circle-fill me-1"></i>Aprobar
                 </button>
                 @endif
@@ -203,7 +230,7 @@
                 <a href="{{ route('obras.materiales', $obra->id) }}" class="btn-obra btn-materiales" id="btn-materiales-{{ $obra->id }}">
                     <i class="bi bi-bricks me-1"></i>Materiales
                 </a>
-                <button type="button" class="btn-obra btn-eliminar" style="border-color:#dc2626; color:#dc2626; background:transparent; cursor:pointer;" onclick="if(confirm('¿Estás seguro de cancelar la aprobación de \'{{ addslashes($datos?->nombre) }}\'? La obra regresará a estado de presupuesto sin aprobar.')) { document.getElementById('form-cancelar-{{ $obra->id }}').submit(); }">
+                <button type="button" class="btn-obra btn-eliminar {{ $caja ? 'btn-full' : '' }}" onclick="if(confirm('¿Estás seguro de cancelar la aprobación de \'{{ addslashes($datos?->nombre) }}\'? La obra regresará a estado de presupuesto sin aprobar.')) { document.getElementById('form-cancelar-{{ $obra->id }}').submit(); }">
                     <i class="bi bi-x-circle me-1"></i>Cancelar
                 </button>
                 <form id="form-cancelar-{{ $obra->id }}" action="{{ route('obras.presupuesto.cancelar_aprobacion', $obra->id) }}" method="POST" style="display:none;">
@@ -211,7 +238,7 @@
                 </form>
             @endif
             @if($tituloSeccion == 'Presupuestos')
-            <button type="button" class="btn-obra btn-eliminar" style="border-color:#dc2626; color:#dc2626; background:transparent; cursor:pointer;" onclick="if(confirm('¿Estás seguro de enviar la obra \'{{ addslashes($datos?->nombre) }}\' a la papelera? Se borrará definitivamente el {{ now()->addDays(30)->format('d/m/Y') }}.')) { document.getElementById('form-delete-{{ $obra->id }}').submit(); }">
+            <button type="button" class="btn-obra btn-eliminar {{ $tieneRenglones ? '' : 'btn-full' }}" onclick="if(confirm('¿Estás seguro de enviar la obra \'{{ addslashes($datos?->nombre) }}\' a la papelera? Se borrará definitivamente el {{ now()->addDays(30)->format('d/m/Y') }}.')) { document.getElementById('form-delete-{{ $obra->id }}').submit(); }">
                 <i class="bi bi-trash3 me-1"></i>Eliminar
             </button>
             <form id="form-delete-{{ $obra->id }}" action="{{ route('obras.destroy', $obra->id) }}" method="POST" style="display:none;">

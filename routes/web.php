@@ -20,7 +20,7 @@ use App\Http\Controllers\ObraMaterialController;
 use App\Http\Controllers\CajaGeneralController;
 
 // ── Inicio ───────────────────────────────────────────────────────────────────
-Route::get('/', [ObraController::class, 'index'])->name('inicio');
+Route::get('/', fn() => view('home'))->name('inicio');
 
 // ==========================================
 // 1. OBRAS

@@ -989,17 +989,17 @@ function renderEditPanel(d) {
                 <select id="ep_uni_cpt">${optUnidades}</select>
             </div>
             <div class="ep-field">
-                <label>Nivel / Planta</label>
+                <label>Partida</label>
                 <select id="ep_nivel_cpt">${optNiveles}</select>
             </div>
         </div>
         <div class="ep-row" style="margin-top: 10px;">
             <div class="ep-field">
-                <label>Bloque</label>
+                <label>Subpartida</label>
                 <select id="ep_bloque_cpt">${optBloques}</select>
             </div>
             <div class="ep-field">
-                <label>Área</label>
+                <label>Codigo</label>
                 <select id="ep_area_cpt">${optAreas}</select>
             </div>
         </div>
